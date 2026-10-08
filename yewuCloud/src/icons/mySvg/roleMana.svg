@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="368"
+   height="364"
+   viewBox="0 0 368.00002 364.00001"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="drawing.svg">
+  <defs
+     id="defs4">
+    <style
+       id="style3340"
+       type="text/css"><![CDATA[
+    .str0 {stroke:#FEFEFE;stroke-width:423.33;stroke-miterlimit:22.9256}
+    .fil0 {fill:none}
+    .fil1 {fill:#FEFEFE}
+   ]]></style>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="153.60535"
+     inkscape:cy="298.33777"
+     inkscape:document-units="px"
+     inkscape:current-layer="g3362"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-688.36224)">
+    <g
+       style="clip-rule:evenodd;fill-rule:evenodd;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+       id="g3362"
+       transform="matrix(0.03543307,0,0,0.03543307,-2788.5561,17.435124)">
+      <g
+         id="图层_x0020_1"
+         transform="translate(-1853.0689,15423.235)">
+        <metadata
+           id="CorelCorpID_0Corel-Layer" />
+        <g
+           id="角色管理">
+          <path
+             id="path3345"
+             d="m 83612.32,13284.49 c -1752,-816.97 -2871.99,-2575.01 -2871.99,-4508.12 0,-2747.15 2227.01,-4974.16 4974.16,-4974.16 2747.15,0 4974.16,2227.01 4974.16,4974.16 0,1933.11 -1119.99,3691.15 -2871.99,4508.12"
+             class="fil0 str0"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:423.32998657;stroke-miterlimit:22.92560005" />
+          <circle
+             id="circle3347"
+             r="1455.22"
+             cy="6334.3301"
+             cx="85714.5"
+             class="fil0 str0"
+             style="fill:none;stroke:#fefefe;stroke-width:423.32998657;stroke-miterlimit:22.92560005" />
+          <path
+             id="path3349"
+             d="m 87968.86,11094.23 0,-970.88 c 0,-796.56 -539.94,-1448.29 -1199.87,-1448.29 l -2225.49,0 c -659.93,0 -1199.87,651.73 -1199.87,1448.29 l 0,970.88"
+             class="fil0 str0"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:423.32998657;stroke-miterlimit:22.92560005" />
+          <rect
+             id="rect3351"
+             ry="206.38"
+             rx="206.38"
+             height="412.75"
+             width="3323.1699"
+             transform="matrix(0.459902,-0.796574,1.04955,0.605958,84073,13695.4)"
+             class="fil1"
+             x="0"
+             y="0"
+             style="fill:#fefefe" />
+          <rect
+             id="rect3353"
+             ry="206.38"
+             rx="206.38"
+             height="412.75"
+             width="3323.1699"
+             transform="matrix(-0.459902,-0.796574,-1.04955,0.605958,87311,13695.4)"
+             class="fil1"
+             x="0"
+             y="0"
+             style="fill:#fefefe" />
+        </g>
+      </g>
+      <g
+         id="图层_x0020_2"
+         transform="translate(-1853.0689,15423.235)">
+        <metadata
+           id="CorelCorpID_1Corel-Layer" />
+      </g>
+    </g>
+  </g>
+</svg>

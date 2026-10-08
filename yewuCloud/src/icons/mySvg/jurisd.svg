@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="380"
+   height="397"
+   viewBox="0 0 380.00001 397.00001"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="jurisd.svg">
+  <defs
+     id="defs4">
+    <style
+       id="style3340"
+       type="text/css"><![CDATA[
+    .str0 {stroke:#FEFEFE;stroke-width:423.33;stroke-miterlimit:22.9256}
+    .str2 {stroke:#FEFEFE;stroke-width:352.78;stroke-miterlimit:22.9256}
+    .str1 {stroke:#FEFEFE;stroke-width:20;stroke-miterlimit:22.9256}
+    .fil0 {fill:none}
+    .fil1 {fill:#FEFEFE}
+   ]]></style>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="158.27597"
+     inkscape:cy="230.33774"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-655.36216)">
+    <g
+       style="clip-rule:evenodd;fill-rule:evenodd;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+       id="g3364"
+       transform="matrix(0.03543307,0,0,0.03543307,-165.80205,551.04017)">
+      <g
+         id="图层_x0020_1">
+        <metadata
+           id="CorelCorpID_0Corel-Layer" />
+        <g
+           id="告警中心">
+          <path
+             id="path3345"
+             d="m 10023.67,4822.69 0.02,0 c 1509.82,0 2745.13,1235.31 2745.13,2745.14 l 0,4385.26 -5490.3,0 0,-4385.26 c 0,-1509.83 1235.31,-2745.14 2745.15,-2745.14 z"
+             class="fil0 str0"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:423.32998657;stroke-miterlimit:22.92560005" />
+          <rect
+             id="rect3347"
+             ry="191.45"
+             rx="175.14"
+             height="382.88"
+             width="8344.3398"
+             y="11805.62"
+             x="5851.5"
+             class="fil1 str1"
+             style="fill:#fefefe;stroke:#fefefe;stroke-width:20;stroke-miterlimit:22.92560005" />
+          <path
+             id="path3349"
+             d="m 10023.66,3164.55 0.01,0 c 401.84,0 730.61,328.77 730.61,730.61 l 0,949.51 -1461.23,0 0,-949.51 c 0,-401.84 328.77,-730.61 730.61,-730.61 z"
+             class="fil0 str0"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:423.32998657;stroke-miterlimit:22.92560005" />
+          <path
+             id="path3351"
+             d="m 10023.68,12775.38 1148.65,0 c 0,634.39 -514.26,1148.66 -1148.65,1148.66 -634.39,0 -1148.65,-514.27 -1148.65,-1148.66 l 1148.65,0 z"
+             class="fil0 str0"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:423.32998657;stroke-miterlimit:22.92560005" />
+          <path
+             id="path3353"
+             d="m 5635.74,10811.6 c -1039.08,-1039.07 -1039.08,-2723.71 0,-3762.78"
+             class="fil0 str2"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:352.77999878;stroke-miterlimit:22.92560005" />
+          <path
+             id="path3355"
+             d="m 14447.31,10811.59 c 1039.08,-1039.07 1039.08,-2723.71 0,-3762.78"
+             class="fil0 str2"
+             inkscape:connector-curvature="0"
+             style="fill:none;stroke:#fefefe;stroke-width:352.77999878;stroke-miterlimit:22.92560005" />
+        </g>
+      </g>
+      <g
+         id="图层_x0020_2">
+        <metadata
+           id="CorelCorpID_1Corel-Layer" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+export const TTDC_TEMPLATE_PERMISSIONS = {
+    view: 'ttdcgroup:findpage',
+    addGroup: 'ttdcgroup:add',
+    updateGroup: 'ttdcgroup:update',
+    changeGroupState: 'ttdcgroup:state',
+    deleteGroup: 'ttdcgroup:delete',
+    addTemplate: 'ttdctemplate:add',
+    updateTemplate: 'ttdctemplate:update',
+    deleteTemplate: 'ttdctemplate:delete',
+    changeTemplateState: 'ttdctemplate:enable',
+    importTemplate: 'ttdctemplate:import',
+    exportTemplate: 'ttdctemplate:export',
+    viewAlarmRule: 'ttdcalarmrule:findpage',
+    addAlarmRule: 'ttdcalarmrule:add',
+    updateAlarmRule: 'ttdcalarmrule:update',
+    deleteAlarmRule: 'ttdcalarmrule:delete',
+    changeAlarmRuleState: 'ttdcalarmrule:state',
+};

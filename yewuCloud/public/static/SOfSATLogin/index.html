@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>锂硫电池溯源平台</title>
+		<link rel="stylesheet" media="screen" href="css/login.css">
+	</head>
+	<body>
+		<!-- particles.js container -->
+		<div id="particles-js" style="display: flex;align-items: center;justify-content: center">
+			<canvas class="particles-js-canvas-el" style="width: 100%; height: 100%;" width="472" height="625"></canvas>
+		</div>
+		<div class="logoCss"><img src="" alt=""></div>
+		<div class="apTitleCss"></div>
+		<div class="logcon"><input id="username" type="text" placeholder="账号" onkeypress='οnkey(event)'>
+		<input id="password" type="password" placeholder="密码"  onkeypress='οnkey(event)'>
+		<button type="button" onclick="login(13)">登录</button></div>
+		
+
+		<!-- scripts -->
+		<script src="js/login.js"></script>
+		<script src="js/loginApp.js"></script>
+		<script>
+			window.addEventListener('message', e => {
+        const data = e.data
+				const logoCss = document.getElementsByClassName('logoCss')[0]
+				if (data.loginPageMsg) {
+					logoCss.style.width = data.loginPageMsg.logoWidth + 'vw'
+					logoCss.style.height = data.loginPageMsg.logoHeight + 'vw'
+					if (data.loginPageMsg.logoUrl) {
+						logoCss.children[0].src = data.loginPageMsg.logoUrl // logo图片
+						if (data.loginPageMsg.showLogo === '1') {
+							logoCss.style.visibility = 'visible'
+						}
+					}
+				}
+				
+				const apTitleCss = document.getElementsByClassName('apTitleCss')[0]
+				apTitleCss.innerText = data.apTitle // 标题
+      })
+		</script>
+		<script>
+			document.getElementById("username").focus()
+			function οnkey(e) {
+				e = e || window.event; 
+				if(e.keyCode == 13) {
+					login(e.keyCode)
+				}
+			}
+			function login(keyCode) {
+				const username = document.getElementById("username").value
+				const password = document.getElementById("password").value
+				const msg = { username, password, keyCode }
+				window.parent.postMessage(msg, "*") // 向父页面发送数据
+			}
+		</script>
+		<style>
+			.logoCss {
+				position: absolute;
+				left: 5%;
+				top: 5%;
+				width: 20vw;
+				height: 5.4vw;
+				visibility: hidden;
+			}
+			img {
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</body>
+</html>

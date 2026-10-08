@@ -1,0 +1,68 @@
+# 采集云迁移修复核对记录
+
+日期：2026-09-21。
+
+final result: passed
+
+本结论仅针对本次截图涉及的浅色网关详情、实时列表、历史曲线及网关抽屉迁移。深色模式存在源版共性缺陷，未通过可用性检查，不包含在上述通过结论中。不能据此认定整个项目的真实接口及所有页面均完成联调。
+
+## 对照依据
+
+- 原版源码：`D:/MyDevelop/vue/MyDevelop/newCj2.0`。
+- 当前源码：`D:/MyDevelop/newMyDevelop/dcsy/yewuCloud`。
+- 用户原版截图：`C:/Users/ditoo/AppData/Local/Temp/codex-clipboard-5548a8e4-efe5-4317-99f2-550ac913a123.png`、`C:/Users/ditoo/AppData/Local/Temp/codex-clipboard-ad6994e8-a74b-4caf-8867-ce93fd3c15ba.png`。
+- 修复前截图：`C:/Users/ditoo/AppData/Local/Temp/codex-clipboard-b8555251-5af8-415c-a6c5-624d3a09d594.png`、`C:/Users/ditoo/AppData/Local/Temp/codex-clipboard-cd0b6627-0f91-408a-a082-372e451bb685.png`。
+- 离线测试目录：`C:/Users/ditoo/AppData/Local/Temp/codex-collection-harness-8df278e382e84eeea63b1e337c89eeec`。测试入口加载两套真实组件，所有接口由本地测试数据拦截，不访问真实服务、不提交写请求。
+- 测试数据：同一 TTDC 网关 `TEST00001`、3 个通道、26 个点位、65 条历史记录。时间字段随测试时刻变化，不做逐像素相等声明。
+- 对照尺寸：桌面 1280 × 720；窄屏为 iframe 内 390 × 720 的真实内容视口。
+
+## 对照证据
+
+以下截图都位于上述测试目录的 `screenshots` 子目录。`reference-` 是原版，`current-` 是迁移版；`compare-` 为左原版、右迁移版的合并对照。
+
+- 整体模块区域：`reference-modules.png`、`current-modules.png`、`compare-modules.png`。
+- 展开通道：`reference-expanded.png`、`current-expanded.png`、`compare-expanded.png`。
+- 实时列表：`reference-rows.png`、`current-rows.png`、`compare-rows.png`。
+- 历史曲线：`reference-chart.png`、`current-chart.png`、`compare-chart.png`。
+- 网关抽屉：`reference-drawer.png`、`current-drawer.png`。抽屉右侧结构一致；原版支持其他机型，迁移版按要求仅保留 TTDC。此截图采集时测试入口尚未补原版标签栏钩子，因此背景标签栏不作为差异证据。
+- 窄屏：`compare-mobile.png`、`compare-mobile-rows.png`。
+- 细节区域：`compare-module-detail.png`，用于核对卡片标题、字重、标签、内边距和通道分组间距。
+
+## 修复与复核
+
+| 修复前问题 | 修改 | 复核结果 |
+| --- | --- | --- |
+| 卡片标题、添加按钮、通道名称及修改删除按钮缺失 | 补齐 ElCard 等组件注册 | 模块折叠及展开状态均正常，标题和按钮与源版对应 |
+| 有点位配置但实时表格为空、查询及分页失效 | 两个子组件恢复纯 JavaScript 的 script setup | 26 个点位可见，第一页 20 条、第二页 6 条；筛选、空结果、重置及翻页通过 |
+| 历史组件绑定错误 | 恢复参数和事件绑定，采集云独立使用 ECharts 6 | 曲线展示 65 条计数、每页 30 条，页码切换及自动刷新开关通过 |
+| 业务全局 CSS 覆盖采集云 | 按页面生命周期启停全局样式，限定业务侧栏滚动条规则 | 返回业务页恢复原样式，再进入无重复样式节点；窄屏表格两版均 overflow-x:auto |
+| 业务抽屉封装覆盖原生抽屉 | 采集云页面局部导入原生 ElDrawer | 新增网关抽屉可打开，字段、取消关闭正常，未提交保存 |
+| 日历缺少中文日期规则 | 加载与原版一致的 Day.js 中文语言包 | 日期弹层从星期一开始排列 |
+
+## 五项视觉核对
+
+- 字体：同一浏览器内两版字体、字号和字重一致；主页面包屑 14px/700，其余面包屑 14px/400。
+- 间距和布局：实测概要卡片 1248 × 122，模块区域 1248 × 165；卡片内容内边距 16px、标题内边距 18px 20px，两版相同。已分别检查整体和局部截图。
+- 颜色和视觉规则：浅色背景、蓝色按钮、绿色采集标签、表格条纹与曲线颜色对应；在线状态动画的捕获帧可能不同。
+- 图片和图标：保留原组件图标与曲线画布，未用新图案替换原资产。曲线截图的绘图区检测到 6807 种颜色、3905 个蓝绿色像素，确认非空，并通过目视对照。
+- 文案和内容：模块通道、数据点统计、通道名称、查询重置、分页和日期文本已恢复。只保留 TTDC 是用户要求，不是遗漏其他机型。
+
+## 验证范围
+
+- `npm run build:dcsy` 成功；保留第三方 PURE 注释及大资源块提示，无构建失败。
+- `node scripts/check-collection-render.mjs` 通过。
+- `node scripts/check-collection-styles.mjs` 六项通过。
+- 本次新增、实质重写和样式隔离相关文件 ESLint 无错误；实时列表模板保留一条原有属性顺序提示。三个旧页面的大量历史格式提示未进行无关批量重写。
+- 干净测试页面的模块、实时列表及历史曲线无 JavaScript 错误；Element Plus 的分页 small 属性可能给出弃用提示。
+- 浏览器操作覆盖：折叠展开、添加和修改表单打开/取消、通道详情展开收起、查询无结果/重置、实时分页、暂停刷新、历史展开、历史页码、日期弹层、网关抽屉、返回业务页和重新进入采集云。
+- 样式退出时：移除采集云样式节点，恢复 normalize/业务样式，删除原本不存在的 data-theme，业务 label 字重恢复 700。
+
+## 保留问题与边界
+
+- 深色主题两版都无法正常显示。已用 Vue 编译器确认，源版 scoped CSS 中 `:global(html[data-theme='dark']) .后代选择器` 会丢失后代部分，将按钮高度和状态圆点的粉红背景误施加到 html。当前网关详情约 3403/3812 行、原版约 3500/3909 行具有相同问题。原入口隐藏，未为本次浅色迁移擅自重写。
+- 原版窄屏本来需要横向滚动，并存在序列号换行；当前保持相同行为，没有另外设计移动版。
+- 没有真实设备与数据库的读写联调，没有验证保存、删除、批量导入等真实写操作。测试数据仅存在于临时测试入口，不进入正式包。
+
+## 下一步
+
+部署本次构建后，用真实网关检查点位与历史接口返回；深色主题如需启用，应单独修复原版共性选择器问题。

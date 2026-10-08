@@ -1,0 +1,782 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+/* 全局按钮美化 */
+.el-button {
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+.el-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.el-button--primary {
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25);
+}
+
+.el-button--default {
+  border-color: #d0d7e2;
+}
+
+html[data-theme='dark'] .el-button {
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .el-button:hover {
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.4);
+}
+
+html[data-theme='dark'] .el-button--primary {
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
+}
+
+html[data-theme='dark'] body {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+html[data-theme='dark'] .admin-layout {
+  background: #0f172a;
+}
+
+html[data-theme='dark'] .main-column,
+html[data-theme='dark'] .content-body {
+  background: #0f172a;
+}
+
+html[data-theme='dark'] .content-header {
+  background: #111827;
+  border-bottom-color: #243244;
+}
+
+html[data-theme='dark'] .breadcrumb-row {
+  border-bottom-color: #243244;
+}
+
+html[data-theme='dark'] .tags-view {
+  background: #111827;
+}
+
+html[data-theme='dark'] .tags-item {
+  background: #0f172a;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .user-name {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+/* 深色区（侧栏/顶栏）文字提亮 */
+html[data-theme='dark'] .logo-text,
+html[data-theme='dark'] .side-title {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme='dark'] .side-menu .el-menu-item,
+html[data-theme='dark'] .side-menu .el-menu-item span,
+html[data-theme='dark'] .side-menu .el-sub-menu__title {
+  color: rgba(226, 232, 240, 0.9) !important;
+}
+
+html[data-theme='dark'] .side-menu .el-menu-item.is-active,
+html[data-theme='dark'] .side-menu .el-menu-item.is-active span {
+  color: #7dd3fc !important;
+}
+
+html[data-theme='dark'] .el-breadcrumb__inner,
+html[data-theme='dark'] .el-breadcrumb__item:last-child .el-breadcrumb__inner,
+html[data-theme='dark'] .header-actions {
+  color: #e2e8f0 !important;
+}
+
+/* 网关详情标题：深色主题下强制白色 */
+html[data-theme='dark'] .detail-page .title-wrap h2 {
+  color: #ffffff !important;
+}
+
+/* 网关详情-模块通道标题行：深色主题强制深色背景 */
+html[data-theme='dark'] .detail-page .module-card .el-card__header {
+  background: #111827 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+html[data-theme='dark'] .detail-page .module-card .module-head > span:first-child {
+  color: #e2e8f0 !important;
+}
+
+/* 网关序列号条：深色主题全局强制生效（避免 scoped 覆盖失效） */
+html[data-theme='dark'] .detail-page .base-card.base-card--summary .summary-strip {
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0) 55%),
+    linear-gradient(108deg, #0f2238 0%, #13253d 42%, #111827 100%) !important;
+  border: 1px solid rgba(71, 85, 105, 0.65) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(148, 163, 184, 0.16),
+    0 8px 20px rgba(2, 6, 23, 0.32) !important;
+}
+
+html[data-theme='dark'] .detail-page .base-card.base-card--summary .summary-label {
+  color: #9fb2ca !important;
+}
+
+html[data-theme='dark'] .detail-page .base-card.base-card--summary .summary-value {
+  color: #eef6ff !important;
+  font-weight: 700 !important;
+}
+
+/* 网关详情-模块卡片：深色主题强制深色（真实 DOM 选择器） */
+html[data-theme='dark'] .detail-page .module-tile {
+  background: linear-gradient(180deg, #0f1b2e 0%, #0b1526 100%) !important;
+  border: 1px solid #334155 !important;
+  box-shadow:
+    0 8px 20px rgba(2, 6, 23, 0.42),
+    inset 0 1px 0 rgba(148, 163, 184, 0.12) !important;
+}
+
+html[data-theme='dark'] .detail-page .module-tile .el-card__header {
+  background: linear-gradient(180deg, #15263f 0%, #0f1b2e 72%) !important;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.35) !important;
+}
+
+html[data-theme='dark'] .detail-page .module-tile .el-card__body {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] .detail-page .module-tile .tile-field {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border-color: rgba(100, 116, 139, 0.4) !important;
+}
+
+html[data-theme='dark'] .detail-page .module-tile .tile-k {
+  color: #9fb2ca !important;
+}
+
+html[data-theme='dark'] .detail-page .module-tile .tile-v,
+html[data-theme='dark'] .detail-page .module-tile .tile-name {
+  color: #e6eef9 !important;
+}
+
+/* 网关详情-通道详情卡片标题：深色主题提亮 */
+html[data-theme='dark'] .detail-page .module-detail-card .tile-head .tile-name {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme='dark'] .detail-page .module-detail-card .tile-head .el-button.is-link,
+html[data-theme='dark'] .detail-page .module-detail-card .tile-head .el-button.is-text {
+  color: #93c5fd !important;
+}
+
+/* 网关详情-数据点列表表格：深色主题背景 */
+html[data-theme='dark'] .detail-page .module-detail-card .el-table,
+html[data-theme='dark'] .detail-page .module-add-card .el-table,
+html[data-theme='dark'] .detail-page .module-edit-card .el-table {
+  --el-table-bg-color: #0b1526;
+  --el-table-tr-bg-color: #0b1526;
+  --el-table-header-bg-color: #0f1b2e;
+  --el-table-row-hover-bg-color: #12213a;
+  --el-table-border-color: #334155;
+  --el-table-text-color: #cbd5e1;
+  --el-table-header-text-color: #e2e8f0;
+}
+
+html[data-theme='dark'] .detail-page .module-detail-card .el-table th.el-table__cell,
+html[data-theme='dark'] .detail-page .module-add-card .el-table th.el-table__cell,
+html[data-theme='dark'] .detail-page .module-edit-card .el-table th.el-table__cell {
+  background: var(--el-table-header-bg-color) !important;
+  color: var(--el-table-header-text-color) !important;
+}
+
+html[data-theme='dark'] .detail-page .module-detail-card .el-table td.el-table__cell,
+html[data-theme='dark'] .detail-page .module-add-card .el-table td.el-table__cell,
+html[data-theme='dark'] .detail-page .module-edit-card .el-table td.el-table__cell {
+  background: var(--el-table-tr-bg-color) !important;
+  color: var(--el-table-text-color) !important;
+}
+
+html[data-theme='dark'] .sider-trigger {
+  color: #cbd5e1 !important;
+}
+
+/* 深色主题：仅网关详情页的输入框/选择器背景 */
+html[data-theme='dark'] .detail-page .el-input__wrapper,
+html[data-theme='dark'] .detail-page .el-select__wrapper,
+html[data-theme='dark'] .detail-page .el-textarea__inner,
+html[data-theme='dark'] .detail-page .el-input-number .el-input__wrapper {
+  background: rgba(15, 27, 46, 0.92) !important;
+  box-shadow: 0 0 0 1px rgba(71, 85, 105, 0.8) inset !important;
+}
+
+html[data-theme='dark'] .detail-page .el-input__wrapper:hover,
+html[data-theme='dark'] .detail-page .el-select__wrapper:hover,
+html[data-theme='dark'] .detail-page .el-textarea__inner:hover,
+html[data-theme='dark'] .detail-page .el-input-number .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.55) inset !important;
+}
+
+html[data-theme='dark'] .detail-page .el-input__inner,
+html[data-theme='dark'] .detail-page .el-textarea__inner,
+html[data-theme='dark'] .detail-page .el-select__selected-item,
+html[data-theme='dark'] .detail-page .el-input-number .el-input__inner {
+  color: #e6eef9 !important;
+}
+
+html[data-theme='dark'] .detail-page .el-input__inner::placeholder,
+html[data-theme='dark'] .detail-page .el-textarea__inner::placeholder {
+  color: rgba(159, 178, 202, 0.75) !important;
+}
+
+html[data-theme='dark'] .detail-page .el-select .el-select__caret,
+html[data-theme='dark'] .detail-page .el-input__suffix,
+html[data-theme='dark'] .detail-page .el-input__prefix {
+  color: rgba(203, 213, 225, 0.85) !important;
+}
+
+html[data-theme='dark'] .detail-page {
+  background: #0f172a;
+}
+
+html[data-theme='dark'] .base-card,
+html[data-theme='dark'] .module-card,
+html[data-theme='dark'] .module-add-card,
+html[data-theme='dark'] .module-edit-card,
+html[data-theme='dark'] .module-detail-card,
+html[data-theme='dark'] .page-head {
+  background: #111827 !important;
+  border-color: #243244 !important;
+}
+
+html[data-theme='dark'] .el-form-item__label,
+html[data-theme='dark'] .el-descriptions__label,
+html[data-theme='dark'] .tile-k,
+html[data-theme='dark'] .title-sub,
+html[data-theme='dark'] .summary-label {
+  color: #94a3b8 !important;
+}
+
+html[data-theme='dark'] .tile-v,
+html[data-theme='dark'] .summary-value,
+html[data-theme='dark'] .module-head,
+html[data-theme='dark'] .detail-info,
+html[data-theme='dark'] .detail-section-title {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme='dark'] .el-input__inner,
+html[data-theme='dark'] .el-select__selected-item,
+html[data-theme='dark'] .el-textarea__inner {
+  color: #e5e7eb !important;
+}
+
+/* Home 列表区（全局兜底，避免 scoped 未命中） */
+html[data-theme='dark'] .workbench .card {
+  background: linear-gradient(180deg, #13253d 0%, #0f1d31 100%) !important;
+  border-color: #294362 !important;
+}
+
+html[data-theme='dark'] .workbench .toolbar,
+html[data-theme='dark'] .workbench .pager {
+  background: rgba(15, 29, 48, 0.95) !important;
+  border-color: #294362 !important;
+}
+
+html[data-theme='dark'] .workbench .table-area .el-table {
+  --el-table-bg-color: #0f1d31;
+  --el-table-tr-bg-color: #0f1d31;
+  --el-table-header-bg-color: #13253d;
+  --el-table-row-hover-bg-color: #17304f;
+  --el-table-border-color: #2d4663;
+  --el-table-text-color: #d7e3f5;
+  --el-table-header-text-color: #eef5ff;
+}
+
+/* 网关数据列表面板 */
+html[data-theme='dark'] .point-list-card {
+  background: linear-gradient(180deg, #13253d 0%, #0f1d31 100%) !important;
+  border-color: #294362 !important;
+}
+
+html[data-theme='dark'] .point-list-card .el-card__header {
+  background: rgba(15, 29, 48, 0.95) !important;
+  border-bottom-color: #294362 !important;
+}
+
+html[data-theme='dark'] .point-list-card .title,
+html[data-theme='dark'] .point-list-card .meta {
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .point-list-card .filters {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] .point-list-card .el-table {
+  --el-table-bg-color: #0f1d31;
+  --el-table-tr-bg-color: #0f1d31;
+  --el-table-header-bg-color: #13253d;
+  --el-table-row-hover-bg-color: #17304f;
+  --el-table-border-color: #2d4663;
+  --el-table-text-color: #d7e3f5;
+  --el-table-header-text-color: #eef5ff;
+}
+
+/* 历史曲线容器 */
+html[data-theme='dark'] .history-wrap {
+  background: linear-gradient(180deg, rgba(19, 37, 61, 0.96) 0%, rgba(15, 29, 48, 0.96) 100%) !important;
+  border-color: #2f4968 !important;
+}
+
+html[data-theme='dark'] .history-title,
+html[data-theme='dark'] .history-meta,
+html[data-theme='dark'] .switch-label {
+  color: #dbe9ff !important;
+}
+
+/* 历史曲线时间弹出层（teleport 到 body）深色兜底 */
+html[data-theme='dark'] .history-range-popper.el-picker-panel {
+  background: linear-gradient(180deg, rgba(19, 37, 61, 0.98) 0%, rgba(15, 29, 48, 0.98) 100%) !important;
+  border-color: #2f4968 !important;
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-picker-panel__body-wrapper,
+html[data-theme='dark'] .history-range-popper .el-picker-panel__body,
+html[data-theme='dark'] .history-range-popper .el-date-range-picker__content,
+html[data-theme='dark'] .history-range-popper .el-date-table tr,
+html[data-theme='dark'] .history-range-popper .el-date-table td {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-date-range-picker__header,
+html[data-theme='dark'] .history-range-popper .el-date-range-picker__time-header {
+  color: #dbe9ff !important;
+  border-bottom-color: rgba(71, 95, 124, 0.75) !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-picker-panel__icon-btn {
+  color: #a7bfdc !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-date-table th {
+  color: #9fb2ca !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-date-table td .el-date-table-cell__text {
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-date-table td.available:hover .el-date-table-cell__text {
+  background: rgba(73, 101, 135, 0.38) !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-date-table td.today .el-date-table-cell__text {
+  color: #8fd4ff !important;
+}
+
+html[data-theme='dark'] .history-range-popper .el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+  color: #ffffff !important;
+}
+
+/* 时间弹层强制深色：由 PointHistoryChart 动态加 class，不依赖主题选择器 */
+.history-range-popper--dark.el-picker-panel {
+  background: linear-gradient(180deg, rgba(19, 37, 61, 0.98) 0%, rgba(15, 29, 48, 0.98) 100%) !important;
+  border-color: #2f4968 !important;
+  color: #dbe9ff !important;
+}
+
+.history-range-popper--dark .el-picker-panel__body-wrapper,
+.history-range-popper--dark .el-picker-panel__body,
+.history-range-popper--dark .el-date-range-picker__content,
+.history-range-popper--dark .el-date-table tr,
+.history-range-popper--dark .el-date-table td,
+.history-range-popper--dark .el-date-table td.in-range .el-date-table-cell,
+.history-range-popper--dark .el-date-table td.in-range div {
+  background: transparent !important;
+}
+
+.history-range-popper--dark .el-date-range-picker__header,
+.history-range-popper--dark .el-date-range-picker__time-header {
+  color: #dbe9ff !important;
+  border-bottom-color: rgba(71, 95, 124, 0.75) !important;
+}
+
+.history-range-popper--dark .el-picker-panel__icon-btn,
+.history-range-popper--dark .el-time-panel__btn {
+  color: #a7bfdc !important;
+}
+
+.history-range-popper--dark .el-date-table th {
+  color: #9fb2ca !important;
+}
+
+.history-range-popper--dark .el-date-table td .el-date-table-cell__text {
+  color: #dbe9ff !important;
+}
+
+.history-range-popper--dark .el-date-table td.available:hover .el-date-table-cell__text {
+  background: rgba(73, 101, 135, 0.38) !important;
+}
+
+.history-range-popper--dark .el-date-table td.today .el-date-table-cell__text {
+  color: #8fd4ff !important;
+}
+
+.history-range-popper--dark .el-date-table td.start-date .el-date-table-cell__text,
+.history-range-popper--dark .el-date-table td.end-date .el-date-table-cell__text,
+.history-range-popper--dark .el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+  color: #ffffff !important;
+}
+
+.history-range-popper--dark .el-input__wrapper,
+.history-range-popper--dark .el-time-editor.el-input__wrapper {
+  background: rgba(15, 29, 48, 0.95) !important;
+  box-shadow: 0 0 0 1px rgba(71, 95, 124, 0.85) inset !important;
+}
+
+.history-range-popper--dark .el-input__inner {
+  color: #dbe9ff !important;
+}
+
+.history-range-popper--dark .el-picker-panel__footer {
+  background: rgba(12, 24, 40, 0.98) !important;
+  border-top-color: rgba(71, 95, 124, 0.75) !important;
+}
+
+.history-range-popper--dark .el-date-range-picker__content .el-date-range-picker__header div {
+  color: #dbe9ff !important;
+}
+
+.history-range-popper--dark .el-date-table td.in-range::before,
+.history-range-popper--dark .el-date-table td.in-range .el-date-table-cell::before {
+  background: rgba(73, 101, 135, 0.26) !important;
+}
+
+.history-range-popper--dark .el-date-table td.next-month .el-date-table-cell__text,
+.history-range-popper--dark .el-date-table td.prev-month .el-date-table-cell__text,
+.history-range-popper--dark .el-date-table td.disabled .el-date-table-cell__text {
+  color: rgba(159, 178, 202, 0.45) !important;
+}
+
+.history-range-popper--dark .el-time-panel {
+  background: rgba(12, 24, 40, 0.98) !important;
+  border-color: #2f4968 !important;
+}
+
+.history-range-popper--dark .el-time-panel__content::before,
+.history-range-popper--dark .el-time-panel__content::after {
+  border-color: rgba(71, 95, 124, 0.75) !important;
+}
+
+.history-range-popper--dark .el-time-spinner__item {
+  color: #a7bfdc !important;
+}
+
+.history-range-popper--dark .el-time-spinner__item:hover:not(.is-disabled):not(.is-active) {
+  background: rgba(73, 101, 135, 0.25) !important;
+}
+
+.history-range-popper--dark .el-time-spinner__item.is-active {
+  color: #ffffff !important;
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+}
+
+.history-range-popper--dark .el-button {
+  border-color: rgba(71, 95, 124, 0.8) !important;
+  background: rgba(15, 29, 48, 0.95) !important;
+  color: #dbe9ff !important;
+}
+
+.history-range-popper--dark .el-button--primary {
+  border-color: #5fa9e6 !important;
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+  color: #ffffff !important;
+}
+
+/* 时间弹层最终兜底：强制覆盖 Element Plus 日期时间范围弹层全部关键节点 */
+body .history-range-popper--dark,
+body .history-range-popper--dark.el-popper,
+body .history-range-popper--dark.el-picker-panel,
+body .history-range-popper--dark.el-date-range-picker {
+  background: #102338 !important;
+  border-color: #2f4968 !important;
+  color: #dbe9ff !important;
+}
+
+body .history-range-popper--dark .el-picker-panel__body,
+body .history-range-popper--dark .el-picker-panel__body-wrapper,
+body .history-range-popper--dark .el-date-range-picker__content,
+body .history-range-popper--dark .el-date-range-picker__time-header,
+body .history-range-popper--dark .el-date-range-picker__header,
+body .history-range-popper--dark .el-picker-panel__footer {
+  background: #102338 !important;
+  color: #dbe9ff !important;
+  border-color: #2f4968 !important;
+}
+
+body .history-range-popper--dark .el-date-table,
+body .history-range-popper--dark .el-date-table tr,
+body .history-range-popper--dark .el-date-table td,
+body .history-range-popper--dark .el-date-table-cell,
+body .history-range-popper--dark .el-date-table-cell__text {
+  background: transparent !important;
+}
+
+body .history-range-popper--dark .el-date-table th,
+body .history-range-popper--dark .el-date-range-picker__header-label,
+body .history-range-popper--dark .el-date-range-picker__header div,
+body .history-range-popper--dark .el-picker-panel__icon-btn {
+  color: #a7bfdc !important;
+}
+
+body .history-range-popper--dark .el-date-table td .el-date-table-cell__text {
+  color: #dbe9ff !important;
+}
+
+body .history-range-popper--dark .el-date-table td.in-range::before,
+body .history-range-popper--dark .el-date-table td.in-range .el-date-table-cell::before {
+  background: rgba(73, 101, 135, 0.28) !important;
+}
+
+body .history-range-popper--dark .el-date-table td.available:hover .el-date-table-cell__text {
+  background: rgba(73, 101, 135, 0.4) !important;
+}
+
+body .history-range-popper--dark .el-date-table td.start-date .el-date-table-cell__text,
+body .history-range-popper--dark .el-date-table td.end-date .el-date-table-cell__text,
+body .history-range-popper--dark .el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+  color: #ffffff !important;
+}
+
+body .history-range-popper--dark .el-date-table td.prev-month .el-date-table-cell__text,
+body .history-range-popper--dark .el-date-table td.next-month .el-date-table-cell__text,
+body .history-range-popper--dark .el-date-table td.disabled .el-date-table-cell__text {
+  color: rgba(159, 178, 202, 0.45) !important;
+}
+
+body .history-range-popper--dark .el-input__wrapper,
+body .history-range-popper--dark .el-time-editor.el-input__wrapper,
+body .history-range-popper--dark .el-range-input {
+  background: rgba(15, 29, 48, 0.95) !important;
+  color: #dbe9ff !important;
+  box-shadow: 0 0 0 1px rgba(71, 95, 124, 0.85) inset !important;
+}
+
+body .history-range-popper--dark .el-input__inner,
+body .history-range-popper--dark .el-range-input::placeholder {
+  color: #dbe9ff !important;
+}
+
+body .history-range-popper--dark .el-time-panel,
+body .history-range-popper--dark .el-time-panel__content,
+body .history-range-popper--dark .el-time-spinner__wrapper {
+  background: #102338 !important;
+  border-color: #2f4968 !important;
+}
+
+body .history-range-popper--dark .el-time-spinner__item {
+  color: #a7bfdc !important;
+}
+
+body .history-range-popper--dark .el-time-spinner__item.is-active {
+  color: #fff !important;
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+}
+
+/* 终极兜底：深色主题下所有日期时间范围弹层统一深色（不依赖 popper-class） */
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-picker-panel__body,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-picker-panel__body-wrapper,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-range-picker__content,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-range-picker__time-header,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-range-picker__header,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-picker-panel__footer {
+  background: #102338 !important;
+  color: #dbe9ff !important;
+  border-color: #2f4968 !important;
+}
+
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table th,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-picker-panel__icon-btn,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-range-picker__header div {
+  color: #a7bfdc !important;
+}
+
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td .el-date-table-cell__text {
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td.in-range::before,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td.in-range .el-date-table-cell::before {
+  background: rgba(73, 101, 135, 0.5) !important;
+}
+
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td.in-range .el-date-table-cell {
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.28) !important;
+}
+
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td.start-date .el-date-table-cell__text,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td.end-date .el-date-table-cell__text,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: linear-gradient(180deg, #225b8e 0%, #1a4f80 100%) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-input__wrapper,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-time-editor.el-input__wrapper,
+html[data-theme='dark'] .el-picker-panel.el-date-range-picker.has-time .el-range-input {
+  background: rgba(15, 29, 48, 0.95) !important;
+  color: #dbe9ff !important;
+  box-shadow: 0 0 0 1px rgba(71, 95, 124, 0.85) inset !important;
+}
+
+html[data-theme='dark'] .el-time-panel,
+html[data-theme='dark'] .el-time-panel__content,
+html[data-theme='dark'] .el-time-spinner__wrapper {
+  background: #102338 !important;
+  border-color: #2f4968 !important;
+}
+
+/* 深色主题：分页“每页条数”下拉弹层（teleported 到 body） */
+html[data-theme='dark'] .el-select-dropdown,
+html[data-theme='dark'] .el-popper.el-select__popper {
+  background: #102338 !important;
+  border-color: #2f4968 !important;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.42) !important;
+}
+
+html[data-theme='dark'] .el-select-dropdown .el-select-dropdown__item {
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .el-select-dropdown .el-select-dropdown__item:hover {
+  background: rgba(73, 101, 135, 0.36) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='dark'] .el-select-dropdown .el-select-dropdown__item.is-selected {
+  color: #9ddcff !important;
+  background: rgba(34, 91, 142, 0.42) !important;
+}
+
+/* 深色主题：消息确认弹窗（MessageBox，teleported 到 body） */
+html[data-theme='dark'] .el-overlay.is-message-box .el-overlay-message-box .el-message-box,
+html.dark .el-overlay.is-message-box .el-overlay-message-box .el-message-box,
+body.dark .el-overlay.is-message-box .el-overlay-message-box .el-message-box,
+[data-theme='dark'] .el-overlay.is-message-box .el-overlay-message-box .el-message-box,
+.theme-dark .el-overlay.is-message-box .el-overlay-message-box .el-message-box,
+.dark-theme .el-overlay.is-message-box .el-overlay-message-box .el-message-box {
+  background: linear-gradient(180deg, #15263d 0%, #0f1d31 100%) !important;
+  border: 1px solid #34506f !important;
+  box-shadow:
+    0 14px 36px rgba(2, 6, 23, 0.52),
+    inset 0 1px 0 rgba(148, 163, 184, 0.14) !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__title,
+html.dark .el-overlay.is-message-box .el-message-box__title,
+body.dark .el-overlay.is-message-box .el-message-box__title,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__title,
+.theme-dark .el-overlay.is-message-box .el-message-box__title,
+.dark-theme .el-overlay.is-message-box .el-message-box__title {
+  color: #eaf3ff !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close,
+html.dark .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close,
+body.dark .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close,
+.theme-dark .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close,
+.dark-theme .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close {
+  color: #9fb2ca !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close:hover,
+html.dark .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close:hover,
+body.dark .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close:hover,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close:hover,
+.theme-dark .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close:hover,
+.dark-theme .el-overlay.is-message-box .el-message-box__headerbtn .el-message-box__close:hover {
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__content,
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__message p,
+html.dark .el-overlay.is-message-box .el-message-box__content,
+html.dark .el-overlay.is-message-box .el-message-box__message p,
+body.dark .el-overlay.is-message-box .el-message-box__content,
+body.dark .el-overlay.is-message-box .el-message-box__message p,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__content,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__message p,
+.theme-dark .el-overlay.is-message-box .el-message-box__content,
+.theme-dark .el-overlay.is-message-box .el-message-box__message p,
+.dark-theme .el-overlay.is-message-box .el-message-box__content,
+.dark-theme .el-overlay.is-message-box .el-message-box__message p {
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__status.el-icon-warning,
+html.dark .el-overlay.is-message-box .el-message-box__status.el-icon-warning,
+body.dark .el-overlay.is-message-box .el-message-box__status.el-icon-warning,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__status.el-icon-warning,
+.theme-dark .el-overlay.is-message-box .el-message-box__status.el-icon-warning,
+.dark-theme .el-overlay.is-message-box .el-message-box__status.el-icon-warning {
+  color: #f59e0b !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__btns .el-button:not(.el-button--primary),
+html.dark .el-overlay.is-message-box .el-message-box__btns .el-button:not(.el-button--primary),
+body.dark .el-overlay.is-message-box .el-message-box__btns .el-button:not(.el-button--primary),
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__btns .el-button:not(.el-button--primary),
+.theme-dark .el-overlay.is-message-box .el-message-box__btns .el-button:not(.el-button--primary),
+.dark-theme .el-overlay.is-message-box .el-message-box__btns .el-button:not(.el-button--primary) {
+  background: rgba(15, 29, 48, 0.95) !important;
+  border-color: rgba(71, 95, 124, 0.78) !important;
+  color: #dbe9ff !important;
+}
+
+html[data-theme='dark'] .el-overlay.is-message-box .el-message-box__btns .el-button--primary,
+html.dark .el-overlay.is-message-box .el-message-box__btns .el-button--primary,
+body.dark .el-overlay.is-message-box .el-message-box__btns .el-button--primary,
+[data-theme='dark'] .el-overlay.is-message-box .el-message-box__btns .el-button--primary,
+.theme-dark .el-overlay.is-message-box .el-message-box__btns .el-button--primary,
+.dark-theme .el-overlay.is-message-box .el-message-box__btns .el-button--primary {
+  background: linear-gradient(180deg, #2f7fc7 0%, #2067a7 100%) !important;
+  border-color: #5fa9e6 !important;
+  color: #ffffff !important;
+}
+

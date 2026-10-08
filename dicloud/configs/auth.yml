@@ -1,0 +1,74 @@
+# DCSY auth 服务配置。账号、密码和密钥可直接在本文件中配置，环境变量仍可用于覆盖普通配置项。
+rsa:
+  # 用于解密数据库、Redis、RocketMQ 等配置密文，以及解密前端提交的登录密码。
+  privateKey: "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKYAq0FcC3bovzcn8R3g/Sxi/bDbwNwyor2gA/544iNGnOWh5wTEXUCLD0IOD62mIcMDuVq5iQI0Z8zpgzGx6yZ+ukOKzh7r1Ffx+WbGlFJ+ZBGjdk/qM+taWwpgiFoJm77louSD+CEBxJFeK9elptpn1a9F9FyAGaBuxjgfwZ9hAgMBAAECgYEAiZz6W0drtZqCkb3J06QlHPu/JTM3cROE97/EL9uUU/wAqxiJQ9lpGM1uy6qOcrzLNjhLGxu9qZc6CZP3D2ZX8Y4Tb1fFtiH09tKdCDQsWZGuJfI2SPEJrXkTZOhLTIBB3OrtnCELDxEqmXyMqrrbOsoDQ/BKnH6YhUCgyy9KqAECQQDb2bRYGBY+a0HfhdFdvnXLpUCnr+WLi2wo1NjiJmE4KMrwloa5LcdfR+elItKMM3bEwL18IBOxfAnETOr/pZAhAkEAwUxRHbf9ZfnCwrhKZwTGvDybFegqxRqx/FEJd2htq1KAGBM3p5OXUaFLw6CNh3VBwG2XmPQVC2CN5p0AIWMnQQJAf0pQccUYc/F0BXAcZbOVzmASzEQ6mo4SBJ4gKOhh17s+rQfqXyNTUSZ3x5Qe5dASTx7tVwXXgSa5HPAQDA6XIQJAbbv6jMmH1F1+4HYo3uUKQZCSZlRf+3eVNW131070e38hcwlt3fdevxu3XD6IOi8p/aj5l/5w9/1/cT0N9uZIQQJBAKNitIBEt43ugyBQnnzJi+HpmQ8Kcn9mnaxnABc3zymAURrzB11MCIK5oxvrKMn5wEzAMtEprcYsQG7qpGIonvw="
+  # 与 privateKey 配对；需要后端加密数据时使用，前端 VITE_RSA_PUBLIC_KEY 也应使用此值。
+  publicKey: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmAKtBXAt26L83J/Ed4P0sYv2w28DcMqK9oAP+eOIjRpzloecExF1Aiw9CDg+tpiHDA7lauYkCNGfM6YMxsesmfrpDis4e69RX8flmxpRSfmQRo3ZP6jPrWlsKYIhaCZu+5aLkg/ghAcSRXivXpabaZ9WvRfRcgBmgbsY4H8GfYQIDAQAB"
+
+server:
+  name: auth
+  port: 10001
+  useNacos: false
+  useSpringCloudGateway: false
+
+# 启用 useNacos 时使用以下注册中心配置；账号密码也可由环境变量覆盖。
+nacos:
+  server:
+    host:
+    port:
+    namespaceId: c0c576b7-1d60-48e9-9b2f-8d440d68c19b
+    groupName: 
+    clusterName: DEFAULT
+    username: nacos
+    password: nacos
+
+# Redis 保存会话、验证码和登录安全状态；renter2 为第二租户数据源。
+redis:
+  host: localhost
+  port: 6379
+  password: PwArNPlYWlYnxqGxGG6oaiwLT3MevWd5A+awy6to+JdzRsZxAAGF9Ec1ETgzH3Inr/yhLmPS89enobT9m1WeylPTZrdDOl5LUeBsbbcsmm5SgHiq6LnGBMvF25DPVVWzfBZKeXmVLXvoEy5hM0pL2zgEZBEK6OBPiWTOG562/Yg=
+#  renter2:
+#    host: localhost
+#    port: 6379
+#    password: ""
+
+# 登录短信接口配置，messageTemplate 中保留验证码占位符。
+sms:
+  login:
+    # false：调用真实短信接口；true：使用模拟验证码，不调用外部短信接口。
+    # 临时测试建议通过环境变量 AUTH_SMS_LOGIN_SIMULATE=true 覆盖，生产环境应保持 false。
+    simulate: true
+    # 模拟模式下使用的固定六位验证码；仅在 simulate=true 时生效。
+    simulateCode: "000000"
+    url: https://security.sctower.cn/gapi/open-api/sms/sendmessage
+    expireSeconds: 300
+    intervalSeconds: 60
+    timeoutSeconds: 20
+    messageTemplate: 您的登录验证码为：%s，5分钟内有效，请勿泄露。
+
+# 连续登录失败限制，时间单位均为分钟。
+security:
+  login:
+    maxFailures: 5
+    failureWindowMinutes: 15
+    lockMinutes: 15
+
+
+# OpenGauss 保存用户、组织及权限数据；程序启动时自动迁移表结构。
+opengauss:
+  host: localhost
+  port: 5432
+  user: gaussdb
+  password: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+  dbname: ditoo
+#  renter2:
+#    host: localhost
+#    port: 5432
+#    user: root
+#    password: ""
+#    dbname: ditoo2
+
+
+# 日志目录必须对当前服务进程可写。
+log:
+  filePath: ./logs/auth.log

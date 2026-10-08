@@ -1,0 +1,82 @@
+// 原 App.vue 的业务云全局样式，由 pageStyles 按当前页面启停。
+.contentCss {
+  width 100%
+  height 100vh
+  min-height 900px
+}
+.gray { // 淡灰色(项目背景色)
+  background-color #F6F5FA
+}
+.gainsboro { // 灰色 (白色背景下的字体色)
+  background-color #AAAAAA
+}
+.blue { // 淡蓝色
+  background-color #25ACFD
+}
+.orange { // 橙色
+  background-color #FFAF32
+}
+.fieldset {
+  padding 15px
+  margin-top 5px
+  border 1px solid #1E7ACE
+  background #fff
+}
+fieldset legend {
+  color #1E7ACE
+  font-weight bold
+  margin-left 30px
+  padding 3px 20px 3px 20px
+  border 1px solid #1E7ACE
+  background #fff
+}
+.allheight {
+  height 700px
+}
+.fixedBottomCss {
+  position fixed
+  bottom 0
+  margin-bottom 20px
+}
+.el-form-item__label { // Drawer标题样式
+  color #AAAAAA
+}
+.monospace { // 等宽字体
+  font-family monospace
+}
+
+// 业务云自定义滚动条。
+::-webkit-scrollbar {
+  width 10px
+  height 10px
+  border-radius 10px
+  background-color #F5F5F5
+}
+::-webkit-scrollbar-thumb {
+  border-radius 10px
+  -webkit-box-shadow inset 0 0 6px rgba(0,0,0,.3)
+  border-radius 10px
+  transition 0.3s ease-in-out
+}
+::-webkit-scrollbar-track {
+  border-radius 10px
+  -webkit-box-shadow inset 0 0 6px rgba(0,0,0,0.3)
+  background-color #F5F5F5
+}
+
+.cursorPointer { // 鼠标变为小手
+  cursor pointer
+}
+
+.el-select-dropdown { // 修正下拉选项显示不全的问题
+  .el-scrollbar {
+    .el-select-dropdown__wrap {
+      margin-bottom 0 !important
+    }
+  }
+}
+
+.el-select.el-select--small { // 业务云小尺寸下拉框宽度
+  width 100%
+  max-width 430px
+}

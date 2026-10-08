@@ -1,0 +1,65 @@
+# TTDC 锂硫、钠电解析服务配置。账号、密码和密钥可直接在本文件中配置。
+rsa:
+  # 用于解密数据库、Redis、RocketMQ 和 TDengine 等配置密文。
+  privateKey: "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKYAq0FcC3bovzcn8R3g/Sxi/bDbwNwyor2gA/544iNGnOWh5wTEXUCLD0IOD62mIcMDuVq5iQI0Z8zpgzGx6yZ+ukOKzh7r1Ffx+WbGlFJ+ZBGjdk/qM+taWwpgiFoJm77louSD+CEBxJFeK9elptpn1a9F9FyAGaBuxjgfwZ9hAgMBAAECgYEAiZz6W0drtZqCkb3J06QlHPu/JTM3cROE97/EL9uUU/wAqxiJQ9lpGM1uy6qOcrzLNjhLGxu9qZc6CZP3D2ZX8Y4Tb1fFtiH09tKdCDQsWZGuJfI2SPEJrXkTZOhLTIBB3OrtnCELDxEqmXyMqrrbOsoDQ/BKnH6YhUCgyy9KqAECQQDb2bRYGBY+a0HfhdFdvnXLpUCnr+WLi2wo1NjiJmE4KMrwloa5LcdfR+elItKMM3bEwL18IBOxfAnETOr/pZAhAkEAwUxRHbf9ZfnCwrhKZwTGvDybFegqxRqx/FEJd2htq1KAGBM3p5OXUaFLw6CNh3VBwG2XmPQVC2CN5p0AIWMnQQJAf0pQccUYc/F0BXAcZbOVzmASzEQ6mo4SBJ4gKOhh17s+rQfqXyNTUSZ3x5Qe5dASTx7tVwXXgSa5HPAQDA6XIQJAbbv6jMmH1F1+4HYo3uUKQZCSZlRf+3eVNW131070e38hcwlt3fdevxu3XD6IOi8p/aj5l/5w9/1/cT0N9uZIQQJBAKNitIBEt43ugyBQnnzJi+HpmQ8Kcn9mnaxnABc3zymAURrzB11MCIK5oxvrKMn5wEzAMtEprcYsQG7qpGIonvw="
+  publicKey: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmAKtBXAt26L83J/Ed4P0sYv2w28DcMqK9oAP+eOIjRpzloecExF1Aiw9CDg+tpiHDA7lauYkCNGfM6YMxsesmfrpDis4e69RX8flmxpRSfmQRo3ZP6jPrWlsKYIhaCZu+5aLkg/ghAcSRXivXpabaZ9WvRfRcgBmgbsY4H8GfYQIDAQAB"
+
+server:
+  name: deal
+
+rocket:
+  # RocketMQ 连接参数；仅订阅 battery.dealQueue。
+  endpoint: 127.0.0.1:9876
+  # Broker 管理地址，自动创建主题时使用；按实际部署地址修改。
+  brokerAddresses:
+    - 127.0.0.1:10911
+  autoCreateTopic: true
+  readQueueNums: 4
+  writeQueueNums: 4
+  accesskey: root
+  secretkey: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+
+
+taos:
+  # TDengine 连接参数，用于保存电池时序点位。
+  host: localhost
+  tcpport: 6030
+  webport: 6041
+  user: root
+  password: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+  dbname: demo
+
+redis:
+  host: localhost
+  port: 6379
+  password: PwArNPlYWlYnxqGxGG6oaiwLT3MevWd5A+awy6to+JdzRsZxAAGF9Ec1ETgzH3Inr/yhLmPS89enobT9m1WeylPTZrdDOl5LUeBsbbcsmm5SgHiq6LnGBMvF25DPVVWzfBZKeXmVLXvoEy5hM0pL2zgEZBEK6OBPiWTOG562/Yg=
+
+
+opengauss:
+  host: localhost
+  port: 5432
+  user: root
+  password: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+  dbname: ditoo
+
+battery:
+  # 锂硫和钠电共用解析开关及缓存刷新周期，电池类型由 MQTT Topic 和模板组决定。
+  enabled: true
+  debugLog: true
+  dealQueue: xc_battery_deal_msg
+  tag: battery_ttdc
+  cacheRefreshSeconds: 30
+  revisionPollSeconds: 5
+  fullCacheRefreshMinutes: 60
+  # 服务启动时依赖暂不可用的重试间隔。
+  initRetrySeconds: 5
+  gatewayAutoCreateEnabled: true
+  channelAutoCreateEnabled: true
+  ai:
+    # AI 评估为可选能力，默认关闭；地址通过 DEAL_BATTERY_AI_URL 注入。
+    enabled: false
+    url: ""
+    timeout: 3s
+
+log:
+  filePath: ./logs/deal.log

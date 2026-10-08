@@ -1,0 +1,48 @@
+# DCSY trigger 服务配置。账号、密码和密钥可直接在本文件中配置。
+rsa:
+  # 用于解密数据库、Redis、RocketMQ 和 TDengine 等配置密文。
+  privateKey: "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKYAq0FcC3bovzcn8R3g/Sxi/bDbwNwyor2gA/544iNGnOWh5wTEXUCLD0IOD62mIcMDuVq5iQI0Z8zpgzGx6yZ+ukOKzh7r1Ffx+WbGlFJ+ZBGjdk/qM+taWwpgiFoJm77louSD+CEBxJFeK9elptpn1a9F9FyAGaBuxjgfwZ9hAgMBAAECgYEAiZz6W0drtZqCkb3J06QlHPu/JTM3cROE97/EL9uUU/wAqxiJQ9lpGM1uy6qOcrzLNjhLGxu9qZc6CZP3D2ZX8Y4Tb1fFtiH09tKdCDQsWZGuJfI2SPEJrXkTZOhLTIBB3OrtnCELDxEqmXyMqrrbOsoDQ/BKnH6YhUCgyy9KqAECQQDb2bRYGBY+a0HfhdFdvnXLpUCnr+WLi2wo1NjiJmE4KMrwloa5LcdfR+elItKMM3bEwL18IBOxfAnETOr/pZAhAkEAwUxRHbf9ZfnCwrhKZwTGvDybFegqxRqx/FEJd2htq1KAGBM3p5OXUaFLw6CNh3VBwG2XmPQVC2CN5p0AIWMnQQJAf0pQccUYc/F0BXAcZbOVzmASzEQ6mo4SBJ4gKOhh17s+rQfqXyNTUSZ3x5Qe5dASTx7tVwXXgSa5HPAQDA6XIQJAbbv6jMmH1F1+4HYo3uUKQZCSZlRf+3eVNW131070e38hcwlt3fdevxu3XD6IOi8p/aj5l/5w9/1/cT0N9uZIQQJBAKNitIBEt43ugyBQnnzJi+HpmQ8Kcn9mnaxnABc3zymAURrzB11MCIK5oxvrKMn5wEzAMtEprcYsQG7qpGIonvw="
+  publicKey: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmAKtBXAt26L83J/Ed4P0sYv2w28DcMqK9oAP+eOIjRpzloecExF1Aiw9CDg+tpiHDA7lauYkCNGfM6YMxsesmfrpDis4e69RX8flmxpRSfmQRo3ZP6jPrWlsKYIhaCZu+5aLkg/ghAcSRXivXpabaZ9WvRfRcgBmgbsY4H8GfYQIDAQAB"
+
+server:
+  name: trigger
+
+# RocketMQ 接收采集数据并发送触发器与告警消息。
+rocket:
+  endpoint: 127.0.0.1:9876
+  # Broker 管理地址，自动创建主题时使用；按实际部署地址修改。
+  brokerAddresses:
+    - 127.0.0.1:10911
+  autoCreateTopic: true
+  readQueueNums: 4
+  writeQueueNums: 4
+  accesskey: root
+  secretkey: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+
+# TDengine 提供触发判断所需的设备时序数据。
+taos:
+  host: localhost
+  tcpport: 6030
+  webport: 6041
+  user: root
+  password: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+  dbname: demo
+
+# OpenGauss 保存通用触发器、实时逻辑和告警记录。
+opengauss:
+  host: localhost
+  port: 5432
+  user: gaussdb
+  password: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+  dbname: ditoo
+
+
+# Redis 保存实时数据、锁和触发器运行状态。
+redis:
+  host: localhost
+  port: 6379
+  password: PwArNPlYWlYnxqGxGG6oaiwLT3MevWd5A+awy6to+JdzRsZxAAGF9Ec1ETgzH3Inr/yhLmPS89enobT9m1WeylPTZrdDOl5LUeBsbbcsmm5SgHiq6LnGBMvF25DPVVWzfBZKeXmVLXvoEy5hM0pL2zgEZBEK6OBPiWTOG562/Yg=
+
+# 日志目录必须对当前服务进程可写。
+log:
+  filePath: ./logs/trigger.log

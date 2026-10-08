@@ -1,0 +1,312 @@
+syntax = "proto3"; // 指定proto版本
+package tolink_grpc;     // 指定默认包名
+
+// 指定golang包名
+option go_package = "./tolink_grpc";
+
+// 定义grpc服务
+service TolinkService {
+    // 添加触发器
+    rpc AddTrigger (TriggerConfig) returns (TolinkTriggerResponse) {}
+    // 删除触发器
+    rpc DeleteTrigger (TriggerConfig) returns (TolinkTriggerResponse) {}
+    // 修改触发器
+    rpc UpdateTrigger (TriggerConfig) returns (TolinkTriggerResponse) {}
+    // 查询触发器
+    rpc FindTrigger (TriggerConfig) returns (TolinkTriggerResponse) {}
+
+    
+    // 添加通用触发器
+    rpc AddGeneralTrigger (GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 删除通用触发器
+    rpc DeleteGeneralTrigger (GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 修改通用触发器
+    rpc UpdateGeneralTrigger (GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 查询通用触发器
+    rpc FindGeneralTrigger (GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 查询所有通用触发器 - 已绑定(生成)标记
+    rpc FindAllGeneralTriggerMarkBinds(GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 根据通用触发器Id, 删除绑定关联标记
+    rpc DeleteMarkByGeneralTriggerId(GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 修改设备标记
+    rpc UpdateMarkTrigger(GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 删除设备标记
+    rpc DeleteMarkTrigger(GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+    // 创建设备标记
+    rpc CreateMarkTrigger(GeneralTriggerConfig) returns (TolinkGeneralTriggerResponse) {}
+
+
+    // 是否存在数据池 - 并通过ApiKey获取
+    rpc ExistApiKey (Stream) returns (TolinkStreamResponse) {}
+
+
+
+    // 定义函数 - 添加网关/网关数据/数据池/数据池数据, 返回数据池apiKey
+    rpc AddGateway (Gateway) returns (TolinkResponse) {}
+    // 同步删除网关数据
+    rpc DeleteGateway (Gateway) returns (TolinkResponse) {}
+    // 获取采集数据 - 健康度
+    rpc GetGatewayIdSOH (Gateway) returns (TolinkSequenceData) {}
+    // 根据数据ID获取采集数据 - 固定数据点ID数据
+    rpc GetLastDataByTime (GetDataDto) returns (TolinkSequenceData) {}
+    // 批量获取指定时间前的最新采集数据
+    rpc GetLastDataByTimeBatch (BatchGetDataDto) returns (TolinkBatchSequenceData) {}
+
+    // TODO: 手动采集数据 - 固定网关数据点ID数据
+    //rpc GatewayDataAcquisition () returns () {}
+    // TODO: 手动采集数据 - 已存在数据池逻辑数据
+    // TODO: 统计数据采集 - 细粒度的数据回写时序数据库
+    //rpc StreamDataAcquisition () returns () {}
+    // TODO: MQTT下发数据 - 已存在数据池逻辑数据
+    //rpc StreamDataDownload () returns () {}
+}
+
+// 网关参数
+message Gateway {
+    string name = 1;
+    string gateway_id = 2;
+    string model = 3;
+    string card = 4;
+    string api_key = 5;
+    int64 create_user_id = 6;
+    int64 corp_id = 7;
+	repeated GatewayData gateway_datas = 8; // 网关（全部）数据点
+    string dbName = 9;
+}
+
+/* 网关数据点数据 */
+message GatewayData {
+    string gateway_id = 1; // 网关序列号 不使用数据库id, 用唯一序列号指定
+    string data_id = 2;    // 数据点id 在网关内唯一
+    int64 data_type = 3;  // 数据值类型 0: float 2: 字符串
+    string name = 4;      // 数据点名称
+    int64 dbconfig = 5;  // 数据库配置
+    string label_id = 6; // 数据池配置
+}
+
+/* 查询最新数据请求参数 */
+message GetDataDto {
+    string gateway_id = 1; // 网关序列号 不使用数据库id, 用唯一序列号指定
+    string data_id = 2;    // 数据点id 在网关内唯一
+    int64 cur_time = 3;    // 查询截止时间范围
+    string dbName = 4;
+}
+
+message BatchGetDataDto {
+    repeated GetDataDto requests = 1;
+}
+
+// TolinkResponse 响应内容
+message TolinkResponse{
+    int64 code = 1;
+    string message = 2;
+}
+
+// TolinkSequenceData 响应 - 时序数据
+message TolinkSequenceData{
+    int64 code = 1;
+    string message = 2;
+    SequenceData sequence_data = 3;
+}
+
+message TolinkBatchSequenceItem {
+    GetDataDto request = 1;
+    SequenceData sequence_data = 2;
+    string error = 3;
+}
+
+message TolinkBatchSequenceData {
+    int64 code = 1;
+    string message = 2;
+    repeated TolinkBatchSequenceItem data = 3;
+}
+
+message SequenceData {
+    int64 create_time = 1;
+    double val = 2;
+    int64 status = 3;
+}
+
+// TolinkTriggerResponse 触发器调用-响应内容
+message TolinkTriggerResponse{
+    int64 code = 1;
+    string message = 2;
+    repeated TriggerConfig triggers = 3;
+}
+
+
+// 触发器参数
+message TriggerConfig {
+    int64 id = 1;
+    int64 siteId = 2;
+    int64 equipmentId = 3;
+    int64 triggerType = 4;
+    int64 triggerModel = 5;
+    string code = 6;
+    string apiKey = 7;
+    string labelName = 8;
+    string labelId = 9;
+    int64 cycle = 10;
+    int64 timer = 11;
+    int64 record = 12;
+    string lastStrMatch = 13;
+    string marktrigger = 14;
+    string formula = 15;
+    int64 sustainTime = 16;
+    int64 sustainRecord = 17;
+    repeated RealtimeLogic logics = 18;
+    repeated RealtimeStrMatch strMatchs = 19;
+    AlarmUser alarmUser = 20;
+    StatisticConfig statisticConfig = 21;
+    string dbName = 22;
+}
+
+// 触发器-触发逻辑
+message RealtimeLogic {
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID 表里可重复
+    string logic = 3; // 具体判断逻辑符号
+    double triggerValue = 4; // 具体判断值
+}
+
+// 触发器-匹配字符
+message RealtimeStrMatch {
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID 表里可重复
+    string matchStr = 3; // 具体判匹配值
+    bool replaceCodeFlag = 4; // 是否替换code, 生成报警记录
+    string replaceCode = 5; // 替换报警值
+}
+
+// 触发器-报警配置
+message AlarmUser {
+    int64 id = 1;
+    int64 triggerId = 2;  // 触发器ID 维一值
+    string alarmCode = 3; // 报警代码
+    string alarmType = 4; // 报警类别 0: 普通 1: 设备 2: 平台 3: 预警, 多种方式用','隔开
+    int64 alarmStage = 5; // 报警等级
+    string alarmChannel = 6; // 报警渠道，当前告警程序仅处理 0（短信）
+    string alarmUsers = 7;  // 报警用户 存储用户ID, 多个用户用','隔开
+}
+
+// 触发器-统计配置
+message StatisticConfig {
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID 维一值
+    string statisticCode = 3; // 统计代码 - 统一代码(指定唯一统计对象)
+    string statisticName = 4; // 统计名称 - 可以命名别名
+    int64 dataSourceType = 5; // 数据来源 0: mqtt数据 1:
+    string statisticType = 6; // 统计方式 0: 通用统计 1: 报警条数统计
+    bool useStatisticValue = 7; // 是否使用设置值统计 true: 使用 - 例: 当StatisticType为1时候 false : 不适用
+    double statisticValue = 8; // 统计值, 覆盖原始值进行统计 1: 一条数据 - 例: 当StatisticType为1时候
+    int64 statisticValueType = 9; // 数据类型 0: 累计值 1: 增量值 - 例: 当StatisticType为1时候
+}
+
+
+// TolinkGeneralTriggerResponse 触发器调用-响应内容
+message TolinkGeneralTriggerResponse{
+    int64 code = 1;
+    string message = 2;
+    repeated GeneralTriggerConfig triggers = 3;
+}
+
+
+// 触发器参数
+message GeneralTriggerConfig {
+    int64 id = 1;
+    repeated int64 equipmentIds = 2;
+    string triggerName = 3;
+    string labelName = 4;
+    int64 triggerType = 5;
+    int64 triggerModel = 6;
+    string code = 7;
+    int64 cycle = 8;
+    int64 sustainTime = 9;
+    string formula = 10;
+
+    repeated GeneralRealtimeLogic logics = 11;
+    repeated GeneralRealtimeStrMatch strMatchs = 12;
+    repeated GeneralMarktrigger marktriggers = 13;
+    GeneralAlarmUser alarmUser = 14;
+    GeneralStatisticConfig statisticConfig = 15;
+    string dbName = 16;
+}
+
+
+message GeneralRealtimeLogic {
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID 表里可重复
+    string logic = 3; // 具体判断逻辑符号
+    double triggerValue = 4; // 具体判断值
+}
+message GeneralRealtimeStrMatch{
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID 表里可重复
+    string matchStr = 3; // 具体判匹配值
+    bool replaceCodeFlag = 4; // 是否替换code, 生成报警记录
+    string replaceCode = 5; // 替换报警值
+}
+message GeneralMarktrigger{
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID
+    int64 siteId = 3; // 站点ID
+    int64 equipmentId = 4; // 设备ID
+    string marktrigger = 5; // 网关数据点记录 可gatewayID+dataId md加密 (添加修改labelId时同步更新)
+    int64 timer = 6; // 报警时间 0: 未报警,正常; 非0: 表示第一次报警状态时间记录
+    int64 record = 7; // 触发器上次触发状态 0: 上次未报警 非0: 上一次报警, 上次报警时间戳
+    string lastStrMatch = 8; // 一次报警str记录
+    int64 sustainRecord = 9; // 触发记录点
+}
+message GeneralAlarmUser{
+    int64 id = 1;
+    int64 triggerId = 2;  // 触发器ID 维一值
+    string alarmCode = 3; // 报警代码
+    string alarmType = 4; // 报警类别 0: 普通 1: 设备 2: 平台 3: 预警, 多种方式用','隔开
+    int64 alarmStage = 5; // 报警等级
+    string alarmChannel = 6; // 报警渠道，当前告警程序仅处理 0（短信）
+    string alarmUsers = 7;  // 报警用户 存储用户ID, 多个用户用','隔开
+}
+message GeneralStatisticConfig{
+    int64 id = 1;
+    int64 triggerId = 2; // 触发器ID 维一值
+    string statisticCode = 3; // 统计代码 - 统一代码(指定唯一统计对象)
+    string statisticName = 4; // 统计名称 - 可以命名别名
+    int64 dataSourceType = 5; // 数据来源 0: mqtt数据 1:
+    string statisticType = 6; // 统计方式 0: 通用统计 1: 报警条数统计
+    bool useStatisticValue = 7; // 是否使用设置值统计 true: 使用 - 例: 当StatisticType为1时候 false : 不适用
+    double statisticValue = 8; // 统计值, 覆盖原始值进行统计 1: 一条数据 - 例: 当StatisticType为1时候
+    int64 statisticValueType = 9; // 数据类型 0: 累计值 1: 增量值 - 例: 当StatisticType为1时候
+}
+
+
+// TolinkStream 数据池调用-响应内容
+message TolinkStreamResponse{
+    int64 code = 1;
+    string message = 2;
+    Stream stream = 3;
+}
+
+message Stream {
+    int64 id = 1;
+    string admin = 2; // 管理员
+    string name = 3; // 数据池名称
+    string apiKey = 4; // apikey
+    int64 createUserId = 5; // 创建用户id
+    int64 corpId = 6; // 部门id, 留作备用
+    string streamCode = 7; // 刘郑自用
+    repeated StreamLabelUnit list = 8; // 数据池（全部）数据点
+    string dbName = 9;
+}
+
+message StreamLabelUnit {
+    int64 streamId = 1; //数据池的id
+	string labelId = 2; //标签id
+    string name = 3; //标签名称
+    string gatewayName = 4; //网关名称
+    string gatewayId = 5; //网关id
+    string dataName = 6; //数据名称
+    string dataType = 7; //数据类型
+    string dataId = 8; //数据点id
+    string formula = 9; //处理公式
+    string unformula = 10; //逆处理公式
+}

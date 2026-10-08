@@ -1,0 +1,1744 @@
+<template>
+  <div class="hisDataCss">
+    <div v-if="isDevelopment" class="bzxxCss">
+      <el-tooltip
+        class="item"
+        effect="dark"
+        placement="top"
+        content="历史数据显示的内容为【名称中包含‘电池状态’的数据点】"
+      >
+        <el-button size="small" type="primary">备注信息</el-button>
+      </el-tooltip>
+    </div>
+    <div class="csxzContentCss">
+      <div class="titleCss">【参数选择】</div>
+      <div class="csxzCss">
+        <div class="csxzTitleCss">电池组参数：</div>
+        <div class="csxzSelectCss">
+          <MyCheckbox
+            :check-list="dczcsSelectList"
+            @select-change="dczcsSelectChange"
+          />
+        </div>
+        <div class="csxzFooterCss" />
+      </div>
+      <div class="csxzCss">
+        <div class="csxzTitleCss">单体电压：</div>
+        <div class="csxzSelectCss">
+          <MyCheckbox
+            :check-list="dtdySelectList"
+            @select-change="dtdySelectChange"
+          />
+        </div>
+        <div class="csxzFooterCss" />
+      </div>
+    </div>
+    <div class="sjxzContentCss">
+      <div class="titleCss">【切片快速选择】</div>
+      <div
+        v-loading="fdSliceLoading"
+        class="sjxzCss"
+        element-loading-background="rgba(255, 255, 255, 0.75)"
+      >
+        <div class="ksxzTitleCss">放电切片快速选择</div>
+        <div class="ksxzLsjlContentCss">
+          <div class="ksxzLsjlCss">
+            <div class="ksxzLsjlTitleCss">历史放电记录</div>
+            <div class="ksxzLsjlDateContentCss">
+              <div class="ksxzLsjlDateCss">
+                <el-date-picker
+                  v-model="fdTimeArr"
+                  size="small"
+                  type="datetimerange"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :disabled="fdSliceLoading"
+                  :disabled-date="fdDisabledDate"
+                  @calendar-change="fdCalendarChange"
+                  @change="timeChange('放电切片快速选择')"
+                />
+              </div>
+            </div>
+            <div class="fdcsCss">放电次数<span class="fdcsNumCss">{{ allFdjlList.length }}</span>次</div>
+          </div>
+          <div class="fdjlContentCss">
+            <div class="fdjlTitleCss">放电记录</div>
+            <div class="fdjlCss">
+              <div class="fdjlTabCss">
+                <div v-if="fdjlList.length > 0" class="fdjlListCss">
+                  <div
+                    v-for="(item, index) in fdjlList"
+                    :key="index"
+                    class="fdjlItemCss cursorPointer"
+                    :class="item.selected ? 'fdjlItemSelectedCss': ''"
+                    @click="clickTable1(item)"
+                  >{{ item.dateArr }}</div>
+                </div>
+                <div v-else class="fdjlListCss wsjCss">无</div>
+                <div class="pagCss">
+                  <Pagination
+                    v-show="total1>0"
+                    v-model:page="page1"
+                    v-model:limit="limit1"
+                    padding="0"
+                    layout="prev, pager, next"
+                    :small="true"
+                    :total="total1"
+                    :page-sizes="[2, 20, 30, 50, 100]"
+                    @pagination="getMsgList1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sjxzFooterCss" />
+      </div>
+      <div
+        v-loading="cdSliceLoading"
+        class="sjxzCss"
+        element-loading-background="rgba(255, 255, 255, 0.75)"
+      >
+        <div class="ksxzTitleCss">充电切片快速选择</div>
+        <div class="ksxzLsjlContentCss">
+          <div class="ksxzLsjlCss">
+            <div class="ksxzLsjlTitleCss">历史充电记录</div>
+            <div class="ksxzLsjlDateContentCss">
+              <div class="ksxzLsjlDateCss">
+                <el-date-picker
+                  v-model="cdTimeArr"
+                  size="small"
+                  type="datetimerange"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :disabled="cdSliceLoading"
+                  :disabled-date="cdDisabledDate"
+                  @calendar-change="cdCalendarChange"
+                  @change="timeChange('充电切片快速选择')"
+                />
+              </div>
+            </div>
+            <div class="fdcsCss">充电次数<span class="fdcsNumCss">{{ allCdjlList.length }}</span>次</div>
+          </div>
+          <div class="fdjlContentCss">
+            <div class="fdjlTitleCss">充电记录</div>
+            <div class="fdjlCss">
+              <div class="fdjlTabCss">
+                <div v-if="cdjlList.length > 0" class="fdjlListCss">
+                  <div
+                    v-for="(item, index) in cdjlList"
+                    :key="index"
+                    class="fdjlItemCss cursorPointer"
+                    :class="item.selected ? 'fdjlItemSelectedCss': ''"
+                    @click="clickTable2(item)"
+                  >{{ item.dateArr }}</div>
+                </div>
+                <div v-else class="fdjlListCss wsjCss">无</div>
+                <div class="pagCss">
+                  <Pagination
+                    v-show="total2>0"
+                    v-model:page="page2"
+                    v-model:limit="limit2"
+                    padding="0"
+                    layout="prev, pager, next"
+                    :small="true"
+                    :total="total2"
+                    :page-sizes="[2, 20, 30, 50, 100]"
+                    @pagination="getMsgList2"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sjxzFooterCss" />
+      </div>
+    </div>
+
+    <div
+      v-loading="curveSliceLoading"
+      class="bhqxContentCss"
+      element-loading-background="rgba(255, 255, 255, 0.75)"
+    >
+      <div class="bhqxHeadContentCss">
+        <div class="bhqxTitleCss">【变化曲线】</div>
+        <div class="bhqxZtCss">
+          <div class="ztIconCss ztIcon1Css" />
+          <div class="ztNameCss">浮充</div>
+          <div class="ztIconCss ztIcon2Css" />
+          <div class="ztNameCss">放电</div>
+          <div class="ztIconCss ztIcon3Css" />
+          <div class="ztNameCss">充电</div>
+        </div>
+        <div class="cxjgSelDateCss">
+          <el-date-picker
+            v-model="timeArr"
+            type="datetimerange"
+            size="small"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :disabled="curveSliceLoading"
+            :disabled-date="curveDisabledDate"
+            @calendar-change="curveCalendarChange"
+            @change="timeChange('')"
+          />
+        </div>
+        <div class="cxjgCss">
+          <div class="cxjgTitleCss">查询间隔：</div>
+          <div class="inputContentCss">
+            <el-input
+              v-model="timeLength"
+              placeholder="间隔长度"
+              type="number"
+              size="small"
+              :min="0"
+            />
+          </div>
+          <div class="inputContentCss">
+            <el-select
+              v-model="timeType"
+              size="small"
+            >
+              <el-option
+                v-for="item in timeTypeList"
+                :key="item.key"
+                :label="item.name"
+                :value="item.key"
+              />
+            </el-select>
+          </div>
+        </div>
+        <div class="exportCss">
+          <el-button
+            size="small"
+            type="primary"
+            :icon="$legacyIcon('el-icon-download')"
+            @click="exportExcel"
+          >导出数据</el-button>
+        </div>
+      </div>
+      <div class="multipleYAxesContentCss">
+        <MixChart id="minChart" background-color="" height="100%" width="100%" :chart-data="pointChartData" />
+        <div class="smultipleYAxesFooterCss" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import MixChart from '@/components/a_myComp/echarts/MixChart.vue'
+import Pagination from '@/components/Pagination' // 分页组件
+import MyCheckbox from '@/components/a_myComp/myCheckbox/MyCheckbox.vue'
+import { getdata } from '@/api/moniList.js'
+import {
+  PRESSURE_POINT_DATA_ID,
+  TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
+  resolveBatteryPoint
+} from '@/utils/battery-points.js'
+import { getTime, formatDateString, dateConvStamp, format0800CSTDateString } from '@/utils/utils.js'
+import { parseUserInfo } from '@/utils/safe-json.js'
+
+// 接口统一使用秒；界面仍保留原版的秒、分钟、小时和天选择。
+const HISTORY_INTERVAL_SECONDS = { second: 1, minute: 60, hour: 3600, day: 86400 }
+const DEFAULT_HISTORY_COLOR = 'rgba(122,247,190)'
+const HISTORY_QUERY_PAGE_SIZE = 100000
+
+export default {
+  components: {
+    MixChart,
+    Pagination,
+    MyCheckbox
+  },
+  props: {
+    formData: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    realDataList: { // 实时数据列表
+      type: Array,
+      default: () => {
+        return []
+      }
+    }
+  },
+  data() {
+    return {
+      isDevelopment: import.meta.env.DEV, // 是否是开发者模式
+      userInfo: parseUserInfo({}),
+      isAdmin: false, // 是否是最高权限管理员
+
+      checkDczcsAll: true,
+      dczcsSelectList: [
+        { checked: true, name: '组电压' }, { checked: true, name: '组电流' },
+        { checked: false, name: '温度1' }, { checked: false, name: '温度2' },
+        { checked: false, name: '温度3' }, { checked: false, name: '温度4' },
+        { checked: false, name: '环境温度' }, { checked: false, name: 'MOS温度' },
+        { checked: false, name: 'SOC', label: 'soc' }, { checked: false, name: 'SOH', label: 'soh' },
+        { checked: false, name: '充电量', label: '充电电量' }, { checked: false, name: '放电量', label: '放电电量' },
+        { checked: false, name: '温差' }
+      ],
+      dczcsList: [],
+      dczcsIsIndeterminate: true,
+
+      checkDtdyAll: true,
+      dtdySelectList: [
+        { checked: false, name: '1节', label: '电压1' }, { checked: false, name: '2节', label: '电压2' },
+        { checked: false, name: '3节', label: '电压3' }, { checked: false, name: '4节', label: '电压4' },
+        { checked: false, name: '5节', label: '电压5' }, { checked: false, name: '6节', label: '电压6' },
+        { checked: false, name: '7节', label: '电压7' }, { checked: false, name: '8节', label: '电压8' },
+        { checked: false, name: '9节', label: '电压9' }, { checked: false, name: '10节', label: '电压10' },
+        { checked: false, name: '11节', label: '电压11' }, { checked: false, name: '12节', label: '电压12' },
+        { checked: false, name: '13节', label: '电压13' }, { checked: false, name: '14节', label: '电压14' },
+        { checked: false, name: '15节', label: '电压15' }, { checked: false, name: '16节', label: '电压16' },
+        { checked: false, name: '压差' }
+      ],
+      dtdyList: [],
+      dtdyIsIndeterminate: true,
+
+      timeArr: [], // 时间选择
+      curvePickingStart: null,
+      curveSliceLoading: false,
+      startTime: '',
+      endTime: '',
+      fdTimeArr: [], // 放电时间范围
+      fdPickingStart: null,
+      fdSliceLoading: false,
+      fdStartTime: '',
+      fdEndTime: '',
+      cdTimeArr: [], // 充电时间范围
+      cdPickingStart: null,
+      cdSliceLoading: false,
+      cdStartTime: '',
+      cdEndTime: '',
+
+      allFdjlList: [],
+      fdjlList: [],
+      total1: 0,
+      page1: 1,
+      limit1: 10,
+
+      allCdjlList: [],
+      cdjlList: [],
+      total2: 0,
+      page2: 1,
+      limit2: 10,
+
+      timeTypeList: [ // 时间类型间隔列表
+        { key: 'second', name: '秒' },
+        { key: 'minute', name: '分钟' },
+        { key: 'hour', name: '小时' },
+        { key: 'day', name: '天' }
+      ],
+      timeType: 'second', // 时间间隔类型
+      timeLength: 5, // 时间间隔长度
+
+      pointChartData: {
+        title: {
+          text: '' // 曲线图标题名称
+        },
+        valueLabelMode: 'adaptive', // 与其他曲线统一按可视宽度等间隔显示数值
+        legend: {
+          data: [''] // 曲线标题
+        },
+        xAxis: { // 横轴
+          data: ['0']
+        },
+        yAxis: [ // 纵轴
+          { name: '' }
+        ],
+        showSeriesLable: 'true', // 是否显示曲线上的文字，为字符串'true'时显示
+        series: [{ // 纵坐标数据
+          name: '',
+          data: [{
+            name: '',
+            value: 0,
+            color: 'rgba(122,247,190)', // 线和文字颜色
+            limitValue: 1, // 限值
+            fixed: 2 // 显示数据小数点保留位数
+          }],
+          color: 'rgba(122,247,190)', // 线和文字颜色
+          limitValue: 1, // 限值
+          fixed: 2 // 显示数据小数点保留位数
+        }]
+      },
+
+      fcData: 0, // value 为 0 时，代表浮充
+      fdqpData: 1, // value 为 1 时，代表放电
+      cdqpData: 2, // value 为 2 时，代表充电
+      dcztMsg: {}, // 电池状态状态信息
+      batteryStatePoints: [], // 浮充、充电、放电独立状态数据点
+      chartBatteryStateIntervals: [], // 当前曲线时间范围内的电池状态区间
+      selectedSliceInterval: null, // 当前点击的充放电切片区间，作为曲线颜色的唯一依据
+      currentBatteryStateCode: null, // 当前实时电池状态
+      currentBatteryStateTimeStmap: null, // 当前实时电池状态采集时间
+      historyEpoch: 0,
+      historySequences: { curve: 0, charge: 0, discharge: 0 },
+      intervalRefreshTimer: null,
+      historyDisposed: false
+    }
+  },
+  watch: {
+    realDataList() {
+      this.init()
+    },
+    timeLength: 'scheduleCurveRefresh',
+    timeType: 'scheduleCurveRefresh'
+  },
+  mounted() {
+    this.isAdmin = this.userInfo.isadmin === 1
+
+    const currentTimestampSec = Math.floor(Date.now() / 1000)
+    const nowDay = formatDateString(currentTimestampSec, 'timeStmapReset')
+    const startDate = formatDateString(currentTimestampSec - 7 * 24 * 3600, 'timeStmapReset')
+    this.fdTimeArr = [startDate, nowDay]
+    this.cdTimeArr = [startDate, nowDay]
+    this.init()
+  },
+  beforeUnmount() {
+    this.historyDisposed = true
+    this.historyEpoch++
+    clearTimeout(this.intervalRefreshTimer)
+  },
+  methods: {
+    getHistoryIntervalSeconds() {
+      const value = Number(this.timeLength)
+      const unit = HISTORY_INTERVAL_SECONDS[this.timeType]
+      const seconds = value * unit
+      if (!Number.isFinite(seconds) || seconds <= 0 || !Number.isInteger(seconds)) {
+        throw new Error('查询间隔必须为大于零的整秒，请检查间隔长度和单位')
+      }
+      return seconds
+    },
+    beginHistoryRequest(area = 'curve') {
+      return { area, epoch: this.historyEpoch, sequence: ++this.historySequences[area] }
+    },
+    isCurrentHistoryRequest(request) {
+      return !this.historyDisposed && request.epoch === this.historyEpoch &&
+        request.sequence === this.historySequences[request.area]
+    },
+    reportHistoryError(error, request) {
+      if (this.isCurrentHistoryRequest(request)) {
+        this.$message.error(error.message || '历史数据查询失败，请稍后重试')
+      }
+    },
+    async queryHistory(params) {
+      const res = await getdata(params)
+      if (Number(res?.code) !== 200) throw new Error(res?.msg || '历史数据查询失败')
+      const data = res.return || {}
+      if (data.error) throw new Error(data.error)
+      if ((data.times != null && !Array.isArray(data.times)) ||
+          (data.values != null && !Array.isArray(data.values)) ||
+          (data.times?.length || 0) !== (data.values?.length || 0)) {
+        throw new Error('历史数据返回格式异常')
+      }
+      return data
+    },
+    scheduleCurveRefresh() {
+      // 合并连续输入，先使旧请求失效，避免较慢的旧间隔覆盖新曲线。
+      this.historySequences.curve++
+      clearTimeout(this.intervalRefreshTimer)
+      this.intervalRefreshTimer = setTimeout(() => {
+        if (this.historyDisposed) return
+        const selected = this.fdjlList.find(item => item.selected) || this.cdjlList.find(item => item.selected)
+        if (selected && this.selectedSliceInterval) {
+          this.selectSliceRecord(selected, this.selectedSliceInterval.code)
+        } else {
+          this.timeChange('')
+        }
+      }, 250)
+    },
+    async init() {
+      const epoch = ++this.historyEpoch
+      await this.getRealTimeDataMsg() // 获取实时数据
+      if (this.historyDisposed || epoch !== this.historyEpoch) return
+      await this.timeChange('')
+      if (this.historyDisposed || epoch !== this.historyEpoch) return
+      await this.timeChange('放电切片快速选择')
+      if (this.historyDisposed || epoch !== this.historyEpoch) return
+      await this.timeChange('充电切片快速选择')
+    },
+    async getRealTimeDataMsg() { // 获取实时数据
+      const list = Array.isArray(this.realDataList) ? this.realDataList : []
+      this.buildSelectLists(list)
+      this.dcztMsg = {}
+      this.batteryStatePoints = this.resolveBatteryStatePoints(list)
+      const currentStateMsg = this.resolveCurrentBatteryStateMsg(this.batteryStatePoints)
+      this.currentBatteryStateCode = currentStateMsg.code
+      this.currentBatteryStateTimeStmap = currentStateMsg.timeStmap
+      list.forEach(item => {
+        const pointName = item.labelName || item.name || ''
+        item.name = pointName
+        if (pointName === '电池状态') {
+          this.dcztMsg = item
+        }
+      })
+    },
+    buildSelectLists(list) {
+      const previousDczcs = new Map(this.dczcsSelectList.map(item => [item.name, item]))
+      const previousDtdy = new Map(this.dtdySelectList.map(item => [item.name, item]))
+      const temperaturePoints = new Map()
+      const voltagePoints = new Map()
+
+      const getPointName = item => item.labelName || item.name || ''
+      list.forEach(item => {
+        const pointName = getPointName(item)
+        const temperatureMatch = pointName.match(/温度(\d+)$/)
+        const voltageMatch = pointName.match(/电压(\d+)$/)
+        if (temperatureMatch) {
+          temperaturePoints.set(Number(temperatureMatch[1]), item)
+        }
+        if (voltageMatch) {
+          voltagePoints.set(Number(voltageMatch[1]), item)
+        }
+      })
+
+      const findPoint = aliases => {
+        const normalizedAliases = aliases.map(alias => alias.toLowerCase())
+        return list.find(item => {
+          const pointName = getPointName(item).toLowerCase()
+          return normalizedAliases.some(alias => pointName.indexOf(alias) !== -1)
+        })
+      }
+      const findExactPoint = pointName => {
+        return list.find(item => getPointName(item).trim() === pointName)
+      }
+      const createOption = (name, defaultChecked, previousOptions, point, label) => {
+        const previousOption = previousOptions.get(name)
+        const option = {
+          checked: previousOption ? previousOption.checked : defaultChecked,
+          name
+        }
+        if (label) option.label = label
+        if (point) {
+          point.title = name
+          option.labelDetails = point
+        }
+        return option
+      }
+
+      const dczcsSelectList = [
+        createOption('组电压', true, previousDczcs, findPoint(['组电压'])),
+        createOption('组电流', true, previousDczcs, findPoint(['组电流']))
+      ]
+      Array.from(temperaturePoints.keys()).sort((a, b) => a - b).forEach(index => {
+        dczcsSelectList.push(createOption(`温度${index}`, false, previousDczcs, temperaturePoints.get(index)))
+      })
+      const temperatureDifferencePoint = resolveBatteryPoint(list, {
+        dataIdSuffix: TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
+        aliases: ['温差'],
+        gatewayId: this.formData.equipmentCode
+      })
+      dczcsSelectList.push(
+        createOption('环境温度', false, previousDczcs, findExactPoint('环境温度')),
+        createOption('MOS温度', false, previousDczcs, findPoint(['MOS温度'])),
+        createOption('SOC', false, previousDczcs, findExactPoint('SOC'), 'soc'),
+        createOption('SOH', false, previousDczcs, findPoint(['SOH']), 'soh'),
+        createOption('充电量', false, previousDczcs, findPoint(['充电量', '充电电量']), '充电电量'),
+        createOption('放电量', false, previousDczcs, findPoint(['放电量', '放电电量']), '放电电量'),
+        createOption('温差', false, previousDczcs, temperatureDifferencePoint)
+      )
+
+      const dtdySelectList = []
+      Array.from(voltagePoints.keys()).sort((a, b) => a - b).forEach(index => {
+        dtdySelectList.push(createOption(`${index}节`, false, previousDtdy, voltagePoints.get(index), `电压${index}`))
+      })
+      const pressurePoint = resolveBatteryPoint(list, {
+        dataIdSuffix: PRESSURE_POINT_DATA_ID,
+        aliases: ['压差'],
+        gatewayId: this.formData.equipmentCode
+      })
+      dtdySelectList.push(createOption('压差', false, previousDtdy, pressurePoint))
+
+      this.dczcsSelectList = dczcsSelectList
+      this.dtdySelectList = dtdySelectList
+    },
+    isPointActive(val) {
+      return val === 1 || val === '1' || Number(val) === 1
+    },
+    getBatteryStateDefinitions() {
+      return [
+        { suffix: '浮充', code: this.fcData },
+        { suffix: '充电', code: this.cdqpData },
+        { suffix: '放电', code: this.fdqpData }
+      ]
+    },
+    resolveBatteryStatePoints(list) {
+      const dataList = Array.isArray(list) ? list : []
+      const statePoints = []
+      this.getBatteryStateDefinitions().forEach(stateDef => {
+        dataList.forEach(labelDetails => {
+          const pointName = labelDetails.labelName || labelDetails.name || ''
+          if (pointName.endsWith(stateDef.suffix)) {
+            statePoints.push({ ...stateDef, labelDetails })
+          }
+        })
+      })
+      return statePoints
+    },
+    getPointTimeStmap(item) {
+      let timeStmap = Number(item.realTimeTimestamp)
+      if (Number.isFinite(timeStmap) && timeStmap > 0) {
+        return timeStmap > 1e12 ? timeStmap / 1000 : timeStmap
+      }
+      if (item.realTimeDate) {
+        timeStmap = dateConvStamp(format0800CSTDateString(item.realTimeDate)) / 1000
+        if (Number.isFinite(timeStmap)) {
+          return timeStmap
+        }
+      }
+      return null
+    },
+    resolveCurrentBatteryStateMsg(statePoints) {
+      const pointList = Array.isArray(statePoints) ? statePoints : []
+      const stateDefs = this.getBatteryStateDefinitions()
+      for (const stateDef of stateDefs) {
+        const activePoints = pointList.filter(item => item.code === stateDef.code && this.isPointActive(item.labelDetails.realTimeVal))
+        if (activePoints.length) {
+          const timeStmaps = activePoints.map(item => this.getPointTimeStmap(item.labelDetails)).filter(Number.isFinite)
+          return {
+            code: stateDef.code,
+            timeStmap: timeStmaps.length ? Math.max(...timeStmaps) : null
+          }
+        }
+      }
+      return { code: null, timeStmap: null }
+    },
+    getBatteryStateColor(value) {
+      if (value === null || value === undefined || value === '') {
+        return null
+      }
+      switch (Number(value)) {
+        case this.fcData: return '#339900'
+        case this.fdqpData: return '#ff0000'
+        case this.cdqpData: return '#ffff00'
+        default: return null
+      }
+    },
+    normalizeBatteryStateCode(value) {
+      if (value === null || value === undefined || value === '') {
+        return null
+      }
+      const stateCode = Number(value)
+      return this.getBatteryStateDefinitions().some(item => item.code === stateCode) ? stateCode : null
+    },
+    buildBatteryStateIntervals(times, values, options = {}) {
+      const currentStateCode = this.normalizeBatteryStateCode(options.currentStateCode)
+      const currentStateTimeStmap = options.currentStateTimeStmap === null || options.currentStateTimeStmap === undefined || options.currentStateTimeStmap === ''
+        ? NaN
+        : Number(options.currentStateTimeStmap)
+      const rangeStartTimeStmap = Number(options.rangeStartTimeStmap)
+      const rangeEndTimeStmap = Number(options.rangeEndTimeStmap)
+      const currentStateIsInRange = currentStateCode !== null && Number.isFinite(currentStateTimeStmap) &&
+        (!Number.isFinite(rangeStartTimeStmap) || currentStateTimeStmap >= rangeStartTimeStmap) &&
+        (!Number.isFinite(rangeEndTimeStmap) || currentStateTimeStmap <= rangeEndTimeStmap)
+      const samples = []
+      times.forEach((timeItem, index) => {
+        const time = format0800CSTDateString(timeItem)
+        const timeStmap = dateConvStamp(time) / 1000
+        if (Number.isFinite(timeStmap)) {
+          samples.push({
+            time,
+            timeStmap,
+            code: this.normalizeBatteryStateCode(values[index])
+          })
+        }
+      })
+      if (currentStateIsInRange) {
+        samples.push({
+          time: getTime(currentStateTimeStmap),
+          timeStmap: currentStateTimeStmap,
+          code: currentStateCode
+        })
+      }
+      samples.sort((a, b) => a.timeStmap - b.timeStmap)
+
+      const intervals = []
+      let currentInterval = null
+      const closeCurrentInterval = isLastInterval => {
+        const isOngoing = Boolean(isLastInterval && currentStateIsInRange && currentInterval && currentInterval.code === currentStateCode)
+        if (currentInterval && (currentInterval.startTimeStmap !== currentInterval.endTimeStmap || isOngoing)) {
+          currentInterval.isOngoing = isOngoing
+          intervals.push(currentInterval)
+        }
+        currentInterval = null
+      }
+      samples.forEach(sample => {
+        if (!currentInterval || currentInterval.code !== sample.code) {
+          closeCurrentInterval(false)
+          if (sample.code !== null) {
+            currentInterval = {
+              code: sample.code,
+              startDate: sample.time,
+              endDate: sample.time,
+              startTimeStmap: sample.timeStmap,
+              endTimeStmap: sample.timeStmap
+            }
+          }
+        } else {
+          currentInterval.endDate = sample.time
+          currentInterval.endTimeStmap = sample.timeStmap
+        }
+      })
+      closeCurrentInterval(true)
+      return intervals
+    },
+    getBatteryStateColorByTime(timeStmap) {
+      const intervals = this.chartBatteryStateIntervals
+      let left = 0
+      let right = intervals.length - 1
+      while (left <= right) {
+        const middle = Math.floor((left + right) / 2)
+        const interval = intervals[middle]
+        if (timeStmap < interval.startTimeStmap) {
+          right = middle - 1
+        } else if (timeStmap > interval.endTimeStmap) {
+          left = middle + 1
+        } else {
+          return this.getBatteryStateColor(interval.code)
+        }
+      }
+      return null
+    },
+    exportExcel() {
+      const chartData = this.pointChartData
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['时间']
+        chartData.series.forEach(item => {
+          tHeader.push(item.name)
+        })
+        const data = this.formatJson(chartData)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: 'table-list'
+        })
+      })
+    },
+    formatJson(chartData) {
+      const xAxisData = chartData.xAxis.data
+      const arr = [] // 声明一维数组
+      for (let x = 0; x < xAxisData.length; x++) {
+        arr[x] = [] // 声明二维
+        for (let y = 0; y <= chartData.series.length; y++) {
+          arr[x][y] = ''
+        }
+      }
+      chartData.xAxis.data.forEach((item, index) => {
+        if (arr[index]) {
+          arr[index][0] = item.value
+        }
+      })
+      chartData.series.forEach((item, index) => {
+        item.data.forEach((dataItem, i) => {
+          if (arr[i]) {
+            arr[i][index + 1] = dataItem.value
+          }
+        })
+      })
+      return arr
+    },
+    getMsgList1(e) {
+      this.page1 = e.page
+      this.limit1 = e.limit
+      this.setCfdList()
+    },
+    getMsgList2(e) {
+      this.page2 = e.page
+      this.limit2 = e.limit
+      this.setCfdList()
+    },
+    async clickTable1(item) {
+      await this.selectSliceRecord(item, this.fdqpData)
+    },
+    async clickTable2(item) {
+      await this.selectSliceRecord(item, this.cdqpData)
+    },
+    async selectSliceRecord(item, stateCode) {
+      const request = this.beginHistoryRequest()
+      this.curveSliceLoading = true
+      try {
+        const timeLength = this.getHistoryIntervalSeconds()
+        this.fdjlList.forEach(tabItem => {
+          tabItem.selected = false
+        })
+        this.cdjlList.forEach(tabItem => {
+          tabItem.selected = false
+        })
+        item.selected = true
+        this.timeArr = [item.startDate, item.endDate]
+        this.startTime = dateConvStamp(item.startDate) / 1000
+        this.endTime = dateConvStamp(item.endDate) / 1000
+        this.pointChartDataInit()
+        this.selectedSliceInterval = {
+          code: stateCode,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          startTimeStmap: this.startTime,
+          endTimeStmap: this.endTime,
+          isOngoing: Boolean(item.isOngoing)
+        }
+        this.chartBatteryStateIntervals = [this.selectedSliceInterval]
+        const xAxisData = await this.getChartXAxisData({
+          startTime: this.startTime,
+          endTime: this.endTime,
+          timeLength
+        })
+        if (!this.isCurrentHistoryRequest(request)) return
+        this.pointChartData.xAxis.data = xAxisData
+        await this.setChartData('电池状态', request) // 设置曲线数据
+      } catch (error) {
+        this.reportHistoryError(error, request)
+      } finally {
+        if (this.isCurrentHistoryRequest(request)) this.curveSliceLoading = false
+      }
+    },
+    dczcsSelectChange(dczcsSelectList) {
+      this.dczcsSelectList = dczcsSelectList
+      this.setChartData() // 设置曲线数据
+    },
+    dtdySelectChange(dtdySelectList) {
+      this.dtdySelectList = dtdySelectList
+      this.setChartData() // 设置曲线数据
+    },
+    async setChartData(jzDataName, request = this.beginHistoryRequest()) { // 设置曲线数据
+      this.curveSliceLoading = true
+      try {
+        const timeLength = this.getHistoryIntervalSeconds()
+        const selectList = []
+        this.dczcsSelectList.forEach(item => {
+          if (item.checked && item.labelDetails) {
+            selectList.push(item.labelDetails)
+          }
+        })
+        this.dtdySelectList.forEach(item => {
+          if (item.checked && item.labelDetails) {
+            selectList.push(item.labelDetails)
+          }
+        })
+        if (jzDataName !== '电池状态') { // 电池状态不是基准数据名称，则获取基准数据点历史数据
+          if (this.selectedSliceInterval) {
+            this.chartBatteryStateIntervals = [this.selectedSliceInterval]
+          } else {
+            await this.getDcztAndJzMsg('', request) // 获取电池状态历史数据 和 获取基准数据点历史数据
+          }
+        }
+        if (!this.isCurrentHistoryRequest(request)) return
+        const xAxisData = this.pointChartData.xAxis.data || []
+        if (!xAxisData.length) {
+          this.pointChartDataInit()
+          return
+        }
+
+        const chartSeries = [] // 曲线需要展示的数据点
+        this.pointChartData.series.forEach(serieItem => {
+          let hasPoint = false // 被选择的数据点中是否在曲线图中存在
+          selectList.forEach(item => {
+            if (item.title === serieItem.name) {
+              hasPoint = true
+            }
+          })
+          if (hasPoint) {
+            chartSeries.push(serieItem)
+          }
+        })
+        for (let i = 0; i < selectList.length; i++) {
+          const item = selectList[i]
+          let hasPoint = false // 曲线中是否已存在数据点
+          chartSeries.forEach(serieItem => {
+            if (item.title === serieItem.name) {
+              hasPoint = true
+            }
+          })
+          if (!hasPoint) {
+            const data = await this.queryHistory({
+              Apikey: this.formData.apiKey,
+              Function: 'historydatapasstime',
+              Pagenum: 1,
+              // 曲线与基准横轴使用相同上限，避免默认 24 小时范围后半段被截断。
+              Pagesize: HISTORY_QUERY_PAGE_SIZE,
+              Datestart: this.startTime,
+              Dateend: this.endTime,
+              labelID: item.labelId,
+              timeType: 'second',
+              timeLength
+            })
+            if (!this.isCurrentHistoryRequest(request)) return
+            const seriesdata = []
+            if (data) {
+              if (data.times) {
+                const times = data.times.slice().reverse() // 不修改接口原始数组
+                const valueTime = [] // 时间戳数组
+                times.forEach(timeItem => {
+                  valueTime.push(dateConvStamp(format0800CSTDateString(timeItem)) / 1000)
+                })
+                const values = (data.values || []).slice().reverse()
+                const valueByTime = new Map()
+                valueTime.forEach((timeStmap, index) => {
+                  valueByTime.set(timeStmap, values[index])
+                })
+                xAxisData.forEach(xAxisItem => {
+                  const timeStmap = xAxisItem.timeStmap
+                  const hasValue = valueByTime.has(timeStmap)
+                  const stateColor = hasValue ? this.getBatteryStateColorByTime(timeStmap) : null
+                  seriesdata.push({
+                    // 状态只决定配色，缺少状态记录不能抹掉已经采集到的真实值。
+                    value: hasValue ? valueByTime.get(timeStmap) : null,
+                    itemStyle: hasValue ? { color: stateColor || DEFAULT_HISTORY_COLOR } : undefined
+                  })
+                })
+              }
+            }
+            chartSeries.push({
+              name: item.title,
+              data: seriesdata,
+              color: 'rgba(122,247,190)', // 线和文字颜色
+              fixed: 2 // 显示数据小数点保留位数
+            })
+          }
+        }
+        if (chartSeries.length === 0) {
+          this.pointChartData.series = [{
+            name: '',
+            data: new Array(xAxisData.length).fill(null),
+            color: 'rgba(122,247,190)',
+            limitValue: 1,
+            fixed: 2
+          }]
+        } else {
+          this.pointChartData.series = chartSeries
+        }
+      } catch (error) {
+        if (this.isCurrentHistoryRequest(request)) this.pointChartDataInit()
+        this.reportHistoryError(error, request)
+      } finally {
+        if (this.isCurrentHistoryRequest(request)) this.curveSliceLoading = false
+      }
+    },
+    pointChartDataInit() {
+      this.pointChartData.xAxis.data = []
+      this.pointChartData.series = [{
+        name: '',
+        data: [null],
+        color: 'rgba(122,247,190)',
+        limitValue: 1,
+        fixed: 2
+      }]
+    },
+    async timeChange(type) {
+      const request = this.beginHistoryRequest(type === '放电切片快速选择' ? 'discharge' : type === '充电切片快速选择' ? 'charge' : 'curve')
+      let startTime = ''
+      let endTime = ''
+      if (type === '') {
+        this.selectedSliceInterval = null
+        this.fdjlList.forEach(tabItem => {
+          tabItem.selected = false
+        })
+        this.cdjlList.forEach(tabItem => {
+          tabItem.selected = false
+        })
+        if (this.timeArr && this.timeArr.length !== 0) {
+          this.timeArr = this.setSelectTime(this.timeArr)
+          this.timeArr = this.limitRangeToOneMonth(this.timeArr)
+          startTime = dateConvStamp(formatDateString(this.timeArr[0], 'formatDate')) / 1000
+          endTime = dateConvStamp(formatDateString(this.timeArr[1], 'formatDate')) / 1000
+        }
+      } else if (type === '放电切片快速选择') {
+        if (this.fdTimeArr && this.fdTimeArr.length !== 0) {
+          this.fdTimeArr = this.setSelectTime(this.fdTimeArr)
+          this.fdTimeArr = this.limitRangeToOneMonth(this.fdTimeArr)
+          startTime = dateConvStamp(formatDateString(this.fdTimeArr[0], 'formatDate')) / 1000
+          endTime = dateConvStamp(formatDateString(this.fdTimeArr[1], 'formatDate')) / 1000
+        }
+      } else if (type === '充电切片快速选择') {
+        if (this.cdTimeArr && this.cdTimeArr.length !== 0) {
+          this.cdTimeArr = this.setSelectTime(this.cdTimeArr)
+          this.cdTimeArr = this.limitRangeToOneMonth(this.cdTimeArr)
+          startTime = dateConvStamp(formatDateString(this.cdTimeArr[0], 'formatDate')) / 1000
+          endTime = dateConvStamp(formatDateString(this.cdTimeArr[1], 'formatDate')) / 1000
+        }
+      }
+      const nowDate = getTime() // 当前时间
+      const nowDay = nowDate.slice(0, 11) + '23:59:59' // 今天最后一秒时间
+      const startDate = nowDate.slice(0, 11) + '00:00:01'
+      if (startTime === '') {
+        startTime = dateConvStamp(startDate) / 1000
+        endTime = dateConvStamp(nowDay) / 1000
+        switch (type) {
+          case '': {
+            const nowTimestampSec = Math.floor(Date.now() / 1000)
+            const endDate = getTime(nowTimestampSec)
+            const startDate24h = getTime(nowTimestampSec - 24 * 3600)
+            startTime = nowTimestampSec - 24 * 3600
+            endTime = nowTimestampSec
+            this.timeArr = [startDate24h, endDate]
+          }
+            break
+          case '放电切片快速选择': {
+            const nowTimestampSec = Math.floor(Date.now() / 1000)
+            const endDate = getTime(nowTimestampSec)
+            const startDate7d = getTime(nowTimestampSec - 7 * 24 * 3600)
+            startTime = nowTimestampSec - 7 * 24 * 3600
+            endTime = nowTimestampSec
+            this.fdTimeArr = [startDate7d, endDate]
+          }
+            break
+          case '充电切片快速选择': {
+            const nowTimestampSec = Math.floor(Date.now() / 1000)
+            const endDate = getTime(nowTimestampSec)
+            const startDate7d = getTime(nowTimestampSec - 7 * 24 * 3600)
+            startTime = nowTimestampSec - 7 * 24 * 3600
+            endTime = nowTimestampSec
+            this.cdTimeArr = [startDate7d, endDate]
+          }
+            break
+        }
+      }
+      if (type === '') {
+        this.startTime = startTime
+        this.endTime = endTime
+        this.pointChartDataInit()
+        this.curveSliceLoading = true
+        try {
+          await this.setChartData(undefined, request) // 设置曲线数据
+        } finally {
+          if (this.isCurrentHistoryRequest(request)) this.curveSliceLoading = false
+        }
+      } else if (type === '放电切片快速选择') {
+        this.fdStartTime = startTime
+        this.fdEndTime = endTime
+        this.fdSliceLoading = true
+        try {
+          await this.getDcztAndJzMsg(type, request) // 获取电池状态历史数据 和 获取基准数据点历史数据
+        } catch (error) {
+          if (this.isCurrentHistoryRequest(request)) this.setFdqp({ intervals: [] })
+          this.reportHistoryError(error, request)
+        } finally {
+          if (this.isCurrentHistoryRequest(request)) this.fdSliceLoading = false
+        }
+      } else if (type === '充电切片快速选择') {
+        this.cdStartTime = startTime
+        this.cdEndTime = endTime
+        this.cdSliceLoading = true
+        try {
+          await this.getDcztAndJzMsg(type, request) // 获取电池状态历史数据 和 获取基准数据点历史数据
+        } catch (error) {
+          if (this.isCurrentHistoryRequest(request)) this.setCdqp({ intervals: [] })
+          this.reportHistoryError(error, request)
+        } finally {
+          if (this.isCurrentHistoryRequest(request)) this.cdSliceLoading = false
+        }
+      }
+    },
+    setSelectTime(selectTimeArr) {
+      const endDate = formatDateString(selectTimeArr[1], 'formatDate')
+      if (endDate.slice(11) === '00:00:00') {
+        selectTimeArr[1] = endDate.slice(0, 10) + ' 23:59:59'
+      }
+      return selectTimeArr
+    },
+    fdDisabledDate(date) {
+      return this.isDateBeyondOneMonth(date, this.fdPickingStart || (this.fdTimeArr && this.fdTimeArr[0]))
+    },
+    cdDisabledDate(date) {
+      return this.isDateBeyondOneMonth(date, this.cdPickingStart || (this.cdTimeArr && this.cdTimeArr[0]))
+    },
+    fdCalendarChange(range) {
+      this.fdPickingStart = range && range[0] ? range[0] : null
+    },
+    cdCalendarChange(range) {
+      this.cdPickingStart = range && range[0] ? range[0] : null
+    },
+    curveDisabledDate(date) {
+      return this.isDateBeyondOneMonth(date, this.curvePickingStart || (this.timeArr && this.timeArr[0]))
+    },
+    curveCalendarChange(range) {
+      this.curvePickingStart = range && range[0] ? range[0] : null
+    },
+    isDateBeyondOneMonth(date, startValue) {
+      if (!startValue) return false
+      const maxEnd = this.getOneMonthEnd(startValue)
+      return Boolean(maxEnd && date.getTime() > maxEnd.getTime())
+    },
+    getOneMonthEnd(startValue) {
+      const startDate = new Date(startValue)
+      if (Number.isNaN(startDate.getTime())) return null
+      const targetMonth = startDate.getMonth() + 1
+      const lastDay = new Date(startDate.getFullYear(), targetMonth + 1, 0).getDate()
+      return new Date(
+        startDate.getFullYear(),
+        targetMonth,
+        Math.min(startDate.getDate(), lastDay),
+        startDate.getHours(),
+        startDate.getMinutes(),
+        startDate.getSeconds(),
+        startDate.getMilliseconds()
+      )
+    },
+    limitRangeToOneMonth(range) {
+      if (!range || !range[0] || !range[1]) return range
+      const maxEnd = this.getOneMonthEnd(range[0])
+      const endDate = new Date(range[1])
+      if (maxEnd && endDate.getTime() > maxEnd.getTime()) {
+        range[1] = getTime(maxEnd.getTime())
+      }
+      return range
+    },
+    async getDcztAndJzMsg(type, request) { // 获取电池状态历史数据 和 获取基准数据点历史数据
+      let startTime = this.startTime
+      let endTime = this.endTime
+      // 快速切片仍按原版一秒识别状态，曲线与横轴使用相同的实际查询间隔。
+      let timeLength = type ? 1 : this.getHistoryIntervalSeconds()
+      switch (type) {
+        case '放电切片快速选择':
+          startTime = this.fdStartTime
+          endTime = this.fdEndTime
+          timeLength = 1
+          break
+        case '充电切片快速选择':
+          startTime = this.cdStartTime
+          endTime = this.cdEndTime
+          timeLength = 1
+          break
+      }
+
+      const dcztRes = await this.getBatteryStateHisMsg({
+        startTime, endTime, timeLength
+      })
+      if (!this.isCurrentHistoryRequest(request)) return
+      const dcztTimes = dcztRes.dcztTimes
+      const dcztValues = dcztRes.dcztValues
+      const stateIntervals = this.buildBatteryStateIntervals(dcztTimes, dcztValues, {
+        currentStateCode: this.currentBatteryStateCode,
+        currentStateTimeStmap: this.currentBatteryStateTimeStmap,
+        rangeStartTimeStmap: startTime,
+        rangeEndTimeStmap: endTime
+      })
+      this.dcztMsg.times = dcztRes.timeStmapArr
+      this.dcztMsg.values = dcztValues
+
+      if (type === '放电切片快速选择') {
+        this.setFdqp({ intervals: stateIntervals })
+        return
+      }
+      if (type === '充电切片快速选择') {
+        this.setCdqp({ intervals: stateIntervals })
+        return
+      }
+      this.chartBatteryStateIntervals = stateIntervals
+
+      const xAxisData = await this.getChartXAxisData({
+        startTime,
+        endTime,
+        timeLength
+      })
+      if (this.isCurrentHistoryRequest(request)) this.pointChartData.xAxis.data = xAxisData
+    },
+    async getChartXAxisData(params) {
+      const { startTime, endTime, timeLength } = params
+      let jzdMsg = {}
+      this.dczcsSelectList.forEach(item => {
+        if (item.name === '组电压' && item.labelDetails) {
+          jzdMsg = item.labelDetails
+        }
+      })
+      // 个别机型没有组电压标签，仍可用已选中的真实测点作为时间轴基准。
+      if (!jzdMsg.labelId) {
+        const fallback = [...this.dczcsSelectList, ...this.dtdySelectList]
+          .find(item => item.checked && item.labelDetails?.labelId)
+        jzdMsg = fallback?.labelDetails || {}
+      }
+      if (!jzdMsg.labelId) {
+        return []
+      }
+
+      const jzData = await this.queryHistory({
+        Apikey: this.formData.apiKey,
+        Function: 'historydatapasstime',
+        Pagenum: 1,
+        Pagesize: HISTORY_QUERY_PAGE_SIZE,
+        Datestart: startTime,
+        Dateend: endTime,
+        labelID: jzdMsg.labelId,
+        timeType: 'second',
+        timeLength
+      })
+      const xAxisData = []
+      if (jzData && jzData.times) {
+        const jzdTimes = jzData.times.slice().reverse()
+        jzdTimes.forEach(timeItem => {
+          xAxisData.push({
+            value: format0800CSTDateString(timeItem),
+            timeStmap: dateConvStamp(format0800CSTDateString(timeItem)) / 1000
+          })
+        })
+      }
+
+      return xAxisData
+    },
+    async getBatteryStateHisMsg(params) {
+      if (this.dcztMsg.labelId) {
+        const stateMsg = await this.getDcztHisMsg(params)
+        if (stateMsg.dcztTimes.length) {
+          return stateMsg
+        }
+      }
+      return this.getIndependentBatteryStateHisMsg(params)
+    },
+    async getIndependentBatteryStateHisMsg(params) {
+      const { startTime, endTime, timeLength = this.getHistoryIntervalSeconds() } = params
+      const statePoints = this.batteryStatePoints.filter(item => item.labelDetails && item.labelDetails.labelId)
+      if (!statePoints.length) {
+        return {
+          dcztTimes: [],
+          dcztValues: [],
+          timeStmapArr: [],
+          dcztXAxisData: []
+        }
+      }
+
+      const stateHistories = await Promise.all(statePoints.map(async statePoint => {
+        const data = await this.queryHistory({
+          Apikey: this.formData.apiKey,
+          Function: 'historydatapasstime',
+          Pagenum: 1,
+          Pagesize: HISTORY_QUERY_PAGE_SIZE,
+          Datestart: startTime,
+          Dateend: endTime,
+          labelID: statePoint.labelDetails.labelId,
+          timeType: 'second',
+          timeLength
+        })
+        const times = Array.isArray(data.times) ? data.times : []
+        const values = Array.isArray(data.values) ? data.values : []
+        const samples = []
+        times.forEach((timeItem, index) => {
+          const time = format0800CSTDateString(timeItem)
+          const timeStmap = dateConvStamp(time) / 1000
+          if (Number.isFinite(timeStmap)) {
+            samples.push({
+              time,
+              timeStmap,
+              active: this.isPointActive(values[index])
+            })
+          }
+        })
+        samples.sort((a, b) => a.timeStmap - b.timeStmap)
+        return {
+          pointKey: String(statePoint.labelDetails.labelId),
+          code: statePoint.code,
+          samples
+        }
+      }))
+
+      const updatesByTime = new Map()
+      stateHistories.forEach(stateHistory => {
+        stateHistory.samples.forEach(sample => {
+          if (!updatesByTime.has(sample.timeStmap)) {
+            updatesByTime.set(sample.timeStmap, {
+              time: sample.time,
+              states: []
+            })
+          }
+          updatesByTime.get(sample.timeStmap).states.push({
+            pointKey: stateHistory.pointKey,
+            code: stateHistory.code,
+            active: sample.active
+          })
+        })
+      })
+
+      const activeStates = new Map()
+      const stateDefs = this.getBatteryStateDefinitions()
+      const timeStmapArr = Array.from(updatesByTime.keys()).sort((a, b) => a - b)
+      const dcztTimes = []
+      const dcztValues = []
+      const dcztXAxisData = []
+      timeStmapArr.forEach(timeStmap => {
+        const timeMsg = updatesByTime.get(timeStmap)
+        timeMsg.states.forEach(state => {
+          activeStates.set(state.pointKey, state)
+        })
+        const currentState = stateDefs.find(stateDef => {
+          return Array.from(activeStates.values()).some(state => state.code === stateDef.code && state.active)
+        })
+        dcztTimes.push(timeMsg.time)
+        dcztValues.push(currentState ? currentState.code : null)
+        dcztXAxisData.push({
+          value: timeMsg.time,
+          timeStmap
+        })
+      })
+
+      return {
+        dcztTimes,
+        dcztValues,
+        timeStmapArr,
+        dcztXAxisData
+      }
+    },
+    async getDcztHisMsg(params) { // 获取电池状态历史数据
+      const { startTime, endTime, timeLength = this.getHistoryIntervalSeconds() } = params
+      const data = await this.queryHistory({
+        Apikey: this.formData.apiKey,
+        Function: 'historydatapasstime',
+        Pagenum: 1,
+        Pagesize: HISTORY_QUERY_PAGE_SIZE,
+        Datestart: startTime,
+        Dateend: endTime,
+        labelID: this.dcztMsg.labelId,
+        timeType: 'second',
+        timeLength
+      })
+      const timeStmapArr = []
+      const dcztXAxisData = []
+      let times = []
+      let values = []
+      if (data) {
+        if (data.times) {
+          times = data.times.slice().reverse() // 颠倒数组顺序
+          values = (data.values || []).slice().reverse()
+          times.forEach(timeItem => {
+            timeStmapArr.push(dateConvStamp(format0800CSTDateString(timeItem)) / 1000)
+            dcztXAxisData.push({
+              value: format0800CSTDateString(timeItem),
+              timeStmap: dateConvStamp(format0800CSTDateString(timeItem)) / 1000
+            })
+          })
+        }
+      }
+      return {
+        dcztTimes: times,
+        dcztValues: values,
+        timeStmapArr,
+        dcztXAxisData
+      }
+    },
+    setFdqp(params) { // 设置放电切片
+      const allFdjlList = params.intervals.filter(item => item.code === this.fdqpData).map(item => ({
+        startDate: item.startDate,
+        endDate: item.endDate,
+        dateArr: item.isOngoing ? item.startDate + ' ~ 进行中' : item.startDate + ' ~ ' + item.endDate,
+        isOngoing: Boolean(item.isOngoing),
+        selected: false
+      }))
+      this.allFdjlList = allFdjlList
+      this.total1 = allFdjlList.length
+      this.setCfdList()
+    },
+    setCdqp(params) { // 设置充电切片
+      const allCdjlList = params.intervals.filter(item => item.code === this.cdqpData).map(item => ({
+        startDate: item.startDate,
+        endDate: item.endDate,
+        dateArr: item.isOngoing ? item.startDate + ' ~ 进行中' : item.startDate + ' ~ ' + item.endDate,
+        isOngoing: Boolean(item.isOngoing),
+        selected: false
+      }))
+      this.allCdjlList = allCdjlList
+      this.total2 = allCdjlList.length
+      this.setCfdList()
+    },
+    setCfdList() { // 设置充放电展示的数据
+      const fdList = this.allFdjlList || []
+      const cdList = this.allCdjlList || []
+      this.fdjlList = fdList.slice((this.page1 - 1) * this.limit1, this.page1 * this.limit1)
+      this.cdjlList = cdList.slice((this.page2 - 1) * this.limit2, this.page2 * this.limit2)
+    }
+  }
+}
+</script>
+
+<style lang="stylus" scoped>
+boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
+.hisDataCss {
+  position relative
+  width 100%
+  .bzxxCss {
+    position absolute
+    top 5px
+    right 10px
+  }
+  .titleCss {
+    padding 0.2vw 0 0 1vw
+    height 1.5vw
+    font-size 1.2vw
+    font-weight bold
+  }
+  .csxzContentCss {
+    margin 0.5vw 0.2%
+    width 99.6%
+    min-height 8.8vw
+    height auto
+    padding-bottom 0.5vw
+    box-sizing border-box
+    box-shadow boxShadow
+    border-radius 0.2vw
+    .csxzCss {
+      position relative
+      display flex
+      align-items flex-start
+      margin 0.5vw 0 0 5%
+      padding 0 1%
+      width 90%
+      min-height 3vw
+      height auto
+      font-size 1vw
+      border-radius 0.2vw
+      border 1px solid rgba(25, 186, 139, 0.17)
+      &::before {
+        position absolute
+        top 0
+        left 0
+        content ''
+        width 10px
+        height 10px
+        border-top 2px solid #02a6b5
+        border-left 2px solid #02a6b5
+        border-radius 20%
+      }
+      &::after {
+        position absolute
+        top 0
+        right 0
+        content ''
+        width 10px
+        height 10px
+        border-top 2px solid #02a6b5
+        border-right 2px solid #02a6b5
+        border-radius 20%
+      }
+      .csxzTitleCss {
+        flex 0 0 10%
+        padding-right 1vw
+        box-sizing border-box
+        height 3vw
+        line-height 3vw
+        font-weight bold
+        text-align right
+      }
+      .csxzSelectCss {
+        flex 1
+        min-width 0
+        min-height 3vw
+        height auto
+      }
+      .csxzFooterCss {
+        position absolute
+        left 0
+        bottom 0
+        width 100%
+        &::before {
+          position absolute
+          bottom 0
+          left 0
+          content ''
+          width 10px
+          height 10px
+          border-bottom 2px solid #02a6b5
+          border-left 2px solid #02a6b5
+          border-radius 20%
+        }
+        &::after {
+          position absolute
+          bottom 0
+          right 0
+          content ''
+          width 10px
+          height 10px
+          border-bottom 2px solid #02a6b5
+          border-right 2px solid #02a6b5
+          border-radius 20%
+        }
+      }
+    }
+  }
+  .sjxzContentCss {
+    margin 0.5vw 0.2%
+    width 99.6%
+    height 20vw
+    box-shadow boxShadow
+    border-radius 0.2vw
+    .sjxzCss {
+      position relative
+      float left
+      margin 0.5vw 0 0 1%
+      padding 0.5vw
+      width 48.5%
+      height 85%
+      border-radius 0.2vw
+      border 1px solid rgba(25, 186, 139, 0.17)
+      &::before {
+        position absolute
+        top 0
+        left 0
+        content ''
+        width 10px
+        height 10px
+        border-top 2px solid #02a6b5
+        border-left 2px solid #02a6b5
+        border-radius 20%
+      }
+      &::after {
+        position absolute
+        top 0
+        right 0
+        content ''
+        width 10px
+        height 10px
+        border-top 2px solid #02a6b5
+        border-right 2px solid #02a6b5
+        border-radius 20%
+      }
+      .ksxzTitleCss {
+        width 100%
+        font-size 1vw
+        font-weight bold
+      }
+      .ksxzLsjlContentCss {
+        width 100%
+        .ksxzLsjlCss {
+          float left
+          margin-right 1%
+          width 44%
+          height 14vw
+          border-right 1px solid #ccc
+          .ksxzLsjlTitleCss {
+            margin-top 0.5vw
+            width 100%
+            height 1.5vw
+            font-size 0.8vw
+            font-weight bold
+          }
+          .ksxzLsjlDateContentCss {
+            width 100%
+            height 40px
+            .ksxzLsjlDateCss {
+              float left
+              width 99%
+            }
+          }
+          .fdcsCss {
+            width 100%
+            font-size 0.7vw
+            .fdcsNumCss {
+              padding 0 0.2vw
+            }
+          }
+        }
+        .fdjlContentCss {
+          margin-top -0.5vw
+          float left
+          width 55%
+
+          .fdjlTitleCss {
+            width 100%
+            height 1.2vw
+            font-size 0.8vw
+            font-weight bold
+          }
+          .fdjlCss {
+            width 100%
+            .fdjlTabCss {
+              float left
+              width 100%
+              height 100%
+              background-color #fff
+              .fdjlListCss {
+                padding-left 0.5vw
+                width 100%
+                .fdjlItemCss {
+                  width 100%
+                  height 1.2vw
+                  line-height 1.2vw
+                  text-align center
+                  font-size 0.7vw
+                  border-bottom 1px solid #EBEEF5
+                }
+                .fdjlItemSelectedCss {
+                  background-color rgba(0,109,255, 0.4)
+                }
+              }
+              .wsjCss {
+                padding-top 0.5vw
+                line-height 1vw
+                text-align center
+              }
+              .pagCss {
+                margin-top 0.5vw
+              }
+            }
+          }
+        }
+      }
+      .sjxzFooterCss {
+        position absolute
+        left 0
+        bottom 0
+        width 100%
+        &::before {
+          position absolute
+          bottom 0
+          left 0
+          content ''
+          width 10px
+          height 10px
+          border-bottom 2px solid #02a6b5
+          border-left 2px solid #02a6b5
+          border-radius 20%
+        }
+        &::after {
+          position absolute
+          bottom 0
+          right 0
+          content ''
+          width 10px
+          height 10px
+          border-bottom 2px solid #02a6b5
+          border-right 2px solid #02a6b5
+          border-radius 20%
+        }
+      }
+    }
+  }
+  .bhqxContentCss {
+    margin 0.5vw 0.2%
+    width 99.6%
+    height 14.5vw
+    box-shadow boxShadow
+    border-radius 0.2vw
+    .bhqxHeadContentCss {
+      width 100%
+      height 2vw
+      .bhqxTitleCss {
+        float left
+        padding 0.2vw 0 0 1vw
+        height 1.5vw
+        font-size 1.2vw
+        font-weight bold
+      }
+      .bhqxZtCss {
+        float left
+        margin 0 2vw
+        height 1.9vw
+        .ztIconCss {
+          float left
+          margin 0.6vw 0.3vw 0 0
+          width 1vw
+          height 1vw
+          border-radius 50%
+        }
+        .ztIcon1Css {
+          background-color #339900
+        }
+        .ztIcon2Css {
+          background-color #ff0000
+        }
+        .ztIcon3Css {
+          background-color #ffff00
+        }
+        .ztNameCss {
+          float left
+          margin 0.5vw 1vw 0 0
+          height 1.9vw
+          font-size 0.8vw
+        }
+      }
+      .cxjgSelDateCss {
+        float left
+        padding-top 0.3vw
+        margin-right 0.5vw
+      }
+      .cxjgCss {
+        float left
+        .cxjgTitleCss {
+          float left
+          margin-top 0.5vw
+          font-size 0.8vw
+        }
+        .inputContentCss {
+          float left
+          margin-top 0.3vw
+          width 80px
+        }
+      }
+      .exportCss {
+        float left
+        margin 0.3vw 0 0 0.5vw
+        .importCss {
+          color red
+          line-height 32px
+        }
+      }
+    }
+    .multipleYAxesContentCss {
+      position relative
+      margin 0.2vw 0 0 1%
+      padding-bottom 0.5vw
+      width 98%
+      height 11.5vw
+      border-radius 0.2vw
+      border 1px solid rgba(25, 186, 139, 0.17)
+      &::before {
+        position absolute
+        top 0
+        left 0
+        content ''
+        width 10px
+        height 10px
+        border-top 2px solid #02a6b5
+        border-left 2px solid #02a6b5
+        border-radius 20%
+      }
+      &::after {
+        position absolute
+        top 0
+        right 0
+        content ''
+        width 10px
+        height 10px
+        border-top 2px solid #02a6b5
+        border-right 2px solid #02a6b5
+        border-radius 20%
+      }
+      .smultipleYAxesFooterCss {
+        position absolute
+        left 0
+        bottom 0
+        width 100%
+        &::before {
+          position absolute
+          bottom 0
+          left 0
+          content ''
+          width 10px
+          height 10px
+          border-bottom 2px solid #02a6b5
+          border-left 2px solid #02a6b5
+          border-radius 20%
+        }
+        &::after {
+          position absolute
+          bottom 0
+          right 0
+          content ''
+          width 10px
+          height 10px
+          border-bottom 2px solid #02a6b5
+          border-right 2px solid #02a6b5
+          border-radius 20%
+        }
+      }
+    }
+  }
+}
+</style>
+
+<style lang="stylus">
+.ksxzLsjlDateCss {
+  .el-date-editor {
+    width 100%
+  }
+}
+
+</style>

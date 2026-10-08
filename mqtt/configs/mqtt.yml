@@ -1,0 +1,54 @@
+# MQTT 转发程序配置。账号、密码和密钥可直接在本文件中配置。
+rsa:
+  # 用于解密 MQTT、Redis 和 RocketMQ 等配置密文。
+  privateKey: "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKYAq0FcC3bovzcn8R3g/Sxi/bDbwNwyor2gA/544iNGnOWh5wTEXUCLD0IOD62mIcMDuVq5iQI0Z8zpgzGx6yZ+ukOKzh7r1Ffx+WbGlFJ+ZBGjdk/qM+taWwpgiFoJm77louSD+CEBxJFeK9elptpn1a9F9FyAGaBuxjgfwZ9hAgMBAAECgYEAiZz6W0drtZqCkb3J06QlHPu/JTM3cROE97/EL9uUU/wAqxiJQ9lpGM1uy6qOcrzLNjhLGxu9qZc6CZP3D2ZX8Y4Tb1fFtiH09tKdCDQsWZGuJfI2SPEJrXkTZOhLTIBB3OrtnCELDxEqmXyMqrrbOsoDQ/BKnH6YhUCgyy9KqAECQQDb2bRYGBY+a0HfhdFdvnXLpUCnr+WLi2wo1NjiJmE4KMrwloa5LcdfR+elItKMM3bEwL18IBOxfAnETOr/pZAhAkEAwUxRHbf9ZfnCwrhKZwTGvDybFegqxRqx/FEJd2htq1KAGBM3p5OXUaFLw6CNh3VBwG2XmPQVC2CN5p0AIWMnQQJAf0pQccUYc/F0BXAcZbOVzmASzEQ6mo4SBJ4gKOhh17s+rQfqXyNTUSZ3x5Qe5dASTx7tVwXXgSa5HPAQDA6XIQJAbbv6jMmH1F1+4HYo3uUKQZCSZlRf+3eVNW131070e38hcwlt3fdevxu3XD6IOi8p/aj5l/5w9/1/cT0N9uZIQQJBAKNitIBEt43ugyBQnnzJi+HpmQ8Kcn9mnaxnABc3zymAURrzB11MCIK5oxvrKMn5wEzAMtEprcYsQG7qpGIonvw="
+  publicKey: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCmAKtBXAt26L83J/Ed4P0sYv2w28DcMqK9oAP+eOIjRpzloecExF1Aiw9CDg+tpiHDA7lauYkCNGfM6YMxsesmfrpDis4e69RX8flmxpRSfmQRo3ZP6jPrWlsKYIhaCZu+5aLkg/ghAcSRXivXpabaZ9WvRfRcgBmgbsY4H8GfYQIDAQAB"
+
+server:
+  name: mqtt
+
+mqtt:
+  # 设备 MQTT 服务地址及认证信息。
+  url: tcp://127.0.0.1:1883
+  username: jstest
+  password: l2anM2/MFICkrfhE2pgTBSSt/VdsLvSVvi6x+UPxgUhW+40WcoMVP3qvyoNj2j4++WHmJdSvs4rUKYGqeoZOldZYWaamK24pdWOFivFNA+fuLadQ+OfOl97mI4dDseevuyay40WOIGzMVCFPKU+shluE5mGYKh9eLouxgGnW5PM=
+    
+
+rocket:
+  # TTDC 电池消息只发布到 battery.dealQueue，并使用 battery.tag。
+  endpoint: 127.0.0.1:9876
+  # Broker 管理地址，自动创建主题时使用；按实际部署地址修改。
+  brokerAddresses:
+    - 127.0.0.1:10911
+  # 启动时自动创建缺失的业务主题。
+  autoCreateTopic: true
+  readQueueNums: 4
+  writeQueueNums: 4
+  accesskey: root
+  secretkey: PIw2A1yXoV79cx0i5LzICIHycocEJcmZV7cYdSTzLhO00GqnFkqoko34BgSngAuLQ4BRT8WVwxft36jRlXu5gN1LXyNPPiyvF6VCK7Gx101WxaAdNf91H9nnF9dS4Nd0UhhdSCgJtSsMTVgWpfnHJxCOJnHkcwV13OBfMuXH5KA=
+
+
+
+redis:
+  host: localhost
+  port: 6379
+  password: PwArNPlYWlYnxqGxGG6oaiwLT3MevWd5A+awy6to+JdzRsZxAAGF9Ec1ETgzH3Inr/yhLmPS89enobT9m1WeylPTZrdDOl5LUeBsbbcsmm5SgHiq6LnGBMvF25DPVVWzfBZKeXmVLXvoEy5hM0pL2zgEZBEK6OBPiWTOG562/Yg=
+
+
+battery:
+  # 订阅 TTDC 电池命名空间，再由下方白名单筛选锂硫和钠电主题。
+  enabled: true
+  debugLog: true
+  subscribeFilter: "/DCBMS4G/+/PUB/+"
+  # allowlist：只转发 candidateTopicSegments 中明确列出的电池类型。
+  candidateRoutingMode: allowlist
+  candidateTopicSegments:
+    - SodiumBattery
+    - LithiumSulfurBattery
+  # 仅在使用 exclusive_namespace 模式且确认整个命名空间都属于电池设备时改为 true。
+  candidateNamespaceExclusiveConfirmed: false
+  dealQueue: xc_battery_deal_msg
+  tag: battery_ttdc
+
+log:
+  filePath: ./logs/mqtt.log

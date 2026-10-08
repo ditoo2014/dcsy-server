@@ -1,0 +1,174 @@
+package service
+
+import (
+	"dicloud/internal/business/client"
+	businessmodel "dicloud/internal/business/model"
+	"dicloud/internal/common/dto"
+	"dicloud/internal/common/grpc/tolink_grpc"
+	tolinkdao "dicloud/internal/tolink/dao"
+	tolinkmodel "dicloud/internal/tolink/model"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+const (
+	ChargeDischargeCodeDischarge = "累计放电量"
+	ChargeDischargeCodeCharge    = "累计充电量"
+)
+
+var chargeDischargeCodes = []string{
+	ChargeDischargeCodeDischarge,
+	ChargeDischargeCodeCharge,
+}
+
+var chargeDischargePointDefinitions = []struct {
+	DataID  string
+	Code    string
+	Aliases []string
+}{
+	{DataID: "tt_fangdiandianliang", Code: ChargeDischargeCodeDischarge, Aliases: []string{"累计放电量", "累计放电容量"}},
+	{DataID: "tt_chongdiandianliang", Code: ChargeDischargeCodeCharge, Aliases: []string{"累计充电量", "累计充电容量"}},
+}
+
+type chargeDischargePoint struct {
+	EquipmentID int
+	GatewayID   string
+	DataID      string
+	Code        string
+}
+
+func resolveChargeDischargePoints(ctx *gin.Context, equipments []businessmodel.Equipment) map[int]map[string][]chargeDischargePoint {
+	result := make(map[int]map[string][]chargeDischargePoint, len(equipments))
+	legacyResolver := newStatisticDataPointResolver(ctx)
+	streams := loadEquipmentStatisticStreams(ctx, equipments)
+	for _, equipment := range equipments {
+		points := resolveChargeDischargeStreamPoints(equipment, streams[strings.TrimSpace(equipment.ApiKey)])
+		if len(points) == 0 && strings.TrimSpace(equipment.EquipmentCode) != "" {
+			legacyPoints := []statisticDataPoint{
+				{DataID: "tt_fangdiandianliang", Code: dto.DP_STATISTIC_CODE_MAP["tt_fangdiandianliang"]},
+				{DataID: "tt_chongdiandianliang", Code: dto.DP_STATISTIC_CODE_MAP["tt_chongdiandianliang"]},
+			}
+			for _, point := range legacyResolver.resolve(equipment.EquipmentCode, legacyPoints) {
+				points = append(points, chargeDischargePoint{
+					EquipmentID: int(equipment.ID),
+					GatewayID:   equipment.EquipmentCode,
+					DataID:      point.DataID,
+					Code:        point.Code,
+				})
+			}
+		}
+		for _, point := range deduplicateChargeDischargePoints(points) {
+			if result[point.EquipmentID] == nil {
+				result[point.EquipmentID] = make(map[string][]chargeDischargePoint)
+			}
+			result[point.EquipmentID][point.Code] = append(result[point.EquipmentID][point.Code], point)
+		}
+	}
+	return result
+}
+
+func resolveChargeDischargeStreamPoints(equipment businessmodel.Equipment, stream *tolink_grpc.Stream) []chargeDischargePoint {
+	if stream == nil {
+		return nil
+	}
+	points := make([]chargeDischargePoint, 0)
+	for _, label := range stream.List {
+		if label == nil {
+			continue
+		}
+		code := chargeDischargeCodeForPoint(label.DataId, label.Name, label.DataName)
+		if code == "" || strings.TrimSpace(label.GatewayId) == "" || strings.TrimSpace(label.DataId) == "" {
+			continue
+		}
+		points = append(points, chargeDischargePoint{
+			EquipmentID: int(equipment.ID),
+			GatewayID:   strings.TrimSpace(label.GatewayId),
+			DataID:      strings.TrimSpace(label.DataId),
+			Code:        code,
+		})
+	}
+	return points
+}
+
+func loadEquipmentStatisticStreams(ctx *gin.Context, equipments []businessmodel.Equipment) map[string]*tolink_grpc.Stream {
+	result := make(map[string]*tolink_grpc.Stream)
+	apiKeys := make([]string, 0, len(equipments))
+	for _, equipment := range equipments {
+		apiKey := strings.TrimSpace(equipment.ApiKey)
+		if apiKey == "" {
+			continue
+		}
+		if _, exists := result[apiKey]; exists {
+			continue
+		}
+		result[apiKey] = nil
+		apiKeys = append(apiKeys, apiKey)
+	}
+	streamDAO := tolinkdao.NewStreamDAO(ctx)
+	streams, err := streamDAO.FindByApiKeys(apiKeys)
+	if err == nil {
+		for _, stream := range streams {
+			result[strings.TrimSpace(stream.ApiKey)] = tolinkStreamGRPCData(stream)
+		}
+	}
+	for _, apiKey := range apiKeys {
+		if result[apiKey] != nil {
+			continue
+		}
+		response, fallbackErr := client.ExistApikey(ctx, &tolinkmodel.Stream{ApiKey: apiKey})
+		if fallbackErr == nil && response != nil && response.Code == 200 {
+			result[apiKey] = response.Stream
+		}
+	}
+	return result
+}
+
+func findEquipmentStatisticStream(ctx *gin.Context, apiKey string) (*tolink_grpc.Stream, bool) {
+	apiKey = strings.TrimSpace(apiKey)
+	if apiKey == "" {
+		return nil, false
+	}
+	streamDAO := tolinkdao.NewStreamDAO(ctx)
+	stream, exists := streamDAO.ExistApiKey(tolinkmodel.Stream{ApiKey: apiKey})
+	if exists && stream.ID != 0 {
+		return tolinkStreamGRPCData(stream), true
+	}
+	response, err := client.ExistApikey(ctx, &tolinkmodel.Stream{ApiKey: apiKey})
+	if err != nil || response == nil || response.Code != 200 || response.Stream == nil {
+		return nil, false
+	}
+	return response.Stream, true
+}
+
+func chargeDischargeCodeForPoint(dataID, name, dataName string) string {
+	normalizedID := strings.ToLower(strings.TrimSpace(dataID))
+	for _, definition := range chargeDischargePointDefinitions {
+		if normalizedID == definition.DataID || strings.HasSuffix(normalizedID, "_"+definition.DataID) {
+			return definition.Code
+		}
+		for _, candidateName := range []string{name, dataName} {
+			candidateName = strings.TrimSpace(candidateName)
+			for _, alias := range definition.Aliases {
+				if candidateName == alias || strings.HasSuffix(candidateName, "_"+alias) {
+					return definition.Code
+				}
+			}
+		}
+	}
+	return ""
+}
+
+func deduplicateChargeDischargePoints(points []chargeDischargePoint) []chargeDischargePoint {
+	result := make([]chargeDischargePoint, 0, len(points))
+	seen := make(map[string]struct{}, len(points))
+	for _, point := range points {
+		key := point.Code + "\x00" + point.GatewayID + "\x00" + point.DataID
+		if _, exists := seen[key]; exists {
+			continue
+		}
+		seen[key] = struct{}{}
+		result = append(result, point)
+	}
+	return result
+}

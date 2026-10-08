@@ -1,0 +1,43 @@
+syntax = "proto3"; // 指定proto版本
+package equipment_grpc;     // 指定默认包名
+
+// 指定golang包名
+option go_package = "./equipment_grpc";
+
+// 命令: 创建
+// protoc -I . --go_out=.\ --go-grpc_out=.\ .\equipment.proto
+//定义grpc服务
+service EquipmentService {
+  // 定义函数
+  rpc AddEquipment (EquipmentDtoArr) returns (HelloResponse) {}
+}
+
+// EquipmentDto
+message EquipmentDto {
+  string name = 1;
+  string message = 2;
+  string equipment_code = 3;   // 设备编码
+  string equipment_name = 4;     // 设备名称
+  int64 equipment_type_id = 5;   // 设备类型id
+  string equipment_type_name = 6; // 设备类型名称
+  string manufacturer = 7;      // 生产厂家
+  string manufacture_time = 8;  // 生产日期
+  string batch = 9;             // 批次
+  string specifications = 10;    // 规格
+  string bms_manufacturer = 11;   // BMS生产厂家
+  string bms_version = 12;        // BMS版本
+  string api_key = 13;
+  int64 engage_internet_status = 14;
+  int64 corp_id = 15;
+}
+
+// EquipmentDtoArr
+message EquipmentDtoArr {
+  repeated EquipmentDto equipment_arr= 16;
+}
+
+// HelloResponse 响应内容
+message HelloResponse{
+  string name = 1;
+  string message = 2;
+}

@@ -1,0 +1,57 @@
+/* 苹方 */
+@font-face {
+  font-family: 'pf';
+  src: url('./pf.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 微软雅黑 */
+@font-face {
+  font-family: 'wryh';
+  src: url('./wryh.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 方正黑体 */
+@font-face {
+  font-family: 'FZHTK';
+  src: url('./FZHTK.TTF');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 方正楷体 */
+@font-face {
+  font-family: 'FZKTK';
+  src: url('./FZKTK.TTF');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 方正小标宋简体 */
+@font-face {
+  font-family: 'FZXBSK';
+  src: url('./FZXBSK.TTF');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Times New Roman 新罗马字体 */
+@font-face {
+  font-family: "TimesNewRoman";
+  src: url('./times.ttf');
+}
+
+/* 电子时钟专用字体 */
+@font-face {
+  font-family: "DS_DIGIT";
+  src: url('./DS-DIGIT.TTF');
+}
+
+/* 华文琥珀字体 */
+@font-face {
+  font-family: "hwhp";
+  src: url('./hwhp.ttf');
+}
