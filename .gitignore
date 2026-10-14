@@ -2,3 +2,6 @@
 /yewuCloud/.idea/*
 /yewuCloud/dist/*
 /yewuCloud/node_modules/*
+/deal/deal
+/alarm/alarm
+/mqtt/mqtt
