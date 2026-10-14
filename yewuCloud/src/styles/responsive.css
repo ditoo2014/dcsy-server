@@ -1,0 +1,60 @@
+/* 业务云和采集云共用尺寸边界；各页面继续保留自己的颜色、字体和桌面布局。 */
+.el-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100% - 32px);
+  /* 保留原来的 top 配置，只限制窗口缩小后的可见高度。 */
+  max-height: calc(100vh - var(--el-dialog-margin-top, 15vh) - 16px);
+  max-height: calc(100dvh - var(--el-dialog-margin-top, 15vh) - 16px);
+}
+
+.el-dialog.is-fullscreen {
+  max-width: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
+}
+
+.el-dialog__header,
+.el-dialog__footer {
+  flex-shrink: 0;
+}
+
+.el-dialog__body {
+  /* 表单或地图超出可见高度时滚动正文，标题、关闭及提交按钮仍可操作。 */
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.el-drawer.rtl,
+.el-drawer.ltr {
+  max-width: 100%;
+}
+
+.el-drawer.ttb,
+.el-drawer.btt {
+  max-height: 100%;
+}
+
+.el-drawer__body {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.el-message-box {
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+}
+
+.el-pagination {
+  /* 不减少分页按钮；可用宽度不足时横向滚动，普通桌面仍保持原排列。 */
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.el-pagination > * {
+  flex-shrink: 0;
+}
