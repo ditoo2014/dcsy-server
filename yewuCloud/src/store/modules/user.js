@@ -9,6 +9,13 @@ import { Message } from '@/utils/element-shim'
 import { notifyBackendLogout } from '@/utils/session-logout'
 import config from '@/config.js'
 import { PLATFORM } from '@/constants/platform'
+import { readPasswordChangeStatus } from '@/utils/password-change-state.js'
+import { useAuthStore } from '@/collection/stores/auth.js'
+import { useTagsViewStore } from '@/collection/stores/tagsView.js'
+
+function changedSessionError() {
+  return Object.assign(new Error('登录会话已更新，已忽略旧请求'), { errorCode: 'SESSION_CHANGED' })
+}
 
 function clearStoredSession() {
   removeToken()
@@ -26,7 +33,10 @@ function clearStoredSession() {
 
 const state = {
   token: getToken(),
-  roles: []
+  roles: [],
+  passwordChangeRequired: false,
+  passwordChangeReason: '',
+  passwordExpiresAt: ''
 }
 
 const mutations = {
@@ -47,43 +57,65 @@ const mutations = {
   },
   SET_CODENAME: (state, codeName) => { // 设置头像图片
     state.codeName = codeName
+  },
+  SET_PASSWORD_STATUS: (state, status) => {
+    Object.assign(state, readPasswordChangeStatus(status))
   }
 }
 
 const actions = {
-  login({ commit }, userInfo) { // 登录
-    return new Promise((resolve, reject) => {
-      login(userInfo).then(response => {
-        const access_token = response.return && response.return.token
-        if (!access_token) {
-          const errMsg = response.msg || '登录成功但未返回 token'
-          Message({ message: errMsg, type: 'error', duration: 3 * 1000 })
-          reject(new Error(errMsg))
-          return
-        }
-        commit('SET_TOKEN', access_token) // 将 access_token 存入vuex中
-        setToken(access_token) // 将 access_token 存入cookie中
-        resolve(true)
-      }).catch(error => {
-        // 业务/网络错误提示已由 api.js 或 request.js 处理，避免重复弹窗
-        reject(error)
-      })
-    })
+  async login({ commit, dispatch }, userInfo) { // 登录
+    const requestedToken = getToken()
+    const response = await login(userInfo)
+    if (getToken() !== requestedToken) throw changedSessionError()
+    const access_token = response.return && response.return.token
+    if (!access_token) {
+      const errMsg = response.msg || '登录成功但未返回 token'
+      Message({ message: errMsg, type: 'error', duration: 3 * 1000 })
+      throw new Error(errMsg)
+    }
+    await dispatch('clearBusinessAccess')
+    if (getToken() !== requestedToken) throw changedSessionError()
+    commit('SET_PASSWORD_STATUS', response)
+    commit('SET_TOKEN', access_token)
+    setToken(access_token)
+    return true
   },
 
-  getInfo({ commit }) { // 获取用户信息
+  getInfo({ commit, dispatch }) { // 获取用户信息
     return new Promise((resolve, reject) => {
-      findSelf().then(response => {
+      const requestedToken = getToken()
+      findSelf().then(async response => {
+        if (getToken() !== requestedToken) throw changedSessionError()
+        commit('SET_PASSWORD_STATUS', response)
         const roles = ['manager'] // 当roles中包含'admin'时，则自动获取全部权限，在role.js中不需要配置'admin'
         const userInfo = response.return.user
         setUserInfoStr(JSON.stringify(userInfo))
         if (userInfo && userInfo.id != null) {
           setUserId(userInfo.id)
         }
+        // 受限登录仅加载本人信息，不请求业务权限或注入业务菜单。
+        if (readPasswordChangeStatus(response).passwordChangeRequired) {
+          await dispatch('requirePasswordChange', response)
+          if (getToken() !== requestedToken) throw changedSessionError()
+          resolve({ roles: [], routers: [], ...readPasswordChangeStatus(response) })
+          return
+        }
         let pageNameList = null // 要显示的页面的名称组成的数组
         let routers = []
         const roleType = userInfo.isadmin
         const applyPermissions = (permiRes) => {
+          if (getToken() !== requestedToken) {
+            reject(changedSessionError())
+            return
+          }
+          if (readPasswordChangeStatus(permiRes).passwordChangeRequired) {
+            dispatch('requirePasswordChange', permiRes).then(() => {
+              if (getToken() !== requestedToken) throw changedSessionError()
+              resolve({ roles: [], routers: [], ...readPasswordChangeStatus(permiRes) })
+            }).catch(reject)
+            return
+          }
           if (roleType === 1) {
             routers = asyncRoutes
           } else {
@@ -147,6 +179,17 @@ const actions = {
         getUserPermissions().then(permiRes => {
           applyPermissions(permiRes)
         }).catch(error => {
+          if (getToken() !== requestedToken) {
+            reject(changedSessionError())
+            return
+          }
+          if (error?.errorCode === 'PASSWORD_CHANGE_REQUIRED') {
+            dispatch('requirePasswordChange', error.responseData).then(() => {
+              if (getToken() !== requestedToken) throw changedSessionError()
+              resolve({ roles: [], routers: [], ...readPasswordChangeStatus(error.responseData) })
+            }).catch(reject)
+            return
+          }
           if (roleType === 1) {
             applyPermissions(null)
             return
@@ -160,6 +203,10 @@ const actions = {
           reject(error)
         })
       }).catch(error => {
+        if (getToken() !== requestedToken) {
+          reject(changedSessionError())
+          return
+        }
         const errMsg = (error && error.message) || error || '获取用户信息失败'
         Message({
           message: typeof errMsg === 'string' ? errMsg : '获取用户信息失败',
@@ -171,6 +218,41 @@ const actions = {
     })
   },
 
+  async checkPasswordChange({ commit, dispatch }) {
+    const requestedToken = getToken()
+    const response = await findSelf()
+    if (!requestedToken || getToken() !== requestedToken) throw changedSessionError()
+    commit('SET_PASSWORD_STATUS', response)
+    const userInfo = response.return?.user
+    if (userInfo) {
+      setUserInfoStr(JSON.stringify(userInfo))
+      if (userInfo.id != null) setUserId(userInfo.id)
+    }
+    const status = readPasswordChangeStatus(response)
+    if (status.passwordChangeRequired) await dispatch('requirePasswordChange', response)
+    if (getToken() !== requestedToken) throw changedSessionError()
+    return status
+  },
+
+  async requirePasswordChange({ commit, dispatch }, body) {
+    commit('SET_PASSWORD_STATUS', body)
+    await dispatch('clearBusinessAccess')
+  },
+
+  async clearBusinessAccess({ commit, dispatch }) {
+    // 到期时清业务菜单、标签及采集权限，保留认证令牌供本人改密。
+    commit('SET_ROLES', [])
+    removePageList()
+    removeCjyToken()
+    useAuthStore().clearAccess()
+    useTagsViewStore().clearVisitedViews()
+    resetRouter()
+    await Promise.all([
+      dispatch('tagsView/delAllViews', null, { root: true }),
+      dispatch('permission/resetRoutes', null, { root: true })
+    ])
+  },
+
   async logout({ dispatch }) { // 退出登录
     notifyBackendLogout(getToken())
     await dispatch('sessionTimeout')
@@ -178,13 +260,10 @@ const actions = {
 
   async sessionTimeout({ commit, dispatch }) { // 登录空闲超时
     commit('SET_TOKEN', '')
-    commit('SET_ROLES', [])
+    commit('SET_PASSWORD_STATUS', {})
+    useAuthStore().logout()
     clearStoredSession()
-    resetRouter()
-    await Promise.all([
-      dispatch('tagsView/delAllViews', null, { root: true }),
-      dispatch('permission/resetRoutes', null, { root: true })
-    ])
+    await dispatch('clearBusinessAccess')
   },
 
   // remove token

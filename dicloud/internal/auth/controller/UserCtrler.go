@@ -3,6 +3,7 @@ package controller
 import (
 	crand "crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/big"
@@ -22,6 +23,7 @@ import (
 	"dicloud/pkg/authsession"
 	"dicloud/pkg/cache"
 	"dicloud/pkg/common"
+	"dicloud/pkg/passwordpolicy"
 	"dicloud/util/encryption"
 	requestutil "dicloud/util/http"
 	normalutil "dicloud/util/normal"
@@ -184,6 +186,9 @@ func (u UserCtrler) Register(ctx *gin.Context) {
 
 	/* 信息入库 */
 	rUser.CreateTime = time.Now()
+	// 管理员创建的是初始密码；首次登录后由用户本人设置正式密码。
+	rUser.PasswordChangedAt = &rUser.CreateTime
+	rUser.MustChangePassword = true
 	_, err = userDao.CreateUser(rUser)
 	if nil != err {
 		log.Println("[AUTH] Register Create: ", err)
@@ -223,6 +228,7 @@ func (u UserCtrler) Update(ctx *gin.Context) {
 	}
 
 	/* 返回成功 */
+	rUser.Password = ""
 	cache.HMSet(ctx, fmt.Sprintf("user:%s", rUser.Username), map[string]interface{}{
 		"info": rUser,
 	})
@@ -279,27 +285,32 @@ func (u UserCtrler) Info(ctx *gin.Context) {
 	userInfo := userInfoCache.(model.User)
 
 	/* 返回成功 */
+	passwordStatus := passwordpolicy.Evaluate(userInfo.PasswordChangedAt, userInfo.MustChangePassword, time.Now())
 
 	response.Success(
 		ctx,
 		"认证成功",
-		gin.H{"user": dto.UserDto{
-			ID:         userInfo.ID,
-			Username:   userInfo.Username,
-			TrueName:   userInfo.TrueName,
-			Phone:      userInfo.Phone,
-			Email:      userInfo.Email,
-			CreateTime: userInfo.CreateTime,
-			TotalLogin: userInfo.TotalLogin,
-			Token:      userInfo.Token,
-			LoginIp:    userInfo.LastIp,
-			LastIp:     userInfo.LastIp,
-			Isadmin:    userInfo.Isadmin,
-			PlatName:   userInfo.PlatName,
-			PlatType:   userInfo.PlatType,
-			Baned:      userInfo.Baned,
-			CorpIds:    userInfo.CorpIds,
-		}})
+		gin.H{
+			"passwordChangeRequired": passwordStatus.PasswordChangeRequired,
+			"passwordChangeReason":   passwordStatus.PasswordChangeReason,
+			"passwordExpiresAt":      passwordStatus.PasswordExpiresAt,
+			"user": dto.UserDto{
+				ID:         userInfo.ID,
+				Username:   userInfo.Username,
+				TrueName:   userInfo.TrueName,
+				Phone:      userInfo.Phone,
+				Email:      userInfo.Email,
+				CreateTime: userInfo.CreateTime,
+				TotalLogin: userInfo.TotalLogin,
+				Token:      userInfo.Token,
+				LoginIp:    userInfo.LastIp,
+				LastIp:     userInfo.LastIp,
+				Isadmin:    userInfo.Isadmin,
+				PlatName:   userInfo.PlatName,
+				PlatType:   userInfo.PlatType,
+				Baned:      userInfo.Baned,
+				CorpIds:    userInfo.CorpIds,
+			}})
 }
 
 // 查询用户
@@ -524,7 +535,13 @@ func (u UserCtrler) Login(ctx *gin.Context) {
 	dbUser.LastIp = dbUser.LoginIp
 	dbUser.LoginIp = ctx.RemoteIP()
 	dbUser.TotalLogin = dbUser.TotalLogin + 1
-	userDao.UpdateLogin(dbUser)
+	// 只更新登录字段，并核对刚验证过的密码，避免与重置/修改密码并发时复活旧会话。
+	dbUser, res = userDao.UpdateLogin(dbUser)
+	if !res || dbUser.Token != token {
+		response.Fail(ctx, "登录状态已变化，请重试", nil)
+		return
+	}
+	passwordStatus := passwordpolicy.Evaluate(dbUser.PasswordChangedAt, dbUser.MustChangePassword, time.Now())
 
 	/* 更新redis */
 
@@ -542,16 +559,18 @@ func (u UserCtrler) Login(ctx *gin.Context) {
 	}
 
 	// 权限查询
-	permissionDao := dao.NewPermissionDAO(ctx)
-	pmss, err := permissionDao.GetUserPermissions(dbUser, rUser.PlatId)
-	if err == nil {
-		cache.HMSet(ctx, fmt.Sprintf("user:%s", dbUser.Username), map[string]interface{}{
-			fmt.Sprintf("permission%v", rUser.PlatId): pmss,
-		})
-		// 设置过期时间
-		cache.ExpireKey(ctx, fmt.Sprintf("user:%s", dbUser.Username), timeDuration)
-	} else {
-		cache.ExpireKey(ctx, fmt.Sprintf("user:%s", dbUser.Username), time.Second*3)
+	// 受限会话只用于改密，不加载业务权限；所有业务请求继续由中间件强制拦截。
+	if !passwordStatus.PasswordChangeRequired {
+		permissionDao := dao.NewPermissionDAO(ctx)
+		pmss, err := permissionDao.GetUserPermissions(dbUser, rUser.PlatId)
+		if err == nil {
+			cache.HMSet(ctx, fmt.Sprintf("user:%s", dbUser.Username), map[string]interface{}{
+				fmt.Sprintf("permission%v", rUser.PlatId): pmss,
+			})
+			cache.ExpireKey(ctx, fmt.Sprintf("user:%s", dbUser.Username), timeDuration)
+		} else {
+			cache.ExpireKey(ctx, fmt.Sprintf("user:%s", dbUser.Username), time.Second*3)
+		}
 	}
 	clearLoginFailure(ctx, loginIdentifier)
 	if accountIdentifier != loginIdentifier {
@@ -560,7 +579,12 @@ func (u UserCtrler) Login(ctx *gin.Context) {
 
 	/* 返回成功 */
 
-	response.Success(ctx, "登录成功", gin.H{"token": token})
+	response.Success(ctx, "登录成功", gin.H{
+		"token":                  token,
+		"passwordChangeRequired": passwordStatus.PasswordChangeRequired,
+		"passwordChangeReason":   passwordStatus.PasswordChangeReason,
+		"passwordExpiresAt":      passwordStatus.PasswordExpiresAt,
+	})
 }
 
 // 发送登录短信验证码
@@ -633,6 +657,7 @@ func (u UserCtrler) SendSmsCode(ctx *gin.Context) {
 	// 模拟模式仍然生成并保存短信验证码，只跳过外部短信接口，保证前端和登录校验流程不变。
 	code := ""
 	if viper.GetBool("sms.login.simulate") {
+		fmt.Println("-----------------------")
 		code = strings.TrimSpace(viper.GetString("sms.login.simulateCode"))
 		validMockCode, _ := regexp.MatchString(`^\d{6}$`, code)
 		if !validMockCode {
@@ -727,7 +752,7 @@ func sendLoginSms(phone string, code string) error {
 	if timeoutSeconds <= 0 {
 		timeoutSeconds = 20
 	}
-
+	fmt.Println("=========================2")
 	respBody, err := requestutil.PostMultipartFormWithTimeout(smsURL, map[string]string{
 		"phone":   phone,
 		"message": message,
@@ -736,6 +761,7 @@ func sendLoginSms(phone string, code string) error {
 		return err
 	}
 
+	fmt.Println("======================3====", string(respBody))
 	var smsResp smsSendResponse
 	if err := json.Unmarshal(respBody, &smsResp); err != nil {
 		return fmt.Errorf("parse sms response fail: %w, body: %s", err, string(respBody))
@@ -805,7 +831,10 @@ func (u UserCtrler) ChangePassword(ctx *gin.Context) {
 
 	userDao := dao.NewUserDAO(ctx)
 	var rDto dto.UserNewPasswordDTO
-	ctx.Bind(&rDto)
+	if err := ctx.ShouldBind(&rDto); err != nil {
+		response.Fail(ctx, "非法数据", nil)
+		return
+	}
 
 	if len(rDto.Password) == 0 || len(rDto.NewPassword) == 0 {
 		response.Fail(ctx, "非法数据", nil)
@@ -828,6 +857,12 @@ func (u UserCtrler) ChangePassword(ctx *gin.Context) {
 		response.Fail(ctx, "系统错误", nil)
 		return
 	}
+	// 改密前再次核验当前令牌，避免旧请求在用户重新登录之后继续修改密码。
+	requestToken := strings.TrimSpace(strings.TrimPrefix(ctx.GetHeader("authorization"), "Bearer "))
+	if requestToken == "" || userInfo.Token != requestToken {
+		response.ResponseCode(ctx, 401, nil, "token验证失败")
+		return
+	}
 	// 验证
 	if err := bcrypt.CompareHashAndPassword([]byte(userInfo.Password), []byte(rDto.Password)); err != nil {
 		log.Println("[AUTH] ChangePassword 密码错误 Fail: ", err)
@@ -841,6 +876,10 @@ func (u UserCtrler) ChangePassword(ctx *gin.Context) {
 	if err != nil {
 		log.Println("[AUTH] ChangePassword RSA Decrypt New Fail: ", err)
 		response.Fail(ctx, "系统错误", nil)
+		return
+	}
+	if err := ensureNewPasswordDiffers(newPwd, userInfo.Password); err != nil {
+		response.Fail(ctx, err.Error(), nil)
 		return
 	}
 	// 校验
@@ -862,21 +901,16 @@ func (u UserCtrler) ChangePassword(ctx *gin.Context) {
 
 	/* 信息入库 */
 
+	expectedHash := userInfo.Password
 	userInfo.Password = rDto.NewPassword
-
-	rUser, res := userDao.Update(userInfo)
-	if !res {
-		log.Println("[AUTH] ChangePassword Fail")
-		response.Fail(ctx, "系统错误", nil)
+	if err := userDao.ChangePassword(userInfo, expectedHash, time.Now(), false); err != nil {
+		respondPasswordUpdateError(ctx, err)
 		return
 	}
 
-	/* 返回成功 */
-	cache.HMSet(ctx, fmt.Sprintf("user:%s", rUser.Username), map[string]interface{}{
-		"info": rUser,
-	})
-
-	response.Success(ctx, "修改成功", nil)
+	// 数据库已经清空令牌，缓存清理失败也不能让旧会话继续使用。
+	clearPasswordSessions(ctx, userInfo)
+	response.Success(ctx, "密码修改成功，请使用新密码重新登录", gin.H{"reloginRequired": true})
 
 }
 
@@ -892,7 +926,10 @@ func (u UserCtrler) ResetUserPassword(ctx *gin.Context) {
 
 	userDao := dao.NewUserDAO(ctx)
 	var rDto dto.ResetUserPwdDTO
-	ctx.Bind(&rDto)
+	if err := ctx.ShouldBind(&rDto); err != nil {
+		response.Fail(ctx, "非法数据", nil)
+		return
+	}
 
 	if rDto.UsersEntity.ID == 0 || len(rDto.ManagerPassword) == 0 || len(rDto.NewPassword) == 0 {
 		response.Fail(ctx, "非法数据", nil)
@@ -937,6 +974,10 @@ func (u UserCtrler) ResetUserPassword(ctx *gin.Context) {
 		response.Fail(ctx, "无效用户", nil)
 		return
 	}
+	if err := ensureNewPasswordDiffers(newPwd, dbUser.Password); err != nil {
+		response.Fail(ctx, err.Error(), nil)
+		return
+	}
 
 	if err := validateSubmittedPassword(newPwd, dbUser); err != nil {
 		log.Println("[AUTH] ResetUserPassword 密码策略校验失败: ", err)
@@ -956,19 +997,41 @@ func (u UserCtrler) ResetUserPassword(ctx *gin.Context) {
 
 	/* 信息入库 */
 
-	// 更新密码
+	// 重置的是临时密码，下次登录仍须由目标用户自行改密。
+	expectedHash := dbUser.Password
 	dbUser.Password = rDto.NewPassword
-	dbUser, res = userDao.Update(dbUser)
-	if !res {
-		log.Println("[AUTH] ResetUserPassword Fail")
-		response.Fail(ctx, "系统错误", nil)
+	if err := userDao.ChangePassword(dbUser, expectedHash, time.Now(), true); err != nil {
+		respondPasswordUpdateError(ctx, err)
 		return
 	}
 
-	/* 返回成功 */
-	cache.HMSet(ctx, fmt.Sprintf("user:%s", dbUser.Username), map[string]interface{}{
-		"info": dbUser,
-	})
+	clearPasswordSessions(ctx, dbUser)
+	response.Success(ctx, "重置成功，用户下次登录须修改密码", nil)
+}
 
-	response.Success(ctx, "修改成功", nil)
+// ensureNewPasswordDiffers 使用当前密文比较，不能靠比较两个随机盐的 bcrypt 密文判断相同。
+func ensureNewPasswordDiffers(newPassword, currentHash string) error {
+	if bcrypt.CompareHashAndPassword([]byte(currentHash), []byte(newPassword)) == nil {
+		return errors.New("新密码不能与当前密码相同")
+	}
+	return nil
+}
+
+func respondPasswordUpdateError(ctx *gin.Context, err error) {
+	if errors.Is(err, dao.ErrPasswordChanged) {
+		response.Fail(ctx, "账号状态已变化，请重新核验后再试", nil)
+		return
+	}
+	log.Printf("[AUTH] 更新密码失败: %v", err)
+	response.Fail(ctx, "修改密码失败", nil)
+}
+
+// clearPasswordSessions 在密码事务提交后清理会话和权限缓存；旧令牌由数据库核验兜底拒绝。
+func clearPasswordSessions(ctx *gin.Context, user model.User) {
+	if err := authsession.Clear(ctx, user.Token); err != nil {
+		log.Printf("[AUTH] 清理旧密码会话失败: %v", err)
+	}
+	if err := cache.Delete(ctx, fmt.Sprintf("user:%s", user.Username)); err != nil {
+		log.Printf("[AUTH] 清理用户权限缓存失败: %v", err)
+	}
 }

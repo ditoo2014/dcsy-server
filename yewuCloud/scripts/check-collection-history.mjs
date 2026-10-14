@@ -28,7 +28,10 @@ function evaluateModule(source, filename, dependencies, windowStub = {}) {
     assert.ok(Object.hasOwn(dependencies, name), `检查壳尚未声明依赖：${name}`)
     return dependencies[name]
   }
-  new Function('require', 'module', 'exports', 'window', compiled)(localRequire, module, module.exports, windowStub)
+  new Function('require', 'module', 'exports', 'window', 'requestAnimationFrame', 'cancelAnimationFrame', 'ResizeObserver', compiled)(
+    localRequire, module, module.exports, windowStub, windowStub.requestAnimationFrame, windowStub.cancelAnimationFrame,
+    windowStub.ResizeObserver
+  )
   return module.exports
 }
 
@@ -64,8 +67,12 @@ function createHarness(initialProps = {}) {
   const beforeUnmount = []
   const intervals = new Map()
   const listeners = new Map()
+  const frames = new Set()
+  let nextFrame = 1
   let nextInterval = 1
   let disposals = 0
+  let resizes = 0
+  let containerResizeNotification = null
   let initializations = 0
   let unmounted = false
   const harness = {
@@ -94,7 +101,7 @@ function createHarness(initialProps = {}) {
       initializations += 1
       return {
         setOption: option => chartOptions.push(option),
-        resize() {},
+        resize() { resizes += 1 },
         dispose() { disposals += 1 }
       }
     },
@@ -102,17 +109,12 @@ function createHarness(initialProps = {}) {
   }
   const isolatedVue = {
     ...Vue,
+    nextTick: (...args) => harness.nextTickReply?.() || Vue.nextTick(...args),
     onMounted: callback => mounted.push(callback),
     onBeforeUnmount: callback => beforeUnmount.push(callback)
   }
-  const component = evaluateModule(compiledComponent, componentPath, {
-    vue: isolatedVue,
-    'echarts-collection/core': chartStub,
-    'echarts-collection/charts': {},
-    'echarts-collection/components': {},
-    'echarts-collection/renderers': {},
-    '../../api/gateway-realtime': api
-  }, {
+  // 浏览器尺寸监听由统一工具检查；此处提供真实工具所需的帧和窗口壳。
+  const browserStub = {
     setInterval(callback) {
       const id = nextInterval++
       intervals.set(id, callback)
@@ -120,8 +122,33 @@ function createHarness(initialProps = {}) {
     },
     clearInterval: id => intervals.delete(id),
     addEventListener: (name, callback) => listeners.set(name, callback),
-    removeEventListener: name => listeners.delete(name)
-  }).default
+    removeEventListener: name => listeners.delete(name),
+    requestAnimationFrame(callback) {
+      const id = nextFrame++
+      frames.add(id)
+      Promise.resolve().then(() => {
+        if (frames.delete(id)) callback()
+      })
+      return id
+    },
+    cancelAnimationFrame: id => frames.delete(id),
+    ResizeObserver: class {
+      constructor(callback) { containerResizeNotification = callback }
+      observe() {}
+      disconnect() { containerResizeNotification = null }
+    }
+  }
+  const resizeHelperPath = path.join(projectRoot, 'src/utils/container-resize.js')
+  const resizeHelper = evaluateModule(fs.readFileSync(resizeHelperPath, 'utf8'), resizeHelperPath, {}, browserStub)
+  const component = evaluateModule(compiledComponent, componentPath, {
+    vue: isolatedVue,
+    'echarts-collection/core': chartStub,
+    'echarts-collection/charts': {},
+    'echarts-collection/components': {},
+    'echarts-collection/renderers': {},
+    '../../api/gateway-realtime': api,
+    '../../../utils/container-resize': resizeHelper
+  }, browserStub).default
   const props = Vue.reactive({
     title: '测试电压',
     gatewayId: '865619085125863',
@@ -142,6 +169,8 @@ function createHarness(initialProps = {}) {
     intervals,
     listeners,
     getDisposals: () => disposals,
+    getResizes: () => resizes,
+    notifyContainerResize: () => containerResizeNotification?.(),
     getInitializations: () => initializations,
     mount: async() => { for (const callback of mounted) await callback() },
     unmount() {
@@ -410,6 +439,22 @@ await check('挂载等待期间卸载不启动轮询', async harness => {
   assert.equal(harness.listeners.size, 0, '异步挂载返回后不能重新添加监听')
 })
 
+await check('接口完成后等待布局期间卸载不重启监听', async harness => {
+  const layout = deferred()
+  let nextTickCalls = 0
+  // 第一次等待属于查询 finally；第二次是 mounted 中等待布局更新。
+  harness.nextTickReply = () => ++nextTickCalls === 2 ? layout.promise : undefined
+  const mounting = harness.mount()
+  await settle()
+  assert.equal(nextTickCalls, 2, '检查应停在接口完成后的 mounted 布局等待处')
+  harness.unmount()
+  layout.resolve()
+  await mounting
+  assert.equal(harness.intervals.size, 0, '布局等待返回后不能重启轮询')
+  assert.equal(harness.listeners.size, 0, '布局等待返回后不能重启尺寸监听')
+  assert.equal(harness.getDisposals(), 1, '卸载应释放已经初始化的图表')
+}, { globalRefreshEnabled: true })
+
 await check('正常挂载与原版自动刷新', async harness => {
   await harness.mount()
   assert.equal(harness.calls.length, 2, '正常挂载不能立即重复查询历史')
@@ -424,5 +469,29 @@ await check('正常挂载与原版自动刷新', async harness => {
   await settle()
   assert.equal(harness.intervals.size, 0, '关闭自动刷新后应停止轮询')
 }, { globalRefreshEnabled: true })
+
+await check('容器变化与隐藏恢复后曲线尺寸更新', async harness => {
+  harness.state.chartRef.value = { clientWidth: 800, clientHeight: 268 }
+  await harness.mount()
+  await settle()
+  assert.equal(harness.getResizes(), 1, '挂载后应按可见容器尺寸调整曲线')
+  harness.state.chartRef.value.clientWidth = 640
+  harness.notifyContainerResize()
+  await settle()
+  assert.equal(harness.getResizes(), 2, '不触发窗口事件的容器变化也应更新曲线')
+  harness.listeners.get('resize')()
+  await settle()
+  assert.equal(harness.getResizes(), 2, '相同尺寸的窗口和容器通知不得重复重绘')
+  harness.state.chartRef.value.clientWidth = 0
+  harness.notifyContainerResize()
+  await settle()
+  assert.equal(harness.getResizes(), 2, '隐藏容器不得绘制零宽曲线')
+  harness.state.chartRef.value.clientWidth = 640
+  harness.notifyContainerResize()
+  await settle()
+  assert.equal(harness.getResizes(), 3, '容器重新显示后应恢复曲线尺寸')
+  harness.unmount()
+  assert.equal(harness.listeners.size, 0, '卸载后应清理窗口监听')
+})
 
 console.log(`采集云历史回归通过（${suites.length} 项）：${suites.join('、')}。`)

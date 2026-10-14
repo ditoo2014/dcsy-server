@@ -1,6 +1,7 @@
 <template>
   <div class="modfiyPasCss">
     <div class="formContentCss">
+      <el-alert v-if="forcePasswordChange" :title="forcePasswordMessage" type="warning" :closable="false" show-icon />
       <el-form ref="dataForm" :rules="rules" :model="form" size="small" label-width="120px" class="password-policy-form">
         <el-row>
           <el-col :span="20">
@@ -33,12 +34,12 @@
       </el-form>
       <div class="buttonContentCss">
         <el-button :icon="$legacyIcon('el-icon-back')" @click="backPage">
-          返回
+          {{ forcePasswordChange ? '退出登录' : '返回' }}
         </el-button>
         <el-button @click="clear">
           清空
         </el-button>
-        <el-button type="primary" @click="setData">
+        <el-button type="primary" :loading="submitting" @click="setData">
           确定
         </el-button>
       </div>
@@ -49,8 +50,10 @@
 
 <script>
 import { goBack, getRSApassword } from '@/utils/utils.js'
-import { getUsername } from '@/utils/auth.js'
+import { getToken, getUsername } from '@/utils/auth.js'
 import { modifyPassword } from '@/api/user.js'
+import { expireSession } from '@/utils/session-expiration'
+import { passwordChangeMessage } from '@/utils/password-change-state.js'
 import {
   createPasswordPolicyValidator,
   PASSWORD_POLICY_ERROR_CODE,
@@ -59,10 +62,17 @@ import {
 
 export default {
   data() {
-    const validateNewPassword = createPasswordPolicyValidator(
+    const validatePolicy = createPasswordPolicyValidator(
       () => this.form,
       value => this.getPasswordPolicyServerMessage('newPassword', value)
     )
+    const validateNewPassword = (rule, value, callback) => {
+      if (value && value === this.form.password) {
+        callback(new Error('新密码不能与旧密码相同'))
+        return
+      }
+      validatePolicy(rule, value, callback)
+    }
     const validateSureNewPassword = (rule, value, callback) => { // 重复新密码
       if (this.form.newPassword !== value) {
         callback(new Error('两次输入的新密码不同'))
@@ -71,6 +81,7 @@ export default {
       }
     }
     return {
+      submitting: false,
       passwordPolicyServerValidation: {
         fieldName: '',
         value: '',
@@ -90,26 +101,42 @@ export default {
       }
     }
   },
+  computed: {
+    forcePasswordChange() {
+      return this.$store.state.user.passwordChangeRequired
+    },
+    forcePasswordMessage() {
+      return passwordChangeMessage(this.$store.state.user.passwordChangeReason)
+    }
+  },
   methods: {
     setData() {
+      if (this.submitting) return
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
+          this.submitting = true
           const form = JSON.parse(JSON.stringify(this.form))
+          const requestedToken = getToken()
           const submittedPassword = form.newPassword
           form.password = getRSApassword(form.password, this)
           form.newPassword = getRSApassword(form.newPassword, this)
-          modifyPassword(form).then(res => {
+          modifyPassword(form).then(async res => {
+            if (getToken() !== requestedToken) return
             if (res.code === 200) {
               this.$notify({
-                title: '修改请求发送成功',
-                message: `成功修改`,
+                title: '密码修改成功',
+                message: '请使用新密码重新登录',
                 type: 'success',
                 duration: 3 * 1000
               })
               this.clear()
+              // 后端已使旧令牌失效，同步清理业务、采集及其他标签页的会话。
+              await expireSession({ redirectPath: '/' })
             }
           }).catch(error => {
             this.handlePasswordPolicyError(error, 'newPassword', submittedPassword)
+          }).finally(() => {
+            this.submitting = false
           })
         }
       })
@@ -159,7 +186,11 @@ export default {
         })
       }
     },
-    backPage() {
+    async backPage() {
+      if (this.forcePasswordChange) {
+        await expireSession({ notifyBackend: true, redirectPath: '/' })
+        return
+      }
       goBack(this)
     }
   }
@@ -170,11 +201,14 @@ export default {
 .modfiyPasCss {
   width 100%
   height 100%
+  // 独立改密页面在高缩放或矮窗口下仍可滚动到提交按钮。
+  overflow auto
   .formContentCss {
     margin 0 auto
     padding-top 10%
     width 500px
-    height 400px
+    max-width calc(100% - 24px)
+    min-height 400px
     text-align center
     .buttonContentCss {
       margin-top 30px

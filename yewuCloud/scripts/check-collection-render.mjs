@@ -36,6 +36,10 @@ function evaluateModule(source, filename) {
       }
       return { fetchGatewayHistoryCount: rejectRequest, fetchGatewayHistoryPaged: rejectRequest }
     }
+    if (specifier.endsWith('/utils/container-resize')) {
+      const helperPath = path.resolve(path.dirname(filename), `${specifier}.js`)
+      return evaluateModule(fs.readFileSync(helperPath, 'utf8'), helperPath)
+    }
     if (specifier.endsWith('.vue')) return loadComponent(path.resolve(path.dirname(filename), specifier))
     return require(specifier)
   }

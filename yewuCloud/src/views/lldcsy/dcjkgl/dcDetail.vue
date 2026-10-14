@@ -20,7 +20,7 @@
             </el-tooltip>
             <div class="zdMsg2Css">站址编码：{{ formData.siteCode || '-' }}</div>
           </div>
-          <div class="zdAddrCss">地址：{{ formData.addr || '-' }}</div>
+          <div class="zdAddrCss" :title="formData.addr || '-'">地址：{{ formData.addr || '-' }}</div>
         </div>
         <div class="zdBasicCss">
           <div class="zdLogoCss">
@@ -531,8 +531,10 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
       color #fff
       text-align right
       .zdDetailsCss {
+        // 隔离名称、编码的浮动，避免 vw 小数像素取整后挤压下一行地址。
+        display flow-root
         width 100%
-        height 2.2vw
+        min-height 2.2vw
         line-height 2.2vw
         font-size 1vw
         .zdMsg1Css {
@@ -552,6 +554,10 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
         height 1.5vw
         line-height 1.5vw
         font-size 0.8vw
+        // 长地址保持单行，鼠标悬停仍可查看完整地址。
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
       }
     }
     .zdBasicCss {

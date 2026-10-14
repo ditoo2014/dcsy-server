@@ -1,4 +1,15 @@
 # DCSY business 服务配置。账号、密码和密钥可直接在本文件中配置。
+security:
+  # 季度改密配置须与 auth.yml、tolink.yml 保持一致；修改后重启服务。
+  password:
+    # true：每个自然季度强制改密；false：关闭季度限制。
+    # 管理员创建或重置密码后的首次改密要求仍然保留。
+    enabled: true
+    # 每年 1月、4月、7月、10月的 1日零点进入新季度，不是修改后满90天。
+    mode: calendar_quarter
+    # 按北京时间判断；程序内置时区数据。本配置不使用环境变量覆盖。
+    timezone: Asia/Shanghai
+
 # 运维图片上传配置；相对路径以 business 服务运行目录为基准。
 uploads:
   # 上传、图片读取和 Excel 导出共用此目录；可填写 Windows 或 Linux 的绝对路径。

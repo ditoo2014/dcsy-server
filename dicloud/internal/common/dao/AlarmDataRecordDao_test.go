@@ -23,11 +23,6 @@ func newAlarmRecordTestDB(t *testing.T) *gorm.DB {
 	if err := db.AutoMigrate(&model.AlarmDataRecord{}); err != nil {
 		t.Fatalf("migrate alarm record: %v", err)
 	}
-	if err := db.Exec(`CREATE UNIQUE INDEX uni_alarm_record_lifecycle_test
-		ON alarm_data_record (equipment_id, alarm_code, begin_time, alarm_type, alarm_stage)`).Error; err != nil {
-		t.Fatalf("create lifecycle index: %v", err)
-	}
-
 	sqlDB, err := db.DB()
 	if err != nil {
 		t.Fatalf("get sql database: %v", err)
@@ -84,7 +79,7 @@ func TestCreateIfNotExistsUsesAlarmLifecycleKey(t *testing.T) {
 func TestCountActiveNormalAlarmByEquipment(t *testing.T) {
 	db := newAlarmRecordTestDB(t)
 	dao := &AlarmDataRecordDao{db: db}
-	if err := db.Exec("DROP INDEX uni_alarm_record_lifecycle_test").Error; err != nil {
+	if err := db.Exec("DROP INDEX uni_alarm_record_lifecycle").Error; err != nil {
 		t.Fatalf("drop lifecycle index: %v", err)
 	}
 	records := []model.AlarmDataRecord{

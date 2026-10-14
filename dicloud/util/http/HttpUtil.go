@@ -142,7 +142,8 @@ func PostMultipartFormWithTimeout(url string, data map[string]string, timeout ti
 	request.Close = true
 
 	transport := &http.Transport{
-		Proxy:                 http.ProxyFromEnvironment,
+		// 短信接口固定直连，不读取 HTTP_PROXY、HTTPS_PROXY、NO_PROXY 等代理环境变量。
+		Proxy:                 nil,
 		DisableKeepAlives:     true,
 		ForceAttemptHTTP2:     false,
 		TLSHandshakeTimeout:   10 * time.Second,
@@ -162,6 +163,7 @@ func PostMultipartFormWithTimeout(url string, data map[string]string, timeout ti
 	defer transport.CloseIdleConnections()
 
 	res, err = io.ReadAll(resp.Body)
+
 	if err != nil {
 		log.Println("[REQUEST UTIL] PostMultipartForm ReadAll Error, ", err)
 		return
@@ -170,7 +172,6 @@ func PostMultipartFormWithTimeout(url string, data map[string]string, timeout ti
 		err = fmt.Errorf("http status %s: %s", resp.Status, string(res))
 		log.Println("[REQUEST UTIL] PostMultipartForm Status Error, ", err)
 	}
-
 	return
 }
 

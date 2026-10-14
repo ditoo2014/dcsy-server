@@ -198,6 +198,8 @@ func businessPermissionSeeds() []businessPermissionSeed {
 		{"site", "站点管理功能", [][2]string{{"add", "新增站点"}, {"delete", "删除站点"}, {"update", "修改站点"}, {"find", "查询站点"}, {"details:find", "查询站点详情"}, {"export", "导出站点"}, {"import", "导入站点及下载模板"}}},
 		{"equipment", "电池设备功能", [][2]string{{"add", "新增电池及类型"}, {"delete", "删除电池及类型"}, {"update", "修改电池及类型"}, {"find", "查询电池及健康状态"}, {"countbycorp", "查询部门电池数量"}, {"export", "导出电池"}, {"import", "导入电池及下载模板"}, {"alldata", "查询电池实时数据"}}},
 		{"datadetails", "设备数据接入功能", [][2]string{{"add", "新增数据详情"}, {"batchadd", "批量新增数据详情"}, {"update", "修改数据详情"}, {"batchupdate", "批量修改数据详情"}, {"find", "查询数据详情"}, {"delete", "删除数据详情"}}},
+		// 通用配置接口恢复认证后单独授权，不由页面权限隐式放行。
+		{"commondata", "平台通用配置功能", [][2]string{{"import", "导入及删除平台通用配置"}}},
 		{"warehouse", "库房管理功能", [][2]string{{"add", "新增库房"}, {"update", "修改库房"}, {"delete", "删除库房"}, {"find", "查询库房"}, {"export", "导出库房"}, {"import", "导入库房及下载模板"}}},
 		{"equipmentcirlog", "电池流转记录功能", [][2]string{{"add", "新增流转记录"}, {"find", "查询流转记录"}}},
 		{"equipmentgoppst", "电池位置功能", [][2]string{{"add", "上报电池位置"}, {"find", "查询电池位置"}}},

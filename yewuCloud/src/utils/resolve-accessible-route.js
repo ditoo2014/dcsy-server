@@ -116,21 +116,26 @@ export function isRouteAccessible(router, path) {
     return false
   }
   try {
-    const resolved = router.resolve({ path })
-    if (!resolved.matched.length) {
-      return false
-    }
-    const leaf = resolved.matched[resolved.matched.length - 1]
-    if (leaf.name) {
-      return true
-    }
-    if (resolved.matched.some(matchedHasPageComponent)) {
-      return true
-    }
-    return false
+    return resolvedRouteHasPage(router, { path }, new Set())
   } catch {
     return false
   }
+}
+
+function resolvedRouteHasPage(router, target, visited) {
+  const resolved = router.resolve(target)
+  if (!resolved.matched.length || visited.has(resolved.fullPath)) {
+    return false
+  }
+  visited.add(resolved.fullPath)
+  const leaf = resolved.matched[resolved.matched.length - 1]
+  // 分组本身不是页面，只有重定向确实能到达页面才允许导航，并阻断循环。
+  if (leaf.redirect) {
+    const redirect = typeof leaf.redirect === 'function' ? leaf.redirect(resolved) : leaf.redirect
+    return Boolean(redirect) && resolvedRouteHasPage(router, redirect, visited)
+  }
+  // 名称和外层 Layout 都不能代替实际页面；权限过滤后的空布局也应拒绝。
+  return !leaf.meta?.routeContainer && !leaf.children?.length && matchedHasPageComponent(leaf)
 }
 
 /**

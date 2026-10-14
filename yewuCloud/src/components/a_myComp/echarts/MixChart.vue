@@ -87,14 +87,12 @@ export default {
   },
   mounted() {
     this.initChart()
-    window.addEventListener('resize', this.handleResize)
   },
   beforeUnmount() {
     if (this.resetTimer) {
       clearTimeout(this.resetTimer)
       this.resetTimer = null
     }
-    window.removeEventListener('resize', this.handleResize)
     if (!this.chart) {
       return
     }
@@ -574,18 +572,15 @@ export default {
       }
     },
     initChart() {
-      this.chart = markRaw(this.$echarts.init(document.getElementById(this.id)))
+      this.chart = markRaw(this.$echarts.init(this.$el))
       this.chart.on('datazoom', this.handleDataZoom)
       this.reSetOption()
     },
     handleDataZoom() {
       this.reSetOption()
     },
-    handleResize() {
-      if (!this.chart) {
-        return
-      }
-      this.chart.resize()
+    afterChartResize() {
+      // 容器宽度改变后，重新计算曲线文字密度，避免不同缩放比例下重叠。
       this.reSetOption()
     }
   }

@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 // 采集云使用与原项目一致的图表版本，保留历史曲线的样式和交互。
 import * as echarts from 'echarts-collection/core'
+import { createContainerResizeWatcher } from '../../../utils/container-resize'
 
 import { LineChart, ScatterChart } from 'echarts-collection/charts'
 import {
@@ -548,9 +549,11 @@ function renderChart() {
   })
 }
 
-function onResize() {
-  chart?.resize()
-}
+// 折叠行、侧栏和分页换行都会改变容器尺寸，不能只依赖窗口 resize。
+const chartResizeWatcher = createContainerResizeWatcher(() => chartRef.value, () => {
+  if (disposed || !chart) return false
+  chart.resize()
+})
 
 watch(historyPage, () => {
   if (suppressPageWatch.value) return
@@ -615,20 +618,22 @@ onMounted(async() => {
   ensureDefaultTimeRange()
   // 折叠打开默认显示最新 30 条：最新在最后一页
   await resetToLatestPageAndFetch()
+  // 每次异步等待后都确认组件仍在，防止离开页面后重启轮询或尺寸监听。
   if (disposed) return
   await nextTick()
+  if (disposed) return
   renderChart()
   if (autoRefresh.value && props.globalRefreshEnabled !== false) {
     startPolling(false)
   }
-  window.addEventListener('resize', onResize)
+  chartResizeWatcher.start()
 })
 
 onBeforeUnmount(() => {
   disposed = true
   requestSequence += 1
   stopPolling()
-  window.removeEventListener('resize', onResize)
+  chartResizeWatcher.stop()
   chart?.dispose()
   chart = null
 })
@@ -677,6 +682,7 @@ onBeforeUnmount(() => {
 <style scoped>
 
 .history-wrap {
+  min-width: 0;
   padding: 8px 6px 2px;
   border: 1px solid #e9eef5;
   border-radius: 10px;
@@ -699,6 +705,7 @@ onBeforeUnmount(() => {
 
 .history-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -723,6 +730,9 @@ onBeforeUnmount(() => {
 
 .history-pager {
   display: flex;
+  /* 时间筛选与分页在容器不足时分行，正常桌面保持原排布。 */
+  flex-wrap: wrap;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -732,8 +742,8 @@ onBeforeUnmount(() => {
 /* 时间范围选择器：更紧凑、更贴合整体风格 */
 :deep(.history-range) {
   width: 320px;
-  min-width: 280px;
-  max-width: 40vw;
+  min-width: min(280px, 100%);
+  max-width: min(100%, 40vw);
 }
 
 :deep(.history-range.el-range-editor.el-input__wrapper) {

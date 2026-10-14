@@ -1,5 +1,8 @@
 import router from '@/router'
 import { getToken } from '@/utils/auth.js'
+import store from '@/store'
+import { requirePasswordChange } from '@/utils/password-change.js'
+import { PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
 import {
   expireSession,
   LAST_ACTIVITY_KEY,
@@ -64,6 +67,9 @@ function timeoutLogout(options = {}) {
     broadcast,
     notifyBackend: broadcast,
     redirectPath: redirect
+  }).finally(() => {
+    // 单页应用重新登录不会重新加载本模块，下一次超时仍需能够退出。
+    redirecting = false
   })
 }
 
@@ -95,6 +101,15 @@ function markActivity() {
 function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
     checkIdle()
+    // 后台标签重新激活时查询真实状态，避免跨季度仍停留在旧业务画面。
+    const token = getToken()
+    if (token && !isLoginRoute()) {
+      store.dispatch('user/checkPasswordChange').then(status => {
+        if (status.passwordChangeRequired) requirePasswordChange(status, token)
+      }).catch(error => {
+        if (error?.errorCode === PASSWORD_CHANGE_REQUIRED) requirePasswordChange(error.responseData, token)
+      })
+    }
   }
 }
 

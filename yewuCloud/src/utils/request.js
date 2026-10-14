@@ -1,6 +1,28 @@
 import axios from 'axios'
 import { Message } from '@/utils/element-shim'
 import { expireSession } from '@/utils/session-expiration'
+import { requirePasswordChange } from '@/utils/password-change.js'
+import { isPasswordChangeFailure, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
+import { getToken } from '@/utils/auth.js'
+
+async function passwordFailure(body, config, readBlob = false) {
+  // 导出下载接口的错误也可能以 Blob 返回，需要先读取中文错误和专用标识。
+  if (typeof Blob !== 'undefined' && body instanceof Blob) {
+    if (!readBlob) return null
+    try {
+      body = JSON.parse(await body.text())
+    } catch {
+      return null
+    }
+  }
+  if (!isPasswordChangeFailure(body)) return null
+  requirePasswordChange(body, requestBearerToken(config))
+  const error = new Error(body.msg || '请先修改密码后继续使用平台')
+  error.code = 403
+  error.errorCode = PASSWORD_CHANGE_REQUIRED
+  error.responseData = body
+  return error
+}
 
 // 创建axios实例
 const service = axios.create({
@@ -31,15 +53,21 @@ service.interceptors.response.use(
   *您还可以通过HTTP状态代码判断状态
   */
 
-  response => {
+  async response => {
+    const contentType = response.headers?.get?.('Content-Type') || response.headers?.['content-type'] || ''
+    const failure = await passwordFailure(response.data, response.config, String(contentType).includes('json'))
+    if (failure) return Promise.reject(failure)
     if (response.config && response.config.responseType === 'blob') {
       return response
     }
     return response.data
   },
-  error => {
+  async error => {
+    const failure = await passwordFailure(error.response?.data, error.config, true)
+    if (failure) return Promise.reject(failure)
     const status = error.response && error.response.status
     if (status === 401) {
+      if (requestBearerToken(error.config) !== (getToken() || '')) return Promise.reject(error)
       Message({
         message: '登录已过期，请重新登录',
         type: 'warning',

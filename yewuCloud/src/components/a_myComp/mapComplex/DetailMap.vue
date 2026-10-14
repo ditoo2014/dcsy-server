@@ -2,7 +2,7 @@
 
   <div class="detailMapCss" :style="{height,width}">
 
-    <div :id="mapContainerId" :style="{height,width}" />
+    <div :id="mapContainerId" ref="mapContainer" :style="{height,width}" />
 
     <div class="searchCss">
 
@@ -18,6 +18,7 @@
 
 import { markRaw } from 'vue'
 import { loadBusinessMap } from '@/utils/amap-loader'
+import { createContainerResizeWatcher } from '@/utils/container-resize.js'
 
 let detailMapInstanceCounter = 0
 
@@ -118,20 +119,35 @@ export default {
   mounted() {
     this.bindWindowHandlers()
 
+    // 地图需跟随实际绘图区变化，侧栏、弹窗和浏览器缩放共用同一调整入口。
+    this.__mapSizeWatcher = createContainerResizeWatcher(
+      () => this.$refs.mapContainer,
+      () => {
+        if (!this.mapKey || typeof this.mapKey.resize !== 'function') return false
+        this.mapKey.resize()
+        return true
+      }
+    )
+    this.__mapSizeWatcher.start()
+
     this.initTimer = setTimeout(() => {
       this.initTimer = null
 
       this.createMarker()
     }, 1000)
+  },
 
-    this.__resizeHandler = () => this.resizeMap()
+  activated() {
+    this.__mapSizeWatcher && this.__mapSizeWatcher.start()
+  },
 
-    window.addEventListener('resize', this.__resizeHandler)
+  deactivated() {
+    this.__mapSizeWatcher && this.__mapSizeWatcher.stop()
   },
 
   beforeUnmount() {
     this.mapDisposed = true
-    window.removeEventListener('resize', this.__resizeHandler)
+    this.__mapSizeWatcher && this.__mapSizeWatcher.stop()
 
     if (this.initTimer) {
       clearTimeout(this.initTimer)
@@ -175,9 +191,7 @@ export default {
     },
 
     resizeMap() {
-      if (this.mapKey && typeof this.mapKey.resize === 'function') {
-        this.mapKey.resize()
-      }
+      this.__mapSizeWatcher && this.__mapSizeWatcher.schedule()
     },
 
     recreateMap() {
@@ -271,6 +285,9 @@ export default {
           map.setFitView()
 
           this.mapKey = markRaw(map)
+
+          // 异步创建完成后主动测量；创建前的观察通知可能早于地图就绪。
+          this.resizeMap()
 
           this.replaceMarkers(map)
         } else {

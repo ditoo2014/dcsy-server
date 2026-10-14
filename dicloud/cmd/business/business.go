@@ -5,6 +5,7 @@ import (
 	"dicloud/models/enum"
 	"dicloud/pkg/cache"
 	"dicloud/pkg/common"
+	"dicloud/pkg/passwordpolicy"
 	"dicloud/util"
 	"dicloud/util/gormutil"
 	"dicloud/util/opengauss"
@@ -54,7 +55,13 @@ func main() {
 	//util.Chdir("/app")
 
 	/* 配置管理器 */
-	util.InitViper("business")
+	if err := util.InitViper("business"); err != nil {
+		panic("读取业务服务配置失败: " + err.Error())
+	}
+	// 从本服务的 business.yml 读取季度规则，环境变量不参与季度规则。
+	if err := passwordpolicy.LoadFile(viper.ConfigFileUsed()); err != nil {
+		panic("加载季度密码策略失败: " + err.Error())
+	}
 
 	/* 日志 */
 	common.InitLog(enum.SERVER_LOG)

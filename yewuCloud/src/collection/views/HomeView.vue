@@ -1537,6 +1537,8 @@ onUnmounted(() => {
 .workbench {
   width: 100%;
   max-width: 100%;
+  /* 按正文实际可用宽度适配，侧栏展开和浏览器缩放也能触发。 */
+  container-type: inline-size;
   padding: 16px 20px;
   box-sizing: border-box;
 }
@@ -1970,6 +1972,36 @@ onUnmounted(() => {
   }
   .toolbar :deep(.el-select) {
     width: 100%;
+  }
+}
+
+/* 仅空间不足时把操作区排到下一行，宽屏保留原来的左右排列。 */
+@container (max-width: 760px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tool-right {
+    justify-self: start;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* 不支持容器查询的旧浏览器，仍按视口宽度提供窄屏兼容。 */
+@supports not (container-type: inline-size) {
+  @media (max-width: 1060px) {
+    .toolbar {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tool-right {
+      justify-self: start;
+      flex-wrap: wrap;
+      min-width: 0;
+      max-width: 100%;
+    }
   }
 }
 </style>

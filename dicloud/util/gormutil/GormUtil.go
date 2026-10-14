@@ -20,9 +20,8 @@ func InitPlatGormDB() {
 	}
 }
 
-// InitPlatGormDBWithError initializes the platform GORM database before the
-// caller starts serving requests. TTDC alarm-rule tables are auto-migrated
-// together with other platform schemas during startup.
+// InitPlatGormDBWithError 在业务服务启动前连接并校验数据库结构。
+// 建表和增量迁移统一由认证服务执行，业务服务不修改生产库结构。
 func InitPlatGormDBWithError() error {
 	dbType := viper.GetString("server.gormdb.type")
 	if len(dbType) == 0 {

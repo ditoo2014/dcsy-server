@@ -1,113 +1,115 @@
 <template>
   <div class="sssjCss">
-    <div class="chartContentCss">
-      <div class="chartCss">
-        <div class="multipleYAxesCss">
-          <MultipleYAxes
-            id="realTimeDataEchartsBasicBar1"
-            width="100%"
-            height="100%"
-            :data-change-key="basicBardataChangeKey"
-            :chart-data="basicBarData1"
-            link-group="realTimeDayCharts"
-            :enable-data-zoom="true"
-            :dynamic-symbol-on-zoom="true"
-          />
-        </div>
-        <div class="multipleYAxesCss">
-          <MultipleYAxes
-            id="realTimeDataEchartsBasicBar2"
-            width="100%"
-            height="100%"
-            :data-change-key="basicBardataChangeKey"
-            :chart-data="basicBarData2"
-            link-group="realTimeDayCharts"
-            :enable-data-zoom="true"
-            :show-data-zoom-slider="true"
-            :dynamic-symbol-on-zoom="true"
-          />
-        </div>
-        <div class="multipleYAxesCss">
-          <MultipleYAxes
-            id="realTimeDataEchartsBasicBar3"
-            width="100%"
-            height="100%"
-            :data-change-key="basicBardataChangeKey"
-            :chart-data="basicBarData3"
-          />
+    <div class="realTimeLayoutCss">
+      <div class="chartContentCss">
+        <div class="chartCss">
+          <div class="multipleYAxesCss">
+            <MultipleYAxes
+              id="realTimeDataEchartsBasicBar1"
+              width="100%"
+              height="100%"
+              :data-change-key="basicBardataChangeKey"
+              :chart-data="basicBarData1"
+              link-group="realTimeDayCharts"
+              :enable-data-zoom="true"
+              :dynamic-symbol-on-zoom="true"
+            />
+          </div>
+          <div class="multipleYAxesCss">
+            <MultipleYAxes
+              id="realTimeDataEchartsBasicBar2"
+              width="100%"
+              height="100%"
+              :data-change-key="basicBardataChangeKey"
+              :chart-data="basicBarData2"
+              link-group="realTimeDayCharts"
+              :enable-data-zoom="true"
+              :show-data-zoom-slider="true"
+              :dynamic-symbol-on-zoom="true"
+            />
+          </div>
+          <div class="multipleYAxesCss">
+            <MultipleYAxes
+              id="realTimeDataEchartsBasicBar3"
+              width="100%"
+              height="100%"
+              :data-change-key="basicBardataChangeKey"
+              :chart-data="basicBarData3"
+            />
+          </div>
         </div>
       </div>
-    </div>
-    <div class="dcDetailsMsgContentCss">
-      <template v-if="showBasicInfo">
-        <div class="dcDetailsMsgCss">
-          <div class="dcTitleContentCss">
-            <div class="dcTitleCss">【 电池信息 】</div>
-          </div>
-          <div class="dcztContentCss">
-            <div class="dcztStatusContentCss">
-              <div class="dcTZtTitleCss">电池状态：</div>
-              <div class="dcXCss">
-                <img v-if="dcztImg" :src="dcztImg">
+      <div class="dcDetailsMsgContentCss">
+        <template v-if="showBasicInfo">
+          <div class="dcDetailsMsgCss">
+            <div class="dcTitleContentCss">
+              <div class="dcTitleCss">【 电池信息 】</div>
+            </div>
+            <div class="dcztContentCss">
+              <div class="dcztStatusContentCss">
+                <div class="dcTZtTitleCss">电池状态：</div>
+                <div class="dcXCss">
+                  <img v-if="dcztImg" :src="dcztImg">
+                </div>
+                <div class="dcTZtCss">{{ dzctMsg }}</div>
               </div>
-              <div class="dcTZtCss">{{ dzctMsg }}</div>
+              <div class="dcTypeContentCss">
+                <div class="dcTypeTitleCss">电池类型：</div>
+                <div class="dcTypeMsgCss" :title="formData.equipmentTypeName || '-'">
+                  {{ formData.equipmentTypeName || '-' }}
+                </div>
+              </div>
             </div>
-            <div class="dcTypeContentCss">
-              <div class="dcTypeTitleCss">电池类型：</div>
-              <div class="dcTypeMsgCss" :title="formData.equipmentTypeName || '-'">
-                {{ formData.equipmentTypeName || '-' }}
+            <div class="dcDetialsGzMsgCss">
+              <div v-for="item in dcxx1List" :key="item.title" class="dcGzMsgContentCss">
+                <div class="dcGzTitelCss">{{ item.title }}：</div>
+                <div class="dcGzMsgCss">{{ item.msg }}</div>
+              </div>
+              <div v-for="item in dcxx2List" :key="item.title" class="dcGzMsgContentCss">
+                <div class="dcGzTitelCss">{{ item.title }}：</div>
+                <div class="dcGzMsgCss">{{ item.title === '剩余放电时长' && item.msg === '-' ? '未放电' : item.msg }}</div>
               </div>
             </div>
           </div>
-          <div class="dcDetialsGzMsgCss">
-            <div v-for="item in dcxx1List" :key="item.title" class="dcGzMsgContentCss">
-              <div class="dcGzTitelCss">{{ item.title }}：</div>
-              <div class="dcGzMsgCss">{{ item.msg }}</div>
+          <div class="mbxxDetailsMsgCss">
+            <div class="dczwTitleContentCss">
+              <div class="dczwTitleCss">电池组温度：</div>
+              <div class="dczwXCss">温差：{{ realTimeWcData }}</div>
             </div>
-            <div v-for="item in dcxx2List" :key="item.title" class="dcGzMsgContentCss">
-              <div class="dcGzTitelCss">{{ item.title }}：</div>
-              <div class="dcGzMsgCss">{{ item.title === '剩余放电时长' && item.msg === '-' ? '未放电' : item.msg }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="mbxxDetailsMsgCss">
-          <div class="dczwTitleContentCss">
-            <div class="dczwTitleCss">电池组温度：</div>
-            <div class="dczwXCss">温差：{{ realTimeWcData }}</div>
-          </div>
-          <div class="mbxxContentCss">
-            <div v-for="item in dczwdList" :key="item.title" class="mbxxCss">
-              <div class="mbxxTitleCss">{{ item.title + '#' }}</div>
-              <div class="mbxxValCss">{{ item.val }}</div>
+            <div class="mbxxContentCss">
+              <div v-for="item in dczwdList" :key="item.title" class="mbxxCss">
+                <div class="mbxxTitleCss">{{ item.title + '#' }}</div>
+                <div class="mbxxValCss">{{ item.val }}</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="qtwdDetailsMsgCss">
-          <div class="qtwdTitleCss">其他温度：</div>
-          <div class="qtwdMsgContentCss">
-            <div class="qtwdMsgCss">
-              <div class="qtwdMsgTitleCss">MOS温度：</div>
-              <div class="qtwdMsgDataCss">{{ mosWd }}</div>
-            </div>
-            <div class="qtwdMsgCss">
-              <div class="qtwdMsgTitleCss">环境温度：</div>
-              <div class="qtwdMsgDataCss">{{ hjWd }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="mbxxDetailsMsgCss">
-          <div class="dczwTitleContentCss">
-            <div class="dczwTitleCss">单体电压：</div>
-            <div class="dczwXCss">压差：{{ realTimeYcData }}</div>
-          </div>
-          <div class="mbxxContentCss">
-            <div v-for="item in dtdyList" :key="item.title" class="mbxxCss">
-              <div class="mbxxTitleCss">{{ item.title + '#' }}</div>
-              <div class="mbxxValCss">{{ item.val }}</div>
+          <div class="qtwdDetailsMsgCss">
+            <div class="qtwdTitleCss">其他温度：</div>
+            <div class="qtwdMsgContentCss">
+              <div class="qtwdMsgCss">
+                <div class="qtwdMsgTitleCss">MOS温度：</div>
+                <div class="qtwdMsgDataCss">{{ mosWd }}</div>
+              </div>
+              <div class="qtwdMsgCss">
+                <div class="qtwdMsgTitleCss">环境温度：</div>
+                <div class="qtwdMsgDataCss">{{ hjWd }}</div>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
+          <div class="mbxxDetailsMsgCss">
+            <div class="dczwTitleContentCss">
+              <div class="dczwTitleCss">单体电压：</div>
+              <div class="dczwXCss">压差：{{ realTimeYcData }}</div>
+            </div>
+            <div class="mbxxContentCss">
+              <div v-for="item in dtdyList" :key="item.title" class="mbxxCss">
+                <div class="mbxxTitleCss">{{ item.title + '#' }}</div>
+                <div class="mbxxValCss">{{ item.val }}</div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -413,6 +415,8 @@ export default {
               position: 'top',
               color: '#000'
             },
+            // 窄图只隐藏互相遮挡的标签，悬停提示仍保留完整数值。
+            labelLayout: { hideOverlap: true },
             yAxisIndex: 0,
             data: []
           },
@@ -424,6 +428,7 @@ export default {
               position: 'top',
               color: '#000'
             },
+            labelLayout: { hideOverlap: true },
             yAxisIndex: 0,
             data: []
           }]
@@ -1034,40 +1039,48 @@ export default {
 
   .sssjCss {
     width 100%
-    display flow-root
+    // 按详情正文的实际宽度适配，侧栏、弹窗和浏览器缩放使用同一套规则。
+    container-type inline-size
+    container-name battery-realtime
+    .realTimeLayoutCss {
+      display grid
+      grid-template-columns minmax(0, 70fr) minmax(320px, 29fr)
+      gap 0.4vw
+      padding 0 0.2vw
+    }
     .chartContentCss {
-      float left
-      margin 0 0.2vw
-      width 70%
-      height 44vw
+      min-width 0
+      width 100%
+      min-height 44vw
+      align-self start
       box-shadow boxShadow
       .chartCss {
         width 100%
-        height 100%
         .multipleYAxesCss {
-          margin-top 1vw
+          margin-top unquote('max(8px, 1vw)')
           width 98%
           height 13.5vw
+          // 坐标文字和时间滑块使用像素尺寸，必须为绘图区保留可读高度。
+          min-height 260px
           border-bottom 1px solid #F6F5FA
         }
       }
     }
     .dcDetailsMsgContentCss {
-      float left
-      margin-left 0.4vw
-      width 29%
+      min-width 0
+      width 100%
       .dcDetailsMsgCss {
         width 100%
-        height 11vw
+        min-height 11vw
+        padding-bottom unquote('max(6px, 0.3vw)')
         border-radius 5px
         box-shadow boxShadow
         .dcTitleContentCss {
           width 100%
-          height 2vw
-          line-height 2vw
+          min-height 2vw
+          line-height unquote('max(24px, 2vw)')
           .dcTitleCss {
-            float left
-            font-size 1vw
+            font-size clamp(12px, 1vw, 24px)
             font-weight bold
           }
         }
@@ -1076,36 +1089,35 @@ export default {
           align-items center
           padding 0.1vw 0 0.1vw 1vw
           width 100%
-          height 1.5vw
-          line-height 1.5vw
+          min-height 1.5vw
+          line-height unquote('max(20px, 1.5vw)')
           .dcztStatusContentCss {
             display flex
             align-items center
+            flex-wrap wrap
             width 50%
             min-width 0
           }
           .dcTZtTitleCss {
-            float left
+            flex none
             margin 0 0.5vw 0 0
-            font-size 0.8vw
-            height 0.8vw
+            font-size clamp(12px, 0.8vw, 20px)
           }
           .dcXCss {
-            float left
+            flex none
             margin 0.1vw 0.1vw 0 0
-            width 1.5vw
-            height 1.2vw
+            width unquote('max(18px, 1.5vw)')
+            height unquote('max(14px, 1.2vw)')
           }
           .dcTZtCss {
-            float left
-            font-size 0.8vw
+            font-size clamp(12px, 0.8vw, 20px)
           }
           .dcTypeContentCss {
             display flex
             align-items center
             width 50%
             min-width 0
-            font-size 0.8vw
+            font-size clamp(12px, 0.8vw, 20px)
             .dcTypeTitleCss {
               flex none
               margin-right 0.5vw
@@ -1119,20 +1131,27 @@ export default {
           }
         }
         .dcDetialsGzMsgCss {
-          padding-top 0.5vw
+          display grid
+          grid-template-columns repeat(2, minmax(0, 1fr))
+          padding-top unquote('max(6px, 0.5vw)')
           width 100%
           .dcGzMsgContentCss {
-            float left
-            padding-left 1vw
-            width 50%
-            height 1.6vw
-            line-height 1.6vw
+            // 长电量换行后由整行和卡片共同撑高，不再压住温度卡片。
+            display flex
+            flex-wrap wrap
+            align-items baseline
+            min-width 0
+            padding-left unquote('max(8px, 1vw)')
+            min-height 1.6vw
+            line-height unquote('max(20px, 1.6vw)')
             .dcGzTitelCss {
-              float left
+              flex none
               margin-right 0.5vw
             }
             .dcGzMsgCss {
-              float left
+              min-width 0
+              max-width 100%
+              overflow-wrap anywhere
             }
           }
         }
@@ -1140,85 +1159,113 @@ export default {
       .mbxxDetailsMsgCss {
         margin 0.5vw 0 0.5vw 0
         width 100%
-        height 13.75vw
+        // 温度和电压列表保留原卡片比例，缩窗时保证标题和数据行可读。
+        height unquote('max(190px, 13.75vw)')
         border-radius 5px
         box-shadow boxShadow
         .dczwTitleContentCss {
           padding-left 1vw
           width 100%
-          height 2vw
-          line-height 2vw
+          display flex
+          align-items center
+          justify-content space-between
+          min-width 0
+          height unquote('max(24px, 2vw)')
+          line-height unquote('max(24px, 2vw)')
           .dczwTitleCss {
-            float left
-            font-size 1vw
+            flex none
+            font-size clamp(12px, 1vw, 24px)
             font-weight bold
           }
           .dczwXCss {
-            float right
             margin 0.1vw 1vw 0 0
-            font-size 0.8vw
+            min-width 0
+            overflow-wrap anywhere
+            font-size clamp(12px, 0.8vw, 20px)
           }
         }
         .mbxxContentCss {
+          display grid
+          grid-template-columns repeat(6, minmax(0, 1fr))
+          align-content start
+          gap unquote('max(6px, 0.61vw)') 2.16%
           margin 0.3vw 0 0 2%
+          padding 2px 2% 6px 0
           width 98%
-          height calc(13.75vw - 2.3vw)
+          height calc(max(190px, 13.75vw) - max(24px, 2vw) - 0.3vw)
           overflow-y auto
-          &::after {
-            content ''
-            display block
-            clear both
-          }
           .mbxxCss {
-            float left
-            margin 0 2.16% 0.61vw 0
-            width 14.5%
-            height 2.25vw
+            min-width 0
+            min-height unquote('max(40px, 2.25vw)')
             text-align center
-            font-size 0.8vw
+            font-size clamp(12px, 0.8vw, 20px)
+            overflow-wrap anywhere
             box-shadow box2Shadow
             .mbxxTitleCss {
               width 100%
-              height 1.1vw
-              line-height 1.1vw
+              line-height unquote('max(18px, 1.1vw)')
             }
             .mbxxValCss {
               width 100%
-              line-height 1vw
+              line-height unquote('max(18px, 1vw)')
             }
           }
         }
       }
       .qtwdDetailsMsgCss {
         margin 0.5vw 0
-        height 4vw
+        min-height 4vw
+        padding-bottom unquote('max(6px, 0.3vw)')
         border-radius 5px
         box-shadow boxShadow
         .qtwdTitleCss {
           padding-left 1vw
           width 100%
-          height 2vw
-          line-height 2vw
-          font-size 1vw
+          min-height 2vw
+          line-height unquote('max(24px, 2vw)')
+          font-size clamp(12px, 1vw, 24px)
           font-weight bold
         }
         .qtwdMsgContentCss {
+          display flex
+          flex-wrap wrap
           padding-left 20%
           width 100%
-          height 1.5vw
-          line-height 1.5vw
-          font-size 0.8vw
+          min-height 1.5vw
+          line-height unquote('max(20px, 1.5vw)')
+          font-size clamp(12px, 0.8vw, 20px)
           .qtwdMsgCss {
-            float left
-            width 40%
+            display flex
+            flex-wrap wrap
+            flex 1 1 100px
+            min-width 0
             .qtwdMsgTitleCss {
-              float left
+              flex none
             }
             .qtwdMsgDataCss {
-              float left
+              min-width 0
+              overflow-wrap anywhere
             }
           }
         }
+      }
+    }
+  }
+
+  // 极窄详情采用上下排列，避免强行压缩右侧信息和左侧坐标。
+  @container battery-realtime (max-width: 900px) {
+    .sssjCss .realTimeLayoutCss {
+      grid-template-columns minmax(0, 1fr)
+      gap 12px
+    }
+  }
+
+  // 兼容不支持容器查询的旧浏览器，常规桌面仍保留左右排列。
+  @supports not (container-type: inline-size) {
+    @media (max-width: 1024px) {
+      .sssjCss .realTimeLayoutCss {
+        grid-template-columns minmax(0, 1fr)
+        gap 12px
       }
     }
   }

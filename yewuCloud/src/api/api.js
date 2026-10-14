@@ -2,6 +2,8 @@ import request from '@/utils/request.js'
 import { Message } from '@/utils/element-shim'
 import { getToken } from '@/utils/auth.js'
 import { expireSession } from '@/utils/session-expiration'
+import { requirePasswordChange } from '@/utils/password-change.js'
+import { isPasswordChangeRequired, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
 
 export function get(url, data, requestMsg) {
   return http({
@@ -96,6 +98,12 @@ export function http(params) {
         businessError.code = Number(res.code)
         businessError.errorCode = res.return && res.return.errorCode
         businessError.responseData = res
+        if (isPasswordChangeRequired(res)) {
+          businessError.errorCode = PASSWORD_CHANGE_REQUIRED
+          requirePasswordChange(res, requestBearerToken(requestParams))
+          reject(businessError)
+          return
+        }
         const sessionInvalid = Number(res.code) === 401 ||
           res.msg === 'token过期或未启用' ||
           res.msg === 'token验证失败' ||
@@ -118,7 +126,7 @@ export function http(params) {
           }
           reject(businessError)
         }
-        if (sessionInvalid) {
+        if (sessionInvalid && requestBearerToken(requestParams) === (getToken() || '')) {
           expireSession()
         }
       } else {

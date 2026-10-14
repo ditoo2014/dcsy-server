@@ -3,6 +3,7 @@
     <div
       v-for="(item, index) in list"
       :key="index"
+      :class="`bannerItemCss--${item.style}`"
       :style="{'float': item.float ? item.float : 'left'}"
     >
       <div v-if="item.style === 'infoNum'" class="infoNumCss marginCss">
@@ -401,6 +402,8 @@ searchContentHeight = 50px
 infoNumHeight = 38px
 
 .bannerCss {
+  // 隔离筛选项浮动，窗口变化时多行筛选不会挤压下方内容。
+  display flow-root
   padding 0 7px 0 3px
   width 100%
   line-height searchContentHeight
@@ -477,6 +480,58 @@ infoNumHeight = 38px
   }
   .marginCss {
     margin 0 0.1vw
+  }
+  > div {
+    max-width 100%
+  }
+}
+
+// 仅在可用宽度较小时设置控件的可读下限，仍按原来的浮动顺序换行。
+@media (max-width: 1280px) {
+  .bannerCss {
+    .bannerItemCss--input, .bannerItemCss--select, .bannerItemCss--multipleSelect, .bannerItemCss--cascader {
+      min-width unquote('min(144px, 100%)')
+      .marginCss {
+        min-width 100%
+      }
+    }
+    .bannerItemCss--selectTimeSlot, .bannerItemCss--selectMonthDate {
+      min-width unquote('min(320px, 100%)')
+      .marginCss {
+        min-width 100%
+      }
+    }
+    .marginCss {
+      max-width 100%
+    }
+    :deep(.el-input), :deep(.el-select), :deep(.el-cascader) {
+      min-width unquote('min(144px, 100%)')
+      max-width 100%
+    }
+    :deep(.el-date-editor) {
+      min-width unquote('min(320px, 100%)')
+      max-width 100%
+    }
+    .infoNumCss {
+      .infoNumTitleCss {
+        width auto
+        padding 0 8px
+        font-size 13px !important
+      }
+      .numUnitAndInfoCss {
+        .numCss {
+          font-size 18px !important
+        }
+        .unitCss, .infoCss {
+          font-size 13px !important
+        }
+      }
+    }
+    .switchContentCss .switchTitleCss {
+      width auto
+      padding 0 8px
+      font-size 13px
+    }
   }
 }
 </style>

@@ -1,6 +1,7 @@
 package dao
 
 import (
+	migration "alarm/internal/migration"
 	"fmt"
 	"time"
 
@@ -141,15 +142,37 @@ func ValidateReliabilitySchema(db *gorm.DB) error {
 	return nil
 }
 
-// AutoMigrateReliabilitySchema 使用 GORM 创建告警可靠投递所需的表和索引。
-// 服务启动时调用，避免依赖人工执行 SQL。
+// AutoMigrateReliabilitySchema 使用 GORM 创建缺失的告警可靠投递表和索引。
+// 已有表只做结构检查，避免启动告警程序时修改生产库旧表。
 func AutoMigrateReliabilitySchema(db *gorm.DB) error {
 	if db == nil {
 		return fmt.Errorf("alarm database is nil")
 	}
-	return db.AutoMigrate(
+	if err := migration.CreateMissingTablesAndValidateExisting(db,
 		&alarmmodel.AlarmEventInbox{},
 		&alarmmodel.AlarmNotificationDelivery{},
 		&commonmodel.AlarmDataRecord{},
-	)
+	); err != nil {
+		return err
+	}
+	return validateReliabilityIndexes(db)
+}
+
+func validateReliabilityIndexes(db *gorm.DB) error {
+	requiredIndexes := []struct {
+		model interface{}
+		name  string
+	}{
+		{&alarmmodel.AlarmEventInbox{}, "uni_alarm_event_inbox_event"},
+		{&alarmmodel.AlarmNotificationDelivery{}, "uni_alarm_delivery_target"},
+		{&alarmmodel.AlarmNotificationDelivery{}, "idx_alarm_delivery_due"},
+		{&alarmmodel.AlarmNotificationDelivery{}, "idx_alarm_delivery_lifecycle"},
+		{&commonmodel.AlarmDataRecord{}, "uni_alarm_record_lifecycle"},
+	}
+	for _, index := range requiredIndexes {
+		if !db.Migrator().HasIndex(index.model, index.name) {
+			return fmt.Errorf("required alarm index %s is unavailable; existing tables are not changed automatically", index.name)
+		}
+	}
+	return nil
 }

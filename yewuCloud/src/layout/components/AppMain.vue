@@ -27,7 +27,8 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
-  overflow: hidden;
+  // 页面超过可用窗口时允许滚动，避免低分辨率或放大后按钮被裁掉。
+  overflow: auto;
   display: flex;
   flex-direction: column;
 }

@@ -5,10 +5,12 @@ import (
 	"dicloud/models/enum"
 	"dicloud/pkg/cache"
 	"dicloud/pkg/common"
+	"dicloud/pkg/passwordpolicy"
 	"dicloud/util"
 	nacosutil "dicloud/util/nacos"
 	"dicloud/util/opengauss"
 	"dicloud/util/redisutil"
+	"log"
 	"strconv"
 	"time"
 
@@ -17,7 +19,8 @@ import (
 )
 
 func InitDB() error {
-	_, err := migration.Initialize()
+	// 认证服务是唯一负责建表和增量迁移的后端进程。
+	_, err := migration.InitializeAndMigrate()
 	return err
 }
 
@@ -34,15 +37,30 @@ func system_CheckThread() {
 
 func main() {
 
-	util.Chdir("/var/lib/dicloud")
+	if err := util.Chdir("/var/lib/dicloud"); err != nil {
+		panic("切换认证服务工作目录失败: " + err.Error())
+	}
 	// util.Chdir("E:/Files/WorkSpace/Visual Studio Code/dicloud")
 	//util.Chdir("/app")
 
-	/* 配置管理器 */
-	util.InitViper("auth")
+	/* 认证服务只读取 auth.yml，避免运行环境覆盖服务器配置。 */
+	if err := util.InitViperFileOnly("auth"); err != nil {
+		panic("读取认证服务配置失败: " + err.Error())
+	}
+	// 从本服务的 auth.yml 读取季度规则，不使用环境变量覆盖安全配置。
+	if err := passwordpolicy.LoadFile(viper.ConfigFileUsed()); err != nil {
+		panic("加载季度密码策略失败: " + err.Error())
+	}
 
 	/* 日志 */
 	common.InitLog(enum.SERVER_LOG)
+	log.Printf("[AUTH] 已加载配置文件: %s", viper.ConfigFileUsed())
+	log.Printf(
+		"[AUTH] 短信配置: simulate=%t, url=%s, timeoutSeconds=%d",
+		viper.GetBool("sms.login.simulate"),
+		viper.GetString("sms.login.url"),
+		viper.GetInt("sms.login.timeoutSeconds"),
+	)
 
 	/* 初始化数据库连接 */
 	if err := InitDB(); err != nil {

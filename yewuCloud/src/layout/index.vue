@@ -123,11 +123,6 @@ export default {
       }
     }
   },
-  mounted() {
-    if (document.documentElement.clientWidth < 1000) {
-      this.bannerHeight = '20vw'
-    }
-  },
   methods: {
     handleClickOutside() {
       this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
@@ -146,6 +141,8 @@ export default {
   @import "../styles/variables.styl";
 
   .app-wrapper {
+    // 页头、侧栏和固定导航共用高度，窄屏时不再各自使用不同的固定值。
+    --business-banner-height: 3.5417vw;
     clearfix();
     display: flex;
     flex-direction: column;
@@ -190,8 +187,16 @@ export default {
   .app-wrapper :deep(.main-container) {
     flex: 1;
     min-height: 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
+  }
+
+  .app-wrapper :deep(.sidebar-container) {
+    // 覆盖旧 #app 侧栏固定定位规则，确保页头高度只扣除一次。
+    margin-top: 0 !important;
+    top: var(--business-banner-height) !important;
+    height: calc(100% - var(--business-banner-height)) !important;
   }
 
   .app-wrapper--jsc :deep(.app-main) {
@@ -221,11 +226,17 @@ export default {
 
   .fixed-header {
     position: fixed;
-    top: 0;
+    top: var(--business-banner-height);
     right: 0;
     z-index: 9;
     width: calc(100% - 185px);
     transition: width 0.28s;
+  }
+
+  @media (max-width: 1280px) {
+    .app-wrapper {
+      --business-banner-height: 52px;
+    }
   }
 
   .hideSidebar .fixed-header {

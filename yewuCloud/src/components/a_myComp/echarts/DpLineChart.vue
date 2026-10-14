@@ -7,7 +7,7 @@
 import resize from './mixins/resize.js'
 import { markRaw } from 'vue'
 import { linearGradientColor, normalizeSeriesItem } from '@/utils/echarts-gradient.js'
-import { safeEchartsResize, safeEchartsSetOption } from '@/utils/echarts-safe.js'
+import { safeEchartsSetOption } from '@/utils/echarts-safe.js'
 
 export default {
   mixins: [resize],
@@ -134,9 +134,7 @@ export default {
   },
   methods: {
     safeChartResize() {
-      if (!safeEchartsResize(this.chart, document.getElementById(this.id))) {
-        this.reSetOption()
-      }
+      this.$_scheduleChartResize()
     },
     buildSeries() {
       const source = this.chartData.series || []
@@ -324,7 +322,7 @@ export default {
       safeEchartsSetOption(this.chart, this.option, { notMerge: true })
     },
     initChart() {
-      const el = document.getElementById(this.id)
+      const el = this.$el
       if (!el) {
         return
       }

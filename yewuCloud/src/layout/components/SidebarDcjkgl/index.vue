@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :class="{'has-logo':showLogo}" :style="{'height': height}">
+    <div class="sidebar-body" :class="{'has-logo':showLogo}">
       <logo v-if="showLogo" :collapse="isCollapse" />
       <el-scrollbar>
         <el-menu
@@ -38,11 +38,6 @@ const DCJKGL_ROOT_PATHS = ['/jkztjc', '/lssjcx', '/gjxx', '/yjxx']
 
 export default {
   components: { SidebarItem, Logo },
-  data() {
-    return {
-      height: '2000px'
-    }
-  },
   computed: {
     ...mapGetters([
       'permission_routes',
@@ -66,9 +61,6 @@ export default {
       return !this.sidebar.opened
     }
   },
-  created() {
-    this.height = document.documentElement.clientHeight - 60 + 'px'
-  },
   methods: {
     handleMenuSelect(index) {
       const path = String(index || '')
@@ -81,9 +73,19 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-// 业务侧栏规则不覆盖采集云表格和下拉框的原生横向滚动。
-body:not(.collection-cloud-active) .el-scrollbar__wrap {
-  overflow-x: hidden;
+<style lang="stylus" scoped>
+// 使用侧栏实际可用高度，窗口或缩放变化后由浏览器自动重新计算。
+.sidebar-body {
+  height: 100%;
+  :deep(.el-scrollbar) {
+    height: 100%;
+  }
+  &.has-logo :deep(.el-scrollbar) {
+    height: calc(100% - 50px);
+  }
+  // 仅禁止侧栏横向滚动，避免影响业务页面的表格和下拉框。
+  :deep(.el-scrollbar__wrap) {
+    overflow-x: hidden;
+  }
 }
 </style>

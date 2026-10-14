@@ -141,10 +141,10 @@ func ConnectRoute(router *gin.Engine) *gin.Engine {
 
 		/* 通用数据导入接口 */
 		business.POST("/commondata/import",
-			// middleware.VerifyMiddleware("commondata:import", 1), middleware.SystemLogMiddleware("导入平台通用配置"),
+			middleware.VerifyMiddleware("commondata:import", 1), middleware.SystemLogMiddleware("导入平台通用配置"),
 			commonDataCtrler.ImportCommonData)
 		business.POST("/commondata/delete",
-			// middleware.VerifyMiddleware("commondata:import", 1), middleware.SystemLogMiddleware("删除平台通用配置"),
+			middleware.VerifyMiddleware("commondata:import", 1), middleware.SystemLogMiddleware("删除平台通用配置"),
 			commonDataCtrler.DeleteCommonDataByEquipmentId)
 
 		/* 设备健康度判断标准接口 */

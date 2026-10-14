@@ -1,4 +1,5 @@
 import store from '@/store'
+import router from '@/router'
 import { getToken } from '@/utils/auth.js'
 import { notifyBackendLogout } from '@/utils/session-logout'
 
@@ -13,11 +14,6 @@ function currentRedirectPath() {
     return '/'
   }
   return hashPath
-}
-
-function loginUrl(redirectPath) {
-  const redirect = encodeURIComponent(redirectPath || '/')
-  return `${window.location.origin}${window.location.pathname}#/login?redirect=${redirect}`
 }
 
 export function expireSession(options = {}) {
@@ -40,13 +36,15 @@ export function expireSession(options = {}) {
     notifyBackendLogout(getToken())
   }
 
-  expirationPromise = Promise.resolve(store.dispatch('user/sessionTimeout'))
+  expirationPromise = Promise.resolve()
+    .then(() => store.dispatch('user/sessionTimeout'))
     .catch(error => {
       console.error('[session] clear session state failed', error)
     })
-    .then(() => {
-      // Full navigation releases stale route records and keep-alive instances.
-      window.location.replace(loginUrl(redirectPath))
+    .then(() => router.replace({ path: '/login', query: { redirect: redirectPath || '/' }}))
+    .finally(() => {
+      // 只合并当前正在执行的退出操作，重新登录后允许再次退出。
+      expirationPromise = null
     })
 
   return expirationPromise

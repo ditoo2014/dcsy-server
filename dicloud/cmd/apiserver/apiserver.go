@@ -54,7 +54,7 @@ func main() {
 
 	/* 初始化数据库连接 */
 	if err := InitDB(); err != nil {
-		panic("自动迁移数据库失败: " + err.Error())
+		panic("数据库连接或结构校验失败: " + err.Error())
 	}
 
 	/* 初始化Redis */

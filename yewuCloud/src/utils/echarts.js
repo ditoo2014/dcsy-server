@@ -15,6 +15,7 @@ import {
   VisualMapComponent
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
+import { LabelLayout } from 'echarts/features'
 
 echarts.use([
   BarChart,
@@ -30,6 +31,8 @@ echarts.use([
   GeoComponent,
   MarkLineComponent,
   GraphicComponent,
+  // 按需构建需要注册标签布局，否则柱状图 hideOverlap 不会生效。
+  LabelLayout,
   CanvasRenderer
 ])
 

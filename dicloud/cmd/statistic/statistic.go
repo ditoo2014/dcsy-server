@@ -28,7 +28,7 @@ var serverName string
 
 func InitDB() {
 	if _, err := migration.Initialize(); err != nil {
-		log.Fatalf("[STATISTIC] 自动迁移数据库失败: %v", err)
+		log.Fatalf("[STATISTIC] 数据库连接或结构校验失败: %v", err)
 	}
 }
 

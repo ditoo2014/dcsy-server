@@ -1,8 +1,10 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -27,6 +29,24 @@ func InitViper(filename string) error {
 	// 启用配置
 	err := viper.ReadInConfig()
 	if err != nil {
+		log.Println("配置文件读取失败", err)
+		return err
+	}
+
+	return nil
+}
+
+// InitViperFileOnly 仅从当前工作目录下的 configs 目录读取配置，不使用环境变量覆盖。
+// 认证服务使用该入口，确保服务器上的 auth.yml 是唯一配置来源。
+func InitViperFileOnly(filename string) error {
+	workDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("获取工作目录失败: %w", err)
+	}
+
+	configFile := filepath.Join(workDir, "configs", filename+".yml")
+	viper.SetConfigFile(configFile)
+	if err := viper.ReadInConfig(); err != nil {
 		log.Println("配置文件读取失败", err)
 		return err
 	}

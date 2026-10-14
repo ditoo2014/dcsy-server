@@ -5,6 +5,7 @@
 <script>
 import { markRaw } from 'vue'
 import { loadBusinessMap } from '@/utils/amap-loader'
+import { createContainerResizeWatcher } from '@/utils/container-resize.js'
 
 let mapDrivingInstanceCounter = 0
 
@@ -38,10 +39,27 @@ export default {
     }
   },
   mounted() {
+    // 流转地图跟随弹窗实际大小，不再依赖固定延时判断容器是否就绪。
+    this.__mapSizeWatcher = createContainerResizeWatcher(
+      () => this.$el,
+      () => {
+        if (!this.map || typeof this.map.resize !== 'function') return false
+        this.map.resize()
+        return true
+      }
+    )
+    this.__mapSizeWatcher.start()
     this.$nextTick(() => this.initMap())
+  },
+  activated() {
+    this.__mapSizeWatcher && this.__mapSizeWatcher.start()
+  },
+  deactivated() {
+    this.__mapSizeWatcher && this.__mapSizeWatcher.stop()
   },
   beforeUnmount() {
     this.mapDisposed = true
+    this.__mapSizeWatcher && this.__mapSizeWatcher.stop()
     if (this.resizeTimer) {
       clearTimeout(this.resizeTimer)
       this.resizeTimer = null
@@ -67,11 +85,12 @@ export default {
           labelzIndex: 130,
           pitch: 0
         }))
+        this.__mapSizeWatcher && this.__mapSizeWatcher.schedule()
         this.drawPositions()
         this.resizeTimer = setTimeout(() => {
           this.resizeTimer = null
           if (this.map) {
-            this.map.resize()
+            this.__mapSizeWatcher && this.__mapSizeWatcher.schedule()
             this.drawPositions()
           }
         }, 300)

@@ -1,4 +1,4 @@
-# DCSY auth 服务配置。账号、密码和密钥可直接在本文件中配置，环境变量仍可用于覆盖普通配置项。
+# DCSY auth 服务配置。认证服务只读取本文件，不使用环境变量覆盖。
 rsa:
   # 用于解密数据库、Redis、RocketMQ 等配置密文，以及解密前端提交的登录密码。
   privateKey: "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKYAq0FcC3bovzcn8R3g/Sxi/bDbwNwyor2gA/544iNGnOWh5wTEXUCLD0IOD62mIcMDuVq5iQI0Z8zpgzGx6yZ+ukOKzh7r1Ffx+WbGlFJ+ZBGjdk/qM+taWwpgiFoJm77louSD+CEBxJFeK9elptpn1a9F9FyAGaBuxjgfwZ9hAgMBAAECgYEAiZz6W0drtZqCkb3J06QlHPu/JTM3cROE97/EL9uUU/wAqxiJQ9lpGM1uy6qOcrzLNjhLGxu9qZc6CZP3D2ZX8Y4Tb1fFtiH09tKdCDQsWZGuJfI2SPEJrXkTZOhLTIBB3OrtnCELDxEqmXyMqrrbOsoDQ/BKnH6YhUCgyy9KqAECQQDb2bRYGBY+a0HfhdFdvnXLpUCnr+WLi2wo1NjiJmE4KMrwloa5LcdfR+elItKMM3bEwL18IBOxfAnETOr/pZAhAkEAwUxRHbf9ZfnCwrhKZwTGvDybFegqxRqx/FEJd2htq1KAGBM3p5OXUaFLw6CNh3VBwG2XmPQVC2CN5p0AIWMnQQJAf0pQccUYc/F0BXAcZbOVzmASzEQ6mo4SBJ4gKOhh17s+rQfqXyNTUSZ3x5Qe5dASTx7tVwXXgSa5HPAQDA6XIQJAbbv6jMmH1F1+4HYo3uUKQZCSZlRf+3eVNW131070e38hcwlt3fdevxu3XD6IOi8p/aj5l/5w9/1/cT0N9uZIQQJBAKNitIBEt43ugyBQnnzJi+HpmQ8Kcn9mnaxnABc3zymAURrzB11MCIK5oxvrKMn5wEzAMtEprcYsQG7qpGIonvw="
@@ -11,7 +11,7 @@ server:
   useNacos: false
   useSpringCloudGateway: false
 
-# 启用 useNacos 时使用以下注册中心配置；账号密码也可由环境变量覆盖。
+# 启用 useNacos 时使用以下注册中心配置。
 nacos:
   server:
     host:
@@ -36,8 +36,8 @@ redis:
 sms:
   login:
     # false：调用真实短信接口；true：使用模拟验证码，不调用外部短信接口。
-    # 临时测试建议通过环境变量 AUTH_SMS_LOGIN_SIMULATE=true 覆盖，生产环境应保持 false。
-    simulate: true
+    # 生产环境保持 false；临时联调时可手动修改为 true，完成后应立即恢复。
+    simulate: false
     # 模拟模式下使用的固定六位验证码；仅在 simulate=true 时生效。
     simulateCode: "000000"
     url: https://security.sctower.cn/gapi/open-api/sms/sendmessage
@@ -48,6 +48,15 @@ sms:
 
 # 连续登录失败限制，时间单位均为分钟。
 security:
+  # 季度改密配置须与 business.yml、tolink.yml 保持一致；修改后重启服务。
+  password:
+    # true：每个自然季度强制改密；false：关闭季度限制。
+    # 管理员创建或重置密码后的首次改密要求仍然保留。
+    enabled: true
+    # 每年 1月、4月、7月、10月的 1日零点进入新季度，不是修改后满90天。
+    mode: calendar_quarter
+    # 按北京时间判断；程序内置时区数据。本配置不使用环境变量覆盖。
+    timezone: Asia/Shanghai
   login:
     maxFailures: 5
     failureWindowMinutes: 15

@@ -7,6 +7,7 @@ import (
 	"dicloud/models/enum"
 	"dicloud/pkg/cache"
 	"dicloud/pkg/common"
+	"dicloud/pkg/passwordpolicy"
 	"dicloud/util"
 	nacosutil "dicloud/util/nacos"
 	"dicloud/util/opengauss"
@@ -60,7 +61,13 @@ func main() {
 	//util.Chdir("/app")
 
 	/* 配置管理器 */
-	util.InitViper("tolink")
+	if err := util.InitViper("tolink"); err != nil {
+		panic("读取采集服务配置失败: " + err.Error())
+	}
+	// 从本服务的 tolink.yml 读取季度规则，环境变量不参与季度规则。
+	if err := passwordpolicy.LoadFile(viper.ConfigFileUsed()); err != nil {
+		panic("加载季度密码策略失败: " + err.Error())
+	}
 
 	/* 日志 */
 	common.InitLog(enum.SERVER_LOG)

@@ -108,7 +108,11 @@ export default {
 <style scoped>
 .pagination-container {
   background: #fff;
-  margin-top: 0
+  margin-top: 0;
+  /* 分页栏属于可收缩内容区，不让固定宽度的按钮撑大整个页面。 */
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
 }
 .pagination-container.hidden {
   display: none;

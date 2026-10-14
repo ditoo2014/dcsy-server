@@ -1,7 +1,6 @@
 import store from '@/store'
 
-const { body } = document
-const WIDTH = 992 // refer to Bootstrap's responsive design
+const WIDTH = 992 // 以浏览器可用的 CSS 像素判断侧栏模式，兼容分辨率和页面缩放。
 
 export default {
   watch: {
@@ -13,30 +12,31 @@ export default {
   },
   beforeMount() {
     window.addEventListener('resize', this.$_resizeHandler)
+    document.addEventListener('visibilitychange', this.$_resizeHandler)
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.$_resizeHandler)
+    document.removeEventListener('visibilitychange', this.$_resizeHandler)
   },
   mounted() {
-    const isMobile = this.$_isMobile()
-    if (isMobile) {
-      store.dispatch('app/toggleDevice', 'mobile')
-      store.dispatch('app/closeSideBar', { withoutAnimation: true })
-    }
+    this.$_resizeHandler()
   },
   methods: {
     // use $_ for mixins properties
     // https://vuejs.org/v2/style-guide/index.html#Private-property-names-essential
     $_isMobile() {
-      const rect = body.getBoundingClientRect()
-      return rect.width - 1 < WIDTH
+      // 页面内容可能具有最小宽度，不能用 body 的内容宽度代替真实视口。
+      return document.documentElement.clientWidth < WIDTH
     },
     $_resizeHandler() {
       if (!document.hidden) {
         const isMobile = this.$_isMobile()
-        store.dispatch('app/toggleDevice', isMobile ? 'mobile' : 'desktop')
+        const device = isMobile ? 'mobile' : 'desktop'
+        const deviceChanged = this.device !== device
+        store.dispatch('app/toggleDevice', device)
 
-        if (isMobile) {
+        // 仅在进入窄屏模式时收起侧栏，避免移动窗口时关掉用户刚打开的菜单。
+        if (isMobile && deviceChanged) {
           store.dispatch('app/closeSideBar', { withoutAnimation: true })
         }
       }

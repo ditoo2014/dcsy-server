@@ -11,6 +11,7 @@
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml"
   },
   "dependencies": {
+    "@ckpack/vue-color": "^1.6.0",
     "@element-plus/icons-vue": "^2.3.2",
     "@kjgl77/datav-vue3": "^1.7.4",
     "@videojs-player/vue": "^1.0.0",
@@ -32,6 +33,7 @@
     "path-to-regexp": "^8.4.2",
     "pinia": "^3.0.3",
     "screenfull": "^6.0.2",
+    "sortablejs": "^1.15.7",
     "tree-transfer-vue3": "^1.2.2",
     "vue": "3.5.41",
     "vue-router": "^4.6.4"

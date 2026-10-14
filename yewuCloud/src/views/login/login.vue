@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="loginViewportCss">
     <div v-if="!isApp" :style="{height:screeHeight+'px'}">
       <div v-if="showDcsyLogin" class="loginPageCss">
         <div class="dcsyCss">
@@ -76,7 +76,7 @@ import Cookies from 'js-cookie'
 import config from '@/config.js'
 import { PLATFORM, isDcsyLoginUi, isDcsyMainUi } from '@/constants/platform'
 import { validUsername } from '@/utils/validate' // 账号密码表单验证
-import { setUsername, setToken, setMydb, setUserId } from '@/utils/auth.js'
+import { getToken, setUsername, setToken, setMydb, setUserId } from '@/utils/auth.js'
 import { parseUserInfo } from '@/utils/safe-json.js'
 import { sendLoginSmsCode } from '@/api/user.js'
 import { statistictaskPlan } from '@/api/lldcsy.js'
@@ -153,7 +153,10 @@ export default {
       }
       this.isApp = false
     }
-    setTimeout(() => {
+    // 独立监听尺寸变化，避免覆盖其他页面已经注册的 resize 处理。
+    window.addEventListener('resize', this.updateScreenHeight)
+    this.updateScreenHeight()
+    this._loginInitTimer = setTimeout(() => {
       this.init()
       if (this.platform === PLATFORM.DCSY_INTRANET && this.port === '80') {
         // this.zfy()
@@ -162,14 +165,19 @@ export default {
   },
   beforeUnmount() {
     this.clearSmsTimer()
+    clearTimeout(this._loginInitTimer)
+    window.removeEventListener('resize', this.updateScreenHeight)
+    window.removeEventListener('message', this.handleIframeMessage)
   },
   methods: {
+    updateScreenHeight() {
+      this.screeHeight = document.documentElement.clientHeight
+    },
+    handleIframeMessage(event) {
+      this.iframeData = event.data
+      this.getMsg()
+    },
     init() {
-      window.onresize = () => {
-        return (() => {
-          this.screeHeight = document.documentElement.clientHeight
-        })()
-      }
       const iframeDoc = this.$refs.iframeRef
       if (iframeDoc) {
         const iframeWid = iframeDoc.contentWindow
@@ -187,11 +195,7 @@ export default {
           iframeWid.postMessage({ apTitle }, '*')
         }
 
-        const This = this
-        window.addEventListener('message', e => {
-          This.iframeData = e.data
-          This.getMsg()
-        })
+        window.addEventListener('message', this.handleIframeMessage)
       }
     },
     validateAccountPassword() {
@@ -317,10 +321,17 @@ export default {
     },
     /** 登录成功后先注入动态路由，再跳转到当前账号实际可访问的页面 */
     async navigateAfterLogin() {
+      const requestedToken = getToken()
       localStorage.removeItem('routerPath')
 
       const roleInfo = await this.$store.dispatch('user/getInfo')
+      if (getToken() !== requestedToken) return
+      if (roleInfo.passwordChangeRequired) {
+        await this.$router.replace({ path: '/modifyPas' })
+        return
+      }
       const accessRoutes = await this.$store.dispatch('permission/generateRoutes', roleInfo)
+      if (getToken() !== requestedToken) return
       accessRoutes.forEach(route => router.addRoute(route))
       markDynamicRoutesReady()
 
@@ -451,6 +462,11 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.loginViewportCss {
+  height 100vh
+  overflow auto
+  background-color #020B42
+}
 .loginPageCss {
   width 100%
   height 100%
@@ -489,10 +505,12 @@ export default {
   }
 }
 .dcsyCss {
+  position relative
   width 100%
   height 100%
   background-color #020B42
 }
+
 .dcsyContentCss {
   position absolute
   top 12vw
@@ -578,6 +596,73 @@ export default {
         margin auto
       }
     }
+  }
+}
+// 窄屏使用原版登录卡片与颜色，仅保证输入框、验证码和登录按钮能完整显示。
+@media (max-width: 1280px) {
+  .dcsyCss {
+    min-height 420px
+  }
+  .dcsyContentCss {
+    top 80px
+    right auto
+    left 50%
+    transform translateX(-50%)
+    width 384px
+    max-width calc(100% - 24px)
+    height 310px
+    .dcsyTitleCss {
+      top 24px
+      width 90%
+      height 36px
+      display flex
+      align-items center
+      justify-content center
+      font-size 24px
+      line-height 36px
+      letter-spacing 3px
+      white-space nowrap
+      .dcsyLogoCss {
+        float none
+        flex-shrink 0
+        margin-right 12px
+        width 24px
+        height 36px
+      }
+      .dcsyTitleMsgCss {
+        float none
+      }
+    }
+    .dcsyInputAllCss {
+      top 82px
+      width 72%
+      .dcsyInputContentCss {
+        margin-top 16px
+        .dcsyPasswordInputCss, .dcsySmsInputCss {
+          margin-top 12px
+        }
+        .dcsySmsInputCss {
+          gap 6px
+          .el-input {
+            min-width 0
+          }
+        }
+      }
+      .dcsyButContentCss {
+        margin-top 20px
+      }
+    }
+  }
+}
+
+@media (max-height: 650px) {
+  .dcsyCss {
+    // 低高度窗口可向下滚动，卡片不再压住底部登录按钮。
+    min-height 420px
+  }
+  .dcsyContentCss {
+    top 40px
+    min-height 310px
   }
 }
 .oldWrapper {

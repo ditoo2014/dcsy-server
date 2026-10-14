@@ -4,8 +4,10 @@ import (
 	"dicloud/internal/auth/dto"
 	entity "dicloud/models/model"
 	"dicloud/util/gormutil"
+	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,6 +16,9 @@ import (
 type UserDAO struct {
 	db *gorm.DB
 }
+
+// ErrPasswordChanged 表示校验之后账号凭证已变化，调用方必须重新验证，不能覆盖并发改密结果。
+var ErrPasswordChanged = errors.New("账号凭证已变化，请重新登录后重试")
 
 // NewUserDAO 创建新的 UserDAO 实例
 func NewUserDAO(ctx *gin.Context) *UserDAO {
@@ -95,9 +100,30 @@ func (dao *UserDAO) ExistNameAndToken(username string, token string) (entity.Use
 
 func (dao *UserDAO) Update(userTem entity.User) (entity.User, bool) {
 	var dbUser entity.User
-
-	// 更新用户,所有非空字段更新
-	if err := dao.db.Model(&userTem).Updates(&userTem).Error; err != nil {
+	if userTem.ID == 0 {
+		return dbUser, false
+	}
+	// 普通资料更新采用明确白名单，不能改写密码、令牌、超管及密码安全状态。
+	// 继续沿用原接口忽略零值的语义，避免未提交的资料被清空。
+	profile := entity.User{
+		TrueName: userTem.TrueName,
+		Phone:    userTem.Phone,
+		Email:    userTem.Email,
+		ParentId: userTem.ParentId,
+		PlatName: userTem.PlatName,
+		PlatType: userTem.PlatType,
+		Baned:    userTem.Baned,
+		CorpIds:  userTem.CorpIds,
+	}
+	err := dao.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&entity.User{}).Where("id = ?", userTem.ID).
+			Updates(&profile)
+		if result.Error != nil {
+			return result.Error
+		}
+		return tx.Where("id = ?", userTem.ID).First(&dbUser).Error
+	})
+	if err != nil {
 		log.Printf("Fail to Update user: %v", err)
 		return dbUser, false
 	}
@@ -106,13 +132,64 @@ func (dao *UserDAO) Update(userTem entity.User) (entity.User, bool) {
 
 func (dao *UserDAO) UpdateLogin(userTem entity.User) (entity.User, bool) {
 	var dbUser entity.User
-	// 更新用户token
-	if err := dao.db.Model(&userTem).Updates(&userTem).Error; err != nil {
+	if userTem.ID == 0 || userTem.Password == "" || userTem.Token == "" {
+		return dbUser, false
+	}
+	// 登录只能更新会话信息；旧密码条件防止验证后并发改密又写回旧令牌。
+	err := dao.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&entity.User{}).
+			Where("id = ? AND password = ?", userTem.ID, userTem.Password).
+			Updates(map[string]any{
+				"token":       userTem.Token,
+				"last_ip":     gorm.Expr("login_ip"),
+				"login_ip":    userTem.LoginIp,
+				"total_login": gorm.Expr("COALESCE(total_login, 0) + 1"),
+			})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return ErrPasswordChanged
+		}
+		if err := tx.Where("id = ?", userTem.ID).First(&dbUser).Error; err != nil {
+			return err
+		}
+		if dbUser.Token != userTem.Token {
+			return ErrPasswordChanged
+		}
+		return nil
+	})
+	if err != nil {
 		// 更新失败
 		log.Printf("Failed to update user login data: %v", err)
 		return dbUser, false
 	}
 	return dbUser, true
+}
+
+// ChangePassword 原子更新密码安全状态并失效数据库令牌。
+// ID、旧密码和旧令牌必须仍匹配，防止并发登录、改密或管理员重置互相覆盖。
+func (dao *UserDAO) ChangePassword(user entity.User, expectedHash string, changedAt time.Time, force bool) error {
+	if user.ID == 0 || expectedHash == "" || user.Password == "" || changedAt.IsZero() {
+		return fmt.Errorf("修改密码参数不完整")
+	}
+	return dao.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&entity.User{}).
+			Where("id = ? AND password = ? AND COALESCE(token, '') = ?", user.ID, expectedHash, user.Token).
+			Updates(map[string]any{
+				"password":             user.Password,
+				"password_changed_at":  changedAt.UTC(),
+				"must_change_password": force,
+				"token":                "",
+			})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return ErrPasswordChanged
+		}
+		return nil
+	})
 }
 
 func (dao *UserDAO) Delete(userTem entity.User) bool {

@@ -257,15 +257,18 @@ onUnmounted(() => {
 
 .filter-item {
   width: 180px;
+  max-width: 100%;
 }
 
 .filter-keyword {
   width: 260px;
+  max-width: 100%;
 }
 
 .pager {
   margin-top: 12px;
   display: flex;
+  min-width: 0;
   justify-content: flex-start;
 }
 

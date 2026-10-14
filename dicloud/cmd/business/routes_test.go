@@ -26,3 +26,23 @@ func TestImageUploadRequiresLogin(t *testing.T) {
 		t.Fatalf("匿名上传未在登录校验处拦截：%s", recorder.Body.String())
 	}
 }
+
+// 通用配置的导入和删除同样必须先认证，防止绕过账号改密限制直接写入数据。
+func TestCommonDataRequiresLogin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := ConnectRoute(gin.New())
+	for _, path := range []string{"/business/commondata/import", "/business/commondata/delete"} {
+		recorder := httptest.NewRecorder()
+		router.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, path, nil))
+		var result struct {
+			Code    int    `json:"code"`
+			Message string `json:"msg"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Code != 400 || result.Message != "auth header格式错误" {
+			t.Fatalf("%s 的匿名请求没有被提前拦截: %s", path, recorder.Body.String())
+		}
+	}
+}

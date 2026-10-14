@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Layout from '@/layout'
+import { resetDynamicRoutesReady } from '@/utils/dynamic-route-state.js'
 // import { TTDC_TEMPLATE_PERMISSIONS } from '@/collection/constants/permissions.js'
 
 // 保留原业务云的菜单图标；路由精简不应改变原来的侧栏样式。
@@ -16,11 +17,13 @@ export const constantRoutes = [
   { path: '/login', component: () => import('@/views/login/login.vue'), hidden: true },
   { path: '/modifyPas', component: () => import('@/views/personMana/modifyPas.vue'), hidden: true },
   { path: '/dcDetail', component: () => import('@/views/lldcsy/dcjkgl/dcDetail.vue'), name: 'dcDetail', hidden: true },
+  // 数据接入的“管理”在新窗口打开，固定注册以支持刷新和重新登录。
+  { path: '/equipManaPage', component: () => import('@/views/equipMana/equipManaPage.vue'), name: 'equipManaPage', hidden: true, meta: { title: '电池管理' } },
   {
     path: '/collection',
     component: () => import('@/collection/layouts/MainLayout.vue'),
     hidden: true,
-    meta: { title: '采集云平台', collectionCloud: true },
+    meta: { title: '采集云平台', collectionCloud: true, routeContainer: true },
     children: [
       {
         path: '',
@@ -70,24 +73,24 @@ export const asyncRoutes = [
   dcsyPage('/jkztjc', 'jkztjc', '健康状态监测', () => import('@/views/lldcsy/dcjkgl/jkztjc.vue'), 'dcjkgl'),
   dcsyPage('/lssjcx', 'lssjcx', '历史数据查询', () => import('@/views/lldcsy/dcjkgl/lssjcx.vue'), 'dcjkgl'),
   {
-    path: '/gjxx', component: Layout, redirect: '/gjxxssgj', dcjkgl: true,
-    meta: { title: '告警信息', icon: 'alarmLog' },
+    path: '/gjxx', name: 'layout-gjxx', component: Layout, redirect: '/gjxxssgj', dcjkgl: true,
+    meta: { title: '告警信息', icon: 'alarmLog', routeContainer: true },
     children: [
       dcsyChild('/gjxxssgj', 'gjxxssgj', '实时告警', () => import('@/views/lldcsy/dcjkgl/gjxxssgj.vue'), 'dcjkgl'),
       dcsyChild('/gjxxlsgj', 'gjxxlsgj', '历史告警', () => import('@/views/lldcsy/dcjkgl/gjxxlsgj.vue'), 'dcjkgl')
     ]
   },
   {
-    path: '/yjxx', component: Layout, redirect: '/yjxxssyj', dcjkgl: true,
-    meta: { title: '预警信息', icon: 'warning' },
+    path: '/yjxx', name: 'layout-yjxx', component: Layout, redirect: '/yjxxssyj', dcjkgl: true,
+    meta: { title: '预警信息', icon: 'warning', routeContainer: true },
     children: [
       dcsyChild('/yjxxssyj', 'yjxxssyj', '实时预警', () => import('@/views/lldcsy/dcjkgl/yjxxssyj.vue'), 'dcjkgl'),
       dcsyChild('/yjxxlsyj', 'yjxxlsyj', '历史预警', () => import('@/views/lldcsy/dcjkgl/yjxxlsyj.vue'), 'dcjkgl')
     ]
   },
   {
-    path: '/jcxxgl', component: Layout, redirect: '/jcxxgl/kfxxgl', jcxxgl: true,
-    meta: { title: '基础信息管理', icon: 'basicmanage' },
+    path: '/jcxxgl', name: 'layout-jcxxgl', component: Layout, redirect: '/jcxxgl/kfxxgl', jcxxgl: true,
+    meta: { title: '基础信息管理', icon: 'basicmanage', routeContainer: true },
     children: [
       dcsyChild('kfxxgl', 'kfxxgl', '库房信息管理', () => import('@/views/lldcsy/jcxxgl/kfxxgl.vue'), 'jcxxgl'),
       dcsyChild('/zdxxgl/index', 'zdxxgl', '站点信息管理', () => import('@/views/lldcsy/jcxxgl/zdxxgl.vue'), 'jcxxgl'),
@@ -125,7 +128,8 @@ export const asyncRoutes = [
 ]
 
 function dcsyPage(path, name, title, component, section) {
-  return { path, component: Layout, [section]: true, children: [dcsyChild('', name, title, component, section)] }
+  // 父路由使用独立名称，退出时可整条移除；页面名称和地址保持原样。
+  return { path, name: `layout-${name}`, component: Layout, meta: { routeContainer: true }, [section]: true, children: [dcsyChild('', name, title, component, section)] }
 }
 
 function dcsyChild(path, name, title, component, section) {
@@ -149,6 +153,8 @@ function collectRouteNames(routes, names = new Set()) {
 const constantRouteNames = collectRouteNames(constantRoutes)
 
 export function resetRouter() {
+  resetDynamicRoutesReady()
+  // 删除具名父路由会同时删除其子页面及分组，避免重新登录匹配旧布局。
   router.getRoutes().forEach(route => {
     if (route.name && !constantRouteNames.has(route.name)) router.removeRoute(route.name)
   })

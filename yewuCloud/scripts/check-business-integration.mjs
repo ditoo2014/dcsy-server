@@ -59,7 +59,9 @@ function mapComponent(file, loadBusinessMap = async () => ({}), AMap = {}) {
   assert.deepEqual(errors, [])
   assert.deepEqual(compileTemplate({ source: descriptor.template.content, filename: file, id: 'map-test' }).errors, [])
   const options = evaluate(descriptor.script.content, {
-    vue: { markRaw: value => value }, '@/utils/amap-loader': { loadBusinessMap }
+    vue: { markRaw: value => value },
+    '@/utils/amap-loader': { loadBusinessMap },
+    '@/utils/container-resize.js': evaluate(read('src/utils/container-resize.js'))
   }, { AMap }).default
   const messages = []
   const state = { ...options.data(), mapMsg: {}, $message: { error: msg => messages.push(msg), warning: msg => messages.push(msg) } }
@@ -110,6 +112,7 @@ await check('区域查询乱序不会恢复旧地图', async () => {
 await check('19 个业务页面都有真实存在的原菜单图标', () => {
   const router = evaluate(read('src/router/index.js'), {
     'vue-router': { createRouter: options => options, createWebHashHistory: () => ({}) },
+    '@/utils/dynamic-route-state.js': { resetDynamicRoutesReady() {} },
     '@/layout': {}, '@/collection/constants/permissions.js': { TTDC_TEMPLATE_PERMISSIONS: {} }
   })
   const leaves = []

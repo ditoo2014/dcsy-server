@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import Cookies from 'js-cookie'
 
 import './styles/pageStyles'
+import './styles/responsive.css'
 import './styles/element-variables.styl'
 
 import App from './App.vue'

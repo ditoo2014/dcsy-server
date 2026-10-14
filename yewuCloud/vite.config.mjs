@@ -37,6 +37,24 @@ export default defineConfig(({ mode }) => {
         '/tolink': { ...apiProxy }
       }
     },
-    build: { outDir: 'dist', assetsDir: 'static', sourcemap: false }
+    build: {
+      outDir: 'dist',
+      assetsDir: 'static',
+      sourcemap: false,
+      // 当前项目包含地图、图表和采集云页面，允许较大的按页面资源包。
+      chunkSizeWarningLimit: 2500,
+      rollupOptions: {
+        onwarn(warning, defaultHandler) {
+          const id = String(warning.id || '').replace(/\\/g, '/')
+          // 只隐藏 VueUse 依赖的 PURE 注释位置警告，其余警告仍按默认方式输出。
+          if (warning.code === 'INVALID_ANNOTATION' &&
+              id.includes('/node_modules/@vueuse/core/') &&
+              warning.message?.includes('#__PURE__')) {
+            return
+          }
+          defaultHandler(warning)
+        }
+      }
+    }
   }
 })

@@ -43,6 +43,7 @@ export default {
 navbarHeight = 2.5vw
 
 .hamburgerAndbreadcrumbCss {
+  display flow-root
   width 100%
   height navbarHeight
   overflow hidden
@@ -60,10 +61,36 @@ navbarHeight = 2.5vw
   }
 }
 .TagsViewContentCss {
-  float left
+  display flow-root
   padding-top 0.468717vw
   width 100%
   border-bottom 1px solid #EAEDF7
   background-color #fff
+}
+
+// 窄屏保持导航可点击、面包屑可读，宽屏仍沿用原版比例。
+@media (max-width: 1280px) {
+  .hamburgerAndbreadcrumbCss {
+    display flex
+    align-items center
+    height 40px
+    .hamburgerContentCss {
+      float none
+      flex 0 0 40px
+      width 40px
+      height 40px
+      line-height 40px
+    }
+    .breadcrumbContainerCss {
+      float none
+      min-width 0
+      overflow-x auto
+      :deep(.appBreadcrumbCss) {
+        font-size 13px
+        line-height 40px
+        white-space nowrap
+      }
+    }
+  }
 }
 </style>

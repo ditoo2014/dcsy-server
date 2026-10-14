@@ -311,6 +311,8 @@ watch(() => route.fullPath, () => {
 
 .breadcrumb-row {
   display: flex;
+  /* 浏览器缩放后允许顶栏自然换行，避免账号信息挤出可见区域。 */
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   min-height: 48px;
@@ -320,6 +322,7 @@ watch(() => route.fullPath, () => {
 
 .sider-trigger {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 36px;
@@ -339,11 +342,15 @@ watch(() => route.fullPath, () => {
 
 .breadcrumb-row :deep(.el-breadcrumb) {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 14px;
 }
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   align-items: center;
   gap: 12px;
   margin-left: auto;
@@ -391,6 +398,15 @@ watch(() => route.fullPath, () => {
   background: #fafafa;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.65);
+  max-width: min(240px, 40vw);
+  min-width: 0;
+}
+
+.user-name > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tags-view {

@@ -6,7 +6,7 @@
 // 多 Y 轴示例 https://echarts.apache.org/examples/zh/editor.html?c=multiple-y-axis
 import resize from './mixins/resize.js'
 import { markRaw } from 'vue'
-import { safeEchartsResize, safeEchartsSetOption, normalizeChartSeries } from '@/utils/echarts-safe.js'
+import { safeEchartsSetOption, normalizeChartSeries } from '@/utils/echarts-safe.js'
 
 const dataZoomLinkGroups = new Map()
 
@@ -159,9 +159,7 @@ export default {
   },
   methods: {
     safeChartResize() {
-      if (!safeEchartsResize(this.chart, document.getElementById(this.id))) {
-        this.reSetOption()
-      }
+      this.$_scheduleChartResize()
     },
     buildDataZoomOption(xAxisType, seriesList) {
       if (!this.enableDataZoom || xAxisType !== 'time') {
@@ -791,7 +789,7 @@ export default {
       this.updateDynamicSymbols()
     },
     initChart() {
-      const dom = document.getElementById(this.id)
+      const dom = this.$el
       this.chart = markRaw(this.$echarts.init(dom))
       this._yAxisSnapshot = null
       this._pendingYAxisCapture = false

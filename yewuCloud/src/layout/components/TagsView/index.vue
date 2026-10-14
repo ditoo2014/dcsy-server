@@ -62,6 +62,9 @@ export default {
     this.initTags()
     this.addTags()
   },
+  beforeUnmount() {
+    document.body.removeEventListener('click', this.closeMenu)
+  },
   methods: {
     isActive(route) {
       return route.path === this.$route.path
@@ -135,11 +138,18 @@ export default {
       this.$router.push({ path: tag.path, query: tag.query })
     },
     openMenu(tag, e) { // 右键点击事件
-      const menuWidth = this.$el.getBoundingClientRect().left // 左侧导航条宽度
-      this.top = e.clientY / 1920 + 5 + 'vw' // 1920为屏幕分辨率
-      this.left = e.clientX - menuWidth + 'px'
+      // 使用事件的视口坐标，避免固定 1920 分辨率换算后右键菜单错位。
+      this.top = `${e.clientY}px`
+      this.left = `${e.clientX}px`
       this.visible = true
       this.selectedTag = tag
+      this.$nextTick(() => {
+        const menu = this.$el.querySelector('.contextmenuCss')
+        if (!menu) return
+        const viewport = document.documentElement
+        this.top = `${Math.max(0, Math.min(e.clientY, viewport.clientHeight - menu.offsetHeight))}px`
+        this.left = `${Math.max(0, Math.min(e.clientX, viewport.clientWidth - menu.offsetWidth))}px`
+      })
     },
     closeMenu() {
       this.visible = false
@@ -151,9 +161,15 @@ export default {
 <style lang="stylus" scoped>
 tagsViewContainerHeight = 2.239583vw
 .tagsViewContainerCss {
+  // 标签过多时横向滚动，避免挤成多行后被固定高度裁掉。
+  display flex
+  overflow-x auto
+  overflow-y hidden
+  white-space nowrap
   width 100%
   height tagsViewContainerHeight
   .tagsViewItemCss {
+    flex-shrink 0
     float left
     padding 0 0.9375vw
     width 8.4375vw
@@ -186,7 +202,7 @@ tagsViewContainerHeight = 2.239583vw
   .contextmenuCss {
     background-color #fff
     z-index 3000
-    position absolute
+    position fixed
     list-style-type none
     padding 5px 0
     border-radius 4px
@@ -200,6 +216,31 @@ tagsViewContainerHeight = 2.239583vw
       cursor pointer
       &:hover {
         background: #eee
+      }
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .tagsViewContainerCss {
+    height 34px
+    .tagsViewItemCss {
+      width 140px
+      height 34px
+      padding 0 12px
+      border-radius 6px 6px 0 0
+      span {
+        display inline-block
+        max-width calc(100% - 18px)
+        overflow hidden
+        text-overflow ellipsis
+        font-size 13px
+        line-height 34px
+      }
+      .closeIconContentCss {
+        margin-top 10px
+        width 14px
+        height 14px
       }
     }
   }

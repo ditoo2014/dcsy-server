@@ -576,9 +576,10 @@ export default {
 </style>
 
 <style lang="stylus" scoped>
-bannerHeight = 3.5417vw
+bannerHeight = var(--business-banner-height, 3.5417vw)
 
 .bannerCss {
+  flex-shrink 0
   position relative
   width 99.5vw
   height bannerHeight
@@ -700,6 +701,92 @@ bannerHeight = 3.5417vw
     right 1.5vw
     width 1.0416vw
     height 1.0416vw
+  }
+}
+
+// 在低分辨率或浏览器放大时保留原配色和按钮，菜单超出宽度可横向滚动。
+@media (max-width: 1280px) {
+  .bannerCss {
+    width 100%
+    .logoNameCss {
+      padding-left 16px
+      width 185px
+      font-size 14px
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+    }
+    .groupOneCss, .groupTwoCss {
+      display none
+    }
+    .bannerButContentCss {
+      left 185px
+      right 150px
+      width auto
+      display flex
+      align-items center
+      padding 0 4px
+      overflow-x auto
+      overflow-y hidden
+      white-space nowrap
+      scrollbar-width thin
+      > div {
+        flex-shrink 0
+      }
+      .numeContentCss {
+        float none
+        margin-top 0
+        width auto !important
+        max-width none
+        padding 0 3px
+        .bannerButCss {
+          height 32px
+          line-height 32px
+          padding 0 12px
+        }
+      }
+    }
+    .userOperationCss {
+      top 9px
+      right 36px
+      width 108px
+      height 34px
+      .userPortraitCss {
+        margin 4px 5px
+        width 26px
+        height 26px
+      }
+      .userNameCss {
+        width 54px
+        font-size 13px
+        line-height 34px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+      }
+      .selectIconCss {
+        margin 15px 6px 0 0
+        border-width 4px
+      }
+    }
+    .screenfullCss {
+      top 17px
+      right 10px
+      width 18px
+      height 18px
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .bannerCss {
+    .logoNameCss {
+      width 88px
+      padding-left 8px
+    }
+    .bannerButContentCss {
+      left 88px
+    }
   }
 }
 img {

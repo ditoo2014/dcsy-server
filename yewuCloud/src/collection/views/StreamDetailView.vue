@@ -1032,6 +1032,8 @@ h2 {
 
 .right {
   display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   align-items: center;
   gap: 10px;
 }
@@ -1048,6 +1050,8 @@ h2 {
 
 .toolbar {
   display: flex;
+  /* 缩放和窄窗口下保留查询按钮可用，不让输入框和按钮相互挤压。 */
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
@@ -1055,6 +1059,7 @@ h2 {
 
 .keyword-input {
   width: 320px;
+  max-width: 100%;
 }
 
 .match-wrap {
@@ -1072,6 +1077,7 @@ h2 {
 .pager {
   margin-top: 12px;
   display: flex;
+  min-width: 0;
   justify-content: flex-start;
 }
 

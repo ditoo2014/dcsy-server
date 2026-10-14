@@ -5,7 +5,7 @@
 <script>
 import { markRaw } from 'vue'
 import resize from './mixins/resize.js'
-import { safeEchartsResize, safeEchartsSetOption } from '@/utils/echarts-safe.js'
+import { safeEchartsSetOption } from '@/utils/echarts-safe.js'
 
 export default {
   mixins: [resize],
@@ -90,9 +90,7 @@ export default {
   },
   methods: {
     safeChartResize() {
-      if (!safeEchartsResize(this.chart, document.getElementById(this.id))) {
-        this.reSetOption()
-      }
+      this.$_scheduleChartResize()
     },
     buildOption() {
       const tooltip = this.chartData.tooltip
@@ -115,7 +113,7 @@ export default {
       safeEchartsSetOption(this.chart, this.buildOption(), { replaceMerge: ['series'] })
     },
     initChart() {
-      const el = document.getElementById(this.id)
+      const el = this.$el
       if (!el) {
         return
       }

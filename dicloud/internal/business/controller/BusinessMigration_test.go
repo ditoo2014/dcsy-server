@@ -55,7 +55,7 @@ func TestGeneralTriggerFailureResponse(t *testing.T) {
 	}
 }
 
-// 模板应直接下载且与真正导入使用同一套表头，长编号按文本保存。
+// 核对下载文件与实际导入兼容，并确保示例页不会混入真实导入数据。
 func TestBusinessImportTemplateDownload(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
@@ -64,6 +64,7 @@ func TestBusinessImportTemplateDownload(t *testing.T) {
 	}{
 		{"站点", (SiteCtrler{}).ImportTemplate, model.SiteExportHeader},
 		{"库房", (WarehouseCtrler{}).ImportTemplate, model.WarehouseExportHeader},
+		{"电池", (EquipmentCtrler{}).ImportTemplate, model.EquipmentExportHeader},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
@@ -94,6 +95,47 @@ func TestBusinessImportTemplateDownload(t *testing.T) {
 			style, err := f.GetStyle(styleID)
 			if err != nil || style.NumFmt != 49 {
 				t.Fatal("编码未设置为文本格式")
+			}
+			if !reflect.DeepEqual(f.GetSheetList(), []string{"Sheet1", "填写示例"}) {
+				t.Fatalf("示例改变了导入工作表顺序：%v", f.GetSheetList())
+			}
+			examples, err := f.GetRows("填写示例")
+			if err != nil || len(examples) < 5 || !reflect.DeepEqual(examples[0], tc.headers) {
+				t.Fatalf("未提供完整填写示例：%v，错误：%v", examples, err)
+			}
+			for _, row := range examples[1:3] {
+				if len(row) != len(tc.headers) {
+					t.Fatalf("示例字段不完整：%v", row)
+				}
+			}
+			if f.GetActiveSheetIndex() != 1 || !strings.Contains(strings.Join(examples[4], ""), "本页不参与导入") {
+				t.Fatal("打开模板时未展示示例或未提示填写位置")
+			}
+			// 模拟用户填写一行后上传，调用真实校验函数，确认只读第一工作表。
+			if err := f.SetSheetRow("Sheet1", "A2", &examples[1]); err != nil {
+				t.Fatal(err)
+			}
+			importRows, err := f.GetRows(f.GetSheetName(0))
+			if err != nil {
+				t.Fatal(err)
+			}
+			corpMap := map[string]int{"请填写已有部门名称": 99}
+			switch tc.name {
+			case "站点":
+				data, issues := validateSiteImportRows(importRows, corpMap)
+				if len(data) != 1 || len(issues) != 0 || data[0].CorpId != 99 || data[0].SiteSerialNumber != examples[1][1] {
+					t.Fatalf("示例干扰站点导入或编码失真：%v，%v", data, issues)
+				}
+			case "库房":
+				data, issues := validateWarehouseImportRows(importRows, corpMap)
+				if len(data) != 1 || len(issues) != 0 || data[0].CorpId != 99 || data[0].ManagerPhone != examples[1][4] {
+					t.Fatalf("示例干扰库房导入或电话失真：%v，%v", data, issues)
+				}
+			case "电池":
+				data, issues := validateEquipmentImportRows(importRows, corpMap)
+				if len(data) != 1 || len(issues) != 0 || data[0].CorpId != 99 || data[0].ManufacturerTime != examples[1][3] {
+					t.Fatalf("示例干扰电池导入或日期失真：%v，%v", data, issues)
+				}
 			}
 		})
 	}

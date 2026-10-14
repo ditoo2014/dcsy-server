@@ -10,12 +10,13 @@ import (
 	alarmdao "alarm/internal/alarm/dao"
 	alarmmodel "alarm/internal/alarm/model"
 	businessmodel "alarm/internal/business/model"
-	commonmodel "alarm/internal/common/model"
+	migration "alarm/internal/migration"
 	usermodel "alarm/models/model"
 	"alarm/util/gormutil"
 	"alarm/util/opengauss"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func ValidateAlarmReliabilityDatabases() error {
@@ -34,7 +35,7 @@ func ValidateAlarmReliabilityDatabases() error {
 	return nil
 }
 
-// AutoMigrateAlarmDatabases 在消费者启动前创建本程序实际使用的业务表。
+// AutoMigrateAlarmDatabases 创建告警自有表，并只读校验依赖的共享业务表。
 func AutoMigrateAlarmDatabases() error {
 	scopes := []*gin.Context{{}}
 	for _, name := range opengauss.ConfiguredRenterDBNames() {
@@ -47,17 +48,23 @@ func AutoMigrateAlarmDatabases() error {
 		if db == nil {
 			return fmt.Errorf("alarm database is nil")
 		}
-		if err := alarmdao.AutoMigrateReliabilitySchema(db); err != nil {
-			return err
-		}
-		// 告警程序会直接查询设备、用户、组织和短信凭据，首次部署时一并自动建表。
-		if err := db.AutoMigrate(
-			&commonmodel.AlarmDataRecord{},
-			&alarmmodel.SmsSecret{},
-			&businessmodel.Equipment{},
-			&usermodel.User{},
-			&usermodel.Corp{},
-		); err != nil {
+		if err := migration.WithSchemaLock(db, func(tx *gorm.DB) error {
+			if err := alarmdao.AutoMigrateReliabilitySchema(tx); err != nil {
+				return err
+			}
+			// 短信凭据属于告警程序，由本程序负责创建。
+			if err := migration.CreateMissingTablesAndValidateExisting(tx,
+				&alarmmodel.SmsSecret{},
+			); err != nil {
+				return err
+			}
+			// 设备、用户和组织属于共享业务结构，只读校验，避免告警程序修改生产表。
+			return migration.ValidateRequiredTables(tx,
+				&businessmodel.Equipment{},
+				&usermodel.User{},
+				&usermodel.Corp{},
+			)
+		}); err != nil {
 			return err
 		}
 	}

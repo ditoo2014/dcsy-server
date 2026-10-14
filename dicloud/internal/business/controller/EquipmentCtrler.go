@@ -684,6 +684,17 @@ func (ctrler EquipmentCtrler) ImportTemplate(ctx *gin.Context) {
 		_ = f.SetCellStyle("Sheet1", "A2", "I1001", textStyle)
 	}
 	_ = f.SetColWidth("Sheet1", "A", "I", 18)
+	if err := addImportTemplateExamples(f, model.EquipmentExportHeader, [][]string{
+		{"BAT000001", "锂电池", "示例生产厂家", "2026-01-01", "PC202601", "48V100Ah", "请填写已有部门名称", "示例BMS厂家", "V1.0"},
+		{"BAT000002", "钠电池", "示例生产厂家", "2026-01-02", "PC202602", "48V100Ah", "请填写已有部门名称", "示例BMS厂家", "V1.1"},
+	}, []string{
+		"填写说明：红色内容仅为示例，请将真实数据填写到第一个“Sheet1”工作表，从第2行开始；本页不参与导入。",
+		"电池ID、电池类型不能为空；电池ID不能与文件中其他行或平台已有电池重复。所属公司请填写平台中已有的完整部门名称。",
+		"请保留表头及列顺序；电池ID按文本填写，生产日期建议使用年-月-日格式，例如2026-01-01，其余字段按实际出厂信息填写。",
+	}); err != nil {
+		response.Fail(ctx, "生成导入模板失败", nil)
+		return
+	}
 	writeEquipmentWorkbook(ctx, "电池出厂信息导入模板.xlsx", f, 200, "导入模板下载成功")
 }
 

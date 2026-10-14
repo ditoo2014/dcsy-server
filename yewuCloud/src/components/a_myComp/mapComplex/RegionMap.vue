@@ -4,7 +4,8 @@
 
 <script>
 import { markRaw } from 'vue'
-import { safeEchartsResize, safeEchartsSetOption } from '@/utils/echarts-safe.js'
+import { safeEchartsSetOption } from '@/utils/echarts-safe.js'
+import resize from '@/components/a_myComp/echarts/mixins/resize.js'
 
 /**
  * 与原 visualMap.inRange 分段一致（见 setChartData 内 pieces）
@@ -29,6 +30,7 @@ function getMapAreaColor(value) {
 }
 
 export default {
+  mixins: [resize],
   props: {
     refKey: {
       type: String,
@@ -91,11 +93,8 @@ export default {
   },
   mounted() {
     this.init()
-    this.__resizeHandler = () => this.safeChartResize()
-    window.addEventListener('resize', this.__resizeHandler)
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.__resizeHandler)
     if (this.refreshFrameId !== null) {
       cancelAnimationFrame(this.refreshFrameId)
       this.refreshFrameId = null
@@ -121,9 +120,7 @@ export default {
       this.chart = null
     },
     safeChartResize() {
-      if (!safeEchartsResize(this.chart, this.getChartEl())) {
-        this.setChartData()
-      }
+      this.$_scheduleChartResize()
     },
     init() {
       if (!this.allEgoData || !this.allEgoData.type) {

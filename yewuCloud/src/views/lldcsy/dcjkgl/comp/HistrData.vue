@@ -1354,6 +1354,10 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
 .hisDataCss {
   position relative
   width 100%
+  min-width 0
+  // 按详情正文实际宽度适配，弹窗和浏览器缩放都使用相同的布局规则。
+  container-type inline-size
+  container-name battery-history
   .bzxxCss {
     position absolute
     top 5px
@@ -1361,8 +1365,9 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
   }
   .titleCss {
     padding 0.2vw 0 0 1vw
-    height 1.5vw
-    font-size 1.2vw
+    min-height 1.5vw
+    line-height 1.5
+    font-size clamp(16px, 1.2vw, 24px)
     font-weight bold
   }
   .csxzContentCss {
@@ -1383,7 +1388,8 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       width 90%
       min-height 3vw
       height auto
-      font-size 1vw
+      font-size clamp(14px, 1vw, 20px)
+      box-sizing border-box
       border-radius 0.2vw
       border 1px solid rgba(25, 186, 139, 0.17)
       &::before {
@@ -1409,11 +1415,11 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         border-radius 20%
       }
       .csxzTitleCss {
-        flex 0 0 10%
-        padding-right 1vw
+        flex 0 0 unquote('max(10%, 110px)')
+        padding 6px clamp(8px, 1vw, 20px) 0 0
         box-sizing border-box
-        height 3vw
-        line-height 3vw
+        min-height 3vw
+        line-height 1.6
         font-weight bold
         text-align right
       }
@@ -1422,6 +1428,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         min-width 0
         min-height 3vw
         height auto
+        padding 6px 0
       }
       .csxzFooterCss {
         position absolute
@@ -1456,16 +1463,26 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
   .sjxzContentCss {
     margin 0.5vw 0.2%
     width 99.6%
-    height 20vw
+    // 切片记录换行或分页增加高度时，外框随内容增长，避免压住变化曲线。
+    display grid
+    grid-template-columns repeat(2, minmax(0, 1fr))
+    gap unquote('max(8px, 0.5vw)') 1%
+    padding 0 1% unquote('max(8px, 0.5vw)')
+    box-sizing border-box
+    min-height 20vw
     box-shadow boxShadow
     border-radius 0.2vw
+    > .titleCss {
+      grid-column 1 / -1
+      padding-left 0
+    }
     .sjxzCss {
       position relative
-      float left
-      margin 0.5vw 0 0 1%
-      padding 0.5vw
-      width 48.5%
-      height 85%
+      min-width 0
+      padding unquote('max(8px, 0.5vw)')
+      box-sizing border-box
+      container-type inline-size
+      container-name battery-history-slice
       border-radius 0.2vw
       border 1px solid rgba(25, 186, 139, 0.17)
       &::before {
@@ -1492,35 +1509,40 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       }
       .ksxzTitleCss {
         width 100%
-        font-size 1vw
+        font-size clamp(14px, 1vw, 20px)
+        line-height 1.6
         font-weight bold
       }
       .ksxzLsjlContentCss {
         width 100%
+        display flex
+        align-items stretch
         .ksxzLsjlCss {
-          float left
+          flex 0 0 44%
+          min-width 0
           margin-right 1%
-          width 44%
-          height 14vw
+          min-height 14vw
           border-right 1px solid #ccc
           .ksxzLsjlTitleCss {
             margin-top 0.5vw
             width 100%
-            height 1.5vw
-            font-size 0.8vw
+            min-height unquote('max(24px, 1.5vw)')
+            line-height 1.6
+            font-size clamp(12px, 0.8vw, 16px)
             font-weight bold
           }
           .ksxzLsjlDateContentCss {
             width 100%
-            height 40px
+            min-height 40px
             .ksxzLsjlDateCss {
-              float left
               width 99%
+              min-width 0
             }
           }
           .fdcsCss {
             width 100%
-            font-size 0.7vw
+            line-height 1.6
+            font-size clamp(12px, 0.7vw, 16px)
             .fdcsNumCss {
               padding 0 0.2vw
             }
@@ -1528,31 +1550,36 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         }
         .fdjlContentCss {
           margin-top -0.5vw
-          float left
-          width 55%
+          flex 1
+          min-width 0
 
           .fdjlTitleCss {
             width 100%
-            height 1.2vw
-            font-size 0.8vw
+            min-height unquote('max(24px, 1.2vw)')
+            line-height 1.6
+            font-size clamp(12px, 0.8vw, 16px)
             font-weight bold
           }
           .fdjlCss {
             width 100%
             .fdjlTabCss {
-              float left
               width 100%
-              height 100%
+              min-width 0
               background-color #fff
               .fdjlListCss {
                 padding-left 0.5vw
                 width 100%
+                box-sizing border-box
                 .fdjlItemCss {
                   width 100%
-                  height 1.2vw
-                  line-height 1.2vw
+                  // 保留完整切片起止时间；长时间文字换行时同步撑高记录行。
+                  min-height unquote('max(24px, 1.2vw)')
+                  padding 3px 4px
+                  box-sizing border-box
+                  line-height 1.5
+                  overflow-wrap anywhere
                   text-align center
-                  font-size 0.7vw
+                  font-size clamp(12px, 0.7vw, 16px)
                   border-bottom 1px solid #EBEEF5
                 }
                 .fdjlItemSelectedCss {
@@ -1561,11 +1588,13 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
               }
               .wsjCss {
                 padding-top 0.5vw
-                line-height 1vw
+                line-height 1.6
                 text-align center
               }
               .pagCss {
                 margin-top 0.5vw
+                max-width 100%
+                overflow-x auto
               }
             }
           }
@@ -1604,28 +1633,37 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
   .bhqxContentCss {
     margin 0.5vw 0.2%
     width 99.6%
-    height 14.5vw
+    min-height 14.5vw
+    padding-bottom unquote('max(8px, 0.5vw)')
+    box-sizing border-box
     box-shadow boxShadow
     border-radius 0.2vw
     .bhqxHeadContentCss {
       width 100%
-      height 2vw
+      // 筛选项按可用宽度换行，每一行的高度由日期框和按钮决定。
+      display flex
+      flex-wrap wrap
+      align-items center
+      gap 6px clamp(8px, 0.5vw, 16px)
+      padding 6px 1%
+      box-sizing border-box
+      min-height 2vw
       .bhqxTitleCss {
-        float left
-        padding 0.2vw 0 0 1vw
-        height 1.5vw
-        font-size 1.2vw
+        flex 0 0 auto
+        line-height 1.5
+        font-size clamp(16px, 1.2vw, 24px)
         font-weight bold
       }
       .bhqxZtCss {
-        float left
-        margin 0 2vw
-        height 1.9vw
+        display flex
+        align-items center
+        flex 0 0 auto
+        margin 0 clamp(4px, 1vw, 20px)
         .ztIconCss {
-          float left
-          margin 0.6vw 0.3vw 0 0
-          width 1vw
-          height 1vw
+          flex-shrink 0
+          margin-right clamp(4px, 0.3vw, 8px)
+          width clamp(10px, 1vw, 20px)
+          height clamp(10px, 1vw, 20px)
           border-radius 50%
         }
         .ztIcon1Css {
@@ -1638,33 +1676,33 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
           background-color #ffff00
         }
         .ztNameCss {
-          float left
-          margin 0.5vw 1vw 0 0
-          height 1.9vw
-          font-size 0.8vw
+          margin-right clamp(8px, 1vw, 20px)
+          line-height 1.6
+          font-size clamp(12px, 0.8vw, 16px)
         }
       }
       .cxjgSelDateCss {
-        float left
-        padding-top 0.3vw
-        margin-right 0.5vw
+        flex 0 1 340px
+        min-width 0
+        max-width 100%
       }
       .cxjgCss {
-        float left
+        display flex
+        flex-wrap wrap
+        align-items center
+        gap 4px
+        min-width 0
         .cxjgTitleCss {
-          float left
-          margin-top 0.5vw
-          font-size 0.8vw
+          line-height 1.6
+          font-size clamp(12px, 0.8vw, 16px)
         }
         .inputContentCss {
-          float left
-          margin-top 0.3vw
           width 80px
+          min-width 0
         }
       }
       .exportCss {
-        float left
-        margin 0.3vw 0 0 0.5vw
+        flex 0 0 auto
         .importCss {
           color red
           line-height 32px
@@ -1677,6 +1715,9 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       padding-bottom 0.5vw
       width 98%
       height 11.5vw
+      // 为图例、坐标轴和缩放条预留可读空间，低分辨率下通过正文滚动查看。
+      min-height 260px
+      box-sizing border-box
       border-radius 0.2vw
       border 1px solid rgba(25, 186, 139, 0.17)
       &::before {
@@ -1728,6 +1769,115 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
           border-right 2px solid #02a6b5
           border-radius 20%
         }
+      }
+    }
+  }
+  :deep(.el-date-editor) {
+    width 100%
+    max-width 100%
+    min-width 0
+    box-sizing border-box
+  }
+  // 参数复选框原来随 vw 缩到不足 10px，仅在本页设置可读字号及点击区域。
+  :deep(.customCheckboxCss) {
+    font-size clamp(12px, 0.7vw, 16px)
+    line-height 1.4
+    min-height clamp(14px, 1vw, 20px)
+    padding-left clamp(14px, 1vw, 20px)
+    margin-bottom unquote('max(6px, 0.5vw)')
+  }
+  :deep(.checkmarkCss) {
+    width clamp(14px, 1vw, 20px)
+    height clamp(14px, 1vw, 20px)
+  }
+  :deep(.customCheckboxCss .checkmarkCss:after) {
+    left 36%
+    top 10%
+    width 26%
+    height 52%
+    border-width 0 unquote('max(1px, 0.1vw)') unquote('max(1px, 0.1vw)') 0
+  }
+  :deep(.customCheckboxCss input:indeterminate ~ .checkmarkCss:before) {
+    top 41%
+    left 15%
+    width 62%
+    height unquote('max(1px, 0.1vw)')
+  }
+}
+
+// 先让单张切片卡片内部纵向排列，再在详情更窄时将充、放电卡片上下排列。
+@container battery-history-slice (max-width: 630px) {
+  .hisDataCss .sjxzContentCss .sjxzCss .ksxzLsjlContentCss {
+    flex-direction column
+    gap 8px
+    .ksxzLsjlCss {
+      flex-basis auto
+      min-height 0
+      margin-right 0
+      padding-bottom 8px
+      border-right 0
+      border-bottom 1px solid #ccc
+    }
+    .fdjlContentCss {
+      margin-top 0
+    }
+  }
+}
+@container battery-history (max-width: 980px) {
+  .hisDataCss .sjxzContentCss {
+    grid-template-columns minmax(0, 1fr)
+  }
+}
+@container battery-history (max-width: 460px) {
+  .hisDataCss .csxzContentCss .csxzCss {
+    flex-direction column
+    .csxzTitleCss {
+      flex-basis auto
+      min-height 0
+      padding-right 0
+      text-align left
+    }
+    .csxzSelectCss {
+      width 100%
+    }
+  }
+}
+
+// 不支持容器查询的旧浏览器使用窗口断点，仍允许内容撑高和工具栏换行。
+@supports not (container-type: inline-size) {
+  @media (max-width: 1440px) {
+    .hisDataCss .sjxzContentCss .sjxzCss .ksxzLsjlContentCss {
+      flex-direction column
+      gap 8px
+      .ksxzLsjlCss {
+        flex-basis auto
+        min-height 0
+        margin-right 0
+        padding-bottom 8px
+        border-right 0
+        border-bottom 1px solid #ccc
+      }
+      .fdjlContentCss {
+        margin-top 0
+      }
+    }
+  }
+  @media (max-width: 1100px) {
+    .hisDataCss .sjxzContentCss {
+      grid-template-columns minmax(0, 1fr)
+    }
+  }
+  @media (max-width: 600px) {
+    .hisDataCss .csxzContentCss .csxzCss {
+      flex-direction column
+      .csxzTitleCss {
+        flex-basis auto
+        min-height 0
+        padding-right 0
+        text-align left
+      }
+      .csxzSelectCss {
+        width 100%
       }
     }
   }
