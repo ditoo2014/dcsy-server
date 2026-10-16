@@ -326,7 +326,6 @@ export default {
         item.fdsc = '-'
         const dischargePoint = resolveBatteryPoint(list, {
           dataIdSuffix: REMAINING_DISCHARGE_TIME_POINT_DATA_ID,
-          exactNames: ['放电时长'],
           gatewayId: item.equipmentCode
         })
         list.forEach(labelItem => {

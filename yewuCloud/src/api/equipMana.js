@@ -89,7 +89,37 @@ export async function getEquipAllPoint(params) { // 获取多个设备以及对�
   const pageNum = params.pageNum ? params.pageNum : 1
   const pageSize = params.pageSize ? params.pageSize : 10
   const query = `?pageNum=${pageNum}&pageSize=${pageSize}&filterFunc=${filterFunc}`
-  return JsonPost(`business/equipment/alldata${query}`, data)
+  const res = await JsonPost(`business/equipment/alldata${query}`, data)
+  const equipments = res.return && res.return.data
+  if (!Array.isArray(equipments)) return res
+
+  // 业务详情只保存标签 ID，通过标签配置补齐实际数据点 ID，避免按中文名称识别旧编码。
+  // 同一批设备共用数据池时只查询一次，不跨请求缓存，确保模板调整后使用最新配置。
+  const metadataRequests = new Map()
+  await Promise.all(equipments.map(async equipment => {
+    const points = equipment.dataDetails
+    const apiKey = String(equipment.apiKey || '').trim()
+    if (!apiKey || apiKey === '-' || !Array.isArray(points) || !points.length) return
+    if (!metadataRequests.has(apiKey)) {
+      metadataRequests.set(apiKey, JsonPost(`api/getlabel?Apikey=${encodeURIComponent(apiKey)}`, {})
+        .then(response => {
+          const labels = response.return && response.return.labelList
+          return new Map((Array.isArray(labels) ? labels : []).map(label => [String(label.labelId), label]))
+        })
+        .catch(error => {
+          console.error('读取数据池数据点编码失败', error)
+          return new Map()
+        }))
+    }
+    const metadataMap = await metadataRequests.get(apiKey)
+    points.forEach(point => {
+      const metadata = metadataMap.get(String(point.labelId))
+      if (!metadata) return
+      point.dataId = metadata.dataId || ''
+      point.gatewayId = metadata.gatewayId || ''
+    })
+  }))
+  return res
 }
 
 export function deleteEquipment(params) { // 删除设备

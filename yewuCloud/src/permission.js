@@ -110,7 +110,11 @@ router.beforeEach(async(to, from, next) => {
           guardNext(next, { path: '/login', query: { redirect: to.fullPath }, replace: true })
         } else {
           // 服务暂时不可用时拒绝本次导航，保留会话供恢复后重试。
-          Message.error('暂时无法核验账号密码状态，请稍后重试或刷新页面')
+          // 会话缓存暂时故障时也不追加导航提示，仍中止导航并保留会话。
+          const serverMessage = error?.response?.data?.msg || error?.responseData?.msg || error?.message
+          if (serverMessage !== '暂时无法校验登录状态，请稍后重试') {
+            Message.error('暂时无法核验账号密码状态，请稍后重试或刷新页面')
+          }
           guardNext(next, false)
         }
         NProgress.done()

@@ -117,7 +117,8 @@ export function http(params) {
           })
           reject(businessError)
         } else {
-          if (businessError.errorCode !== 'PASSWORD_POLICY_VIOLATION') {
+          // 指定提示静默处理，仍保留请求失败结果及后端校验。
+          if (businessError.errorCode !== 'PASSWORD_POLICY_VIOLATION' && errMsg !== '密钥不存在' && errMsg !== '暂时无法校验登录状态，请稍后重试') {
             Message({
               message: errMsg,
               type: 'error',

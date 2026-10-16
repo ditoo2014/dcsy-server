@@ -17,7 +17,7 @@ type statisticDataPoint struct {
 	Code   string
 }
 
-// statisticDataPointResolver 在一次统计任务中缓存网关配置，支持原版 ID 的地址前缀。
+// statisticDataPointResolver 在一次统计任务中缓存网关配置，支持英文 ID 的通道地址前缀。
 type statisticDataPointResolver struct {
 	ctx   *gin.Context
 	cache map[string][]tolinkmodel.GatewayData
@@ -29,11 +29,28 @@ func newStatisticDataPointResolver(ctx *gin.Context) *statisticDataPointResolver
 }
 
 var statisticPointAliases = map[string][]string{
-	// 沿用原版名称回退，兼容已有通道的数据点配置。
+	// SOH 保持既有识别规则；循环次数仍只按统一英文 ID 识别。
+	"alg_soh": {"SOH"},
+}
+
+// 两项累计容量支持已有配置的名称，查询仍使用配置中的真实 ID，不写入或转换存量数据。
+var cumulativeCapacityAliases = map[string][]string{
 	pointid.TotalDischargeCapacity: {"累计放电量", "累计放电容量"},
-	pointid.CycleCount:             {"循环次数", "充电次数"},
 	pointid.TotalChargeCapacity:    {"累计充电量", "累计充电容量"},
-	"alg_soh":                      {"SOH"},
+}
+
+func matchesCumulativeCapacityName(baseID, name string) bool {
+	name = strings.TrimSpace(name)
+	// 只允许两位十六进制通道地址前缀，防止把月统计等同名派生指标识别为设备累计值。
+	if len(name) > 3 && name[2] == '_' && strings.ContainsRune("0123456789abcdefABCDEF", rune(name[0])) && strings.ContainsRune("0123456789abcdefABCDEF", rune(name[1])) {
+		name = name[3:]
+	}
+	for _, alias := range cumulativeCapacityAliases[baseID] {
+		if name == alias {
+			return true
+		}
+	}
+	return false
 }
 
 // resolve returns every physical candidate for each canonical statistic code.
@@ -47,8 +64,8 @@ func (r *statisticDataPointResolver) resolve(gatewayID string, standardPoints []
 	resolved := make([]statisticDataPoint, 0, len(standardPoints))
 	points, found := r.gatewayData(gatewayID)
 	if !found || len(points) == 0 {
-		log.Printf("[Business-Statistic] gateway data points unavailable, use legacy IDs gateway=%s", gatewayID)
-		// 配置暂时不可用时，按原版固定 ID 查询已有数据。
+		log.Printf("[Business-Statistic] 网关数据点配置暂不可用，按标准英文 ID 查询 gateway=%s", gatewayID)
+		// 配置暂时不可用时仍只查询标准英文 ID，不回退到历史编码。
 		resolved = append(resolved, standardPoints...)
 		return resolved
 	}
@@ -110,6 +127,9 @@ func resolveStatisticPoints(points []tolinkmodel.GatewayData, baseID string) []s
 			score = 1
 		}
 		name := strings.TrimSpace(point.Name)
+		if score < 0 && matchesCumulativeCapacityName(baseID, name) {
+			score = 2
+		}
 		for _, alias := range aliases {
 			if name == alias {
 				if score < 0 || score > 2 {
@@ -139,6 +159,10 @@ func resolveStatisticPoints(points []tolinkmodel.GatewayData, baseID string) []s
 	})
 	dataIDs := make([]string, 0, len(candidates))
 	for _, candidate := range candidates {
+		// 累计容量按指标选择英文候选或名称候选，避免两套配置同时参与查询。
+		if len(cumulativeCapacityAliases[baseID]) > 0 && candidates[0].score < 2 && candidate.score >= 2 {
+			continue
+		}
 		dataIDs = append(dataIDs, candidate.dataID)
 	}
 	return dataIDs

@@ -527,7 +527,6 @@ export default {
         const dataDetails = item.dataDetails || []
         const dischargePoint = resolveBatteryPoint(dataDetails, {
           dataIdSuffix: REMAINING_DISCHARGE_TIME_POINT_DATA_ID,
-          exactNames: ['放电时长'],
           gatewayId: item.equipmentCode
         })
         dataDetails.forEach(labelItem => {

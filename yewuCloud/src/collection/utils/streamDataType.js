@@ -1,8 +1,5 @@
 import { THERMAL_RUNAWAY_RISK_POINT_DATA_ID, matchesBatteryPointId } from '../../utils/battery-point-ids.js';
 
-const STRING_POINT_NAMES = new Set([
-    '热失控风险等级',
-]);
 function text(value) {
     return String(value ?? '').trim();
 }
@@ -15,9 +12,6 @@ export function isStringStreamPoint(source = {}) {
         return true;
     const dataId = text(source.dataId ?? source.dataID ?? source.DataId ?? source.id);
     if (matchesBatteryPointId(dataId, THERMAL_RUNAWAY_RISK_POINT_DATA_ID))
-        return true;
-    const name = text(source.dataName ?? source.name ?? source.pointName ?? source.label ?? source.tagName);
-    if (STRING_POINT_NAMES.has(name))
         return true;
     if (isStrGateway(source.gatewayId ?? source.gatewayID ?? source.GatewayID))
         return true;

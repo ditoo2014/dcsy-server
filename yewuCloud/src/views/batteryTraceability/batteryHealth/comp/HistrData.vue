@@ -529,17 +529,14 @@ export default {
       })
       const temperatureDifferencePoint = resolveBatteryPoint(list, {
         dataIdSuffix: TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
-        aliases: ['温差'],
         gatewayId: this.formData.equipmentCode
       })
       const totalChargePoint = resolveBatteryPoint(list, {
         dataIdSuffix: TOTAL_CHARGE_CAPACITY_POINT_DATA_ID,
-        aliases: ['充电量', '充电电量'],
         gatewayId: this.formData.equipmentCode
       })
       const totalDischargePoint = resolveBatteryPoint(list, {
         dataIdSuffix: TOTAL_DISCHARGE_CAPACITY_POINT_DATA_ID,
-        aliases: ['放电量', '放电电量'],
         gatewayId: this.formData.equipmentCode
       })
       batteryParameterOptions.push(
@@ -558,7 +555,6 @@ export default {
       })
       const pressurePoint = resolveBatteryPoint(list, {
         dataIdSuffix: PRESSURE_POINT_DATA_ID,
-        aliases: ['压差'],
         gatewayId: this.formData.equipmentCode
       })
       cellVoltageOptions.push(createOption('压差', false, previousCellVoltageOptions, pressurePoint))

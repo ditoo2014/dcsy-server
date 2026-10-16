@@ -78,6 +78,8 @@ service.interceptors.response.use(
       const serverMsg = error.response?.data?.msg ||
         error.response?.data?.message ||
         error.message
+      // 会话缓存暂时故障时静默返回失败，保留登录态，不反复弹出提示。
+      if (serverMsg === '暂时无法校验登录状态，请稍后重试') return Promise.reject(error)
       Message({
         message: serverMsg || '网络请求失败',
         type: 'error',

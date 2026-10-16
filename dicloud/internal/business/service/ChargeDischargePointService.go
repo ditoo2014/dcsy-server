@@ -24,12 +24,11 @@ var chargeDischargeCodes = []string{
 }
 
 var chargeDischargePointDefinitions = []struct {
-	DataID  string
-	Code    string
-	Aliases []string
+	DataID string
+	Code   string
 }{
-	{DataID: pointid.TotalDischargeCapacity, Code: ChargeDischargeCodeDischarge, Aliases: []string{"累计放电量", "累计放电容量"}},
-	{DataID: pointid.TotalChargeCapacity, Code: ChargeDischargeCodeCharge, Aliases: []string{"累计充电量", "累计充电容量"}},
+	{DataID: pointid.TotalDischargeCapacity, Code: ChargeDischargeCodeDischarge},
+	{DataID: pointid.TotalChargeCapacity, Code: ChargeDischargeCodeCharge},
 }
 
 type chargeDischargePoint struct {
@@ -41,22 +40,31 @@ type chargeDischargePoint struct {
 
 func resolveChargeDischargePoints(ctx *gin.Context, equipments []businessmodel.Equipment) map[int]map[string][]chargeDischargePoint {
 	result := make(map[int]map[string][]chargeDischargePoint, len(equipments))
-	legacyResolver := newStatisticDataPointResolver(ctx)
+	pointResolver := newStatisticDataPointResolver(ctx)
 	streams := loadEquipmentStatisticStreams(ctx, equipments)
 	for _, equipment := range equipments {
 		points := resolveChargeDischargeStreamPoints(equipment, streams[strings.TrimSpace(equipment.ApiKey)])
-		if len(points) == 0 && strings.TrimSpace(equipment.EquipmentCode) != "" {
-			legacyPoints := []statisticDataPoint{
-				{DataID: pointid.TotalDischargeCapacity, Code: dto.DP_STATISTIC_CODE_MAP[pointid.TotalDischargeCapacity]},
-				{DataID: pointid.TotalChargeCapacity, Code: dto.DP_STATISTIC_CODE_MAP[pointid.TotalChargeCapacity]},
+		if strings.TrimSpace(equipment.EquipmentCode) != "" {
+			// 充电和放电分别补查，避免只绑定其中一项时漏掉另一项。
+			foundCodes := make(map[string]bool)
+			for _, point := range points {
+				foundCodes[point.Code] = true
 			}
-			for _, point := range legacyResolver.resolve(equipment.EquipmentCode, legacyPoints) {
-				points = append(points, chargeDischargePoint{
-					EquipmentID: int(equipment.ID),
-					GatewayID:   equipment.EquipmentCode,
-					DataID:      point.DataID,
-					Code:        point.Code,
-				})
+			standardPoints := make([]statisticDataPoint, 0, len(chargeDischargePointDefinitions))
+			for _, definition := range chargeDischargePointDefinitions {
+				if !foundCodes[definition.Code] {
+					standardPoints = append(standardPoints, statisticDataPoint{DataID: definition.DataID, Code: dto.DP_STATISTIC_CODE_MAP[definition.DataID]})
+				}
+			}
+			if len(standardPoints) > 0 {
+				for _, point := range pointResolver.resolve(equipment.EquipmentCode, standardPoints) {
+					points = append(points, chargeDischargePoint{
+						EquipmentID: int(equipment.ID),
+						GatewayID:   equipment.EquipmentCode,
+						DataID:      point.DataID,
+						Code:        point.Code,
+					})
+				}
 			}
 		}
 		for _, point := range deduplicateChargeDischargePoints(points) {
@@ -74,11 +82,26 @@ func resolveChargeDischargeStreamPoints(equipment businessmodel.Equipment, strea
 		return nil
 	}
 	points := make([]chargeDischargePoint, 0)
+	// 每个指标独立优先选英文 ID；只有没有对应英文点时才沿用已有名称绑定。
+	englishCodes := make(map[string]bool)
+	for _, label := range stream.List {
+		if label != nil && strings.TrimSpace(label.GatewayId) != "" {
+			if code := chargeDischargeCodeForPoint(label.DataId); code != "" {
+				englishCodes[code] = true
+			}
+		}
+	}
 	for _, label := range stream.List {
 		if label == nil {
 			continue
 		}
-		code := chargeDischargeCodeForPoint(label.DataId, label.Name, label.DataName)
+		code := chargeDischargeCodeForPoint(label.DataId)
+		if code == "" {
+			code = chargeDischargeCodeForPoint(label.DataId, label.Name, label.DataName)
+			if englishCodes[code] {
+				continue
+			}
+		}
 		if code == "" || strings.TrimSpace(label.GatewayId) == "" || strings.TrimSpace(label.DataId) == "" {
 			continue
 		}
@@ -142,19 +165,18 @@ func findEquipmentStatisticStream(ctx *gin.Context, apiKey string) (*tolink_grpc
 	return response.Stream, true
 }
 
-// chargeDischargeCodeForPoint 按原版 ID 及通道前缀识别充放电点，并保留名称回退。
-func chargeDischargeCodeForPoint(dataID, name, dataName string) string {
+// chargeDischargeCodeForPoint 优先识别英文 ID；可按已有标签名称读取实际绑定，不改写 ID。
+func chargeDischargeCodeForPoint(dataID string, names ...string) string {
 	normalizedID := strings.ToLower(strings.TrimSpace(dataID))
 	for _, definition := range chargeDischargePointDefinitions {
 		if pointid.Matches(normalizedID, definition.DataID) {
 			return definition.Code
 		}
-		for _, candidateName := range []string{name, dataName} {
-			candidateName = strings.TrimSpace(candidateName)
-			for _, alias := range definition.Aliases {
-				if candidateName == alias || strings.HasSuffix(candidateName, "_"+alias) {
-					return definition.Code
-				}
+	}
+	for _, definition := range chargeDischargePointDefinitions {
+		for _, name := range names {
+			if matchesCumulativeCapacityName(definition.DataID, name) {
+				return definition.Code
 			}
 		}
 	}

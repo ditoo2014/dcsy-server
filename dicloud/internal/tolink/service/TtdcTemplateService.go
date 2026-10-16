@@ -197,7 +197,7 @@ func normalizeTemplateRequest(req TtdcTemplateRequest) (model.TtdcTemplate, erro
 		}
 		point := model.TtdcTemplatePoint{ID: requestPoint.ID, GroupID: item.GroupID, SortNo: requestPoint.SortNo, BaseDataID: baseID, Name: name, DataType: requestPoint.DataType, Enabled: requestPoint.Enabled, Description: strings.TrimSpace(requestPoint.Description)}
 		if item.CID2Type == model.TtdcRoleCID42SOC {
-			// 沿用原版算法 ID 校验，并兼容历史模板通过算法键关联输出。
+			// 固定算法点使用统一英文 ID，算法键不能将其他编码映射为这四项结果。
 			var algorithmKey *string
 			if value := strings.TrimSpace(requestPoint.AlgorithmKey); value != "" {
 				if _, ok := model.TtdcAlgorithmDataType(value); !ok {
@@ -271,7 +271,7 @@ var cid42ReservedBaseDataIDs = map[string]bool{
 	"temperature_count": true, "environment_temperature": true,
 	"mos_temperature": true, "battery_current": true,
 	"battery_voltage": true, "remaining_capacity": true,
-	"total_capacity": true, "cycle_count": true, "custom_count": true,
+	"total_capacity": true, pointid.CycleCount: true, "custom_count": true,
 	"pack_soc": true, "pack_soh": true,
 }
 
@@ -334,7 +334,7 @@ func assignCID42BaseDataIDs(points []TtdcTemplatePointRequest) ([]TtdcTemplatePo
 		expected[pAddress-16] = "battery_voltage"
 		expected[pAddress-12] = "remaining_capacity"
 		expected[pAddress-8] = "total_capacity"
-		expected[pAddress-4] = "cycle_count"
+		expected[pAddress-4] = pointid.CycleCount
 		expected[pAddress] = "custom_count"
 		expected[pAddress+2] = "pack_soc"
 		expected[pAddress+6] = "pack_soh"

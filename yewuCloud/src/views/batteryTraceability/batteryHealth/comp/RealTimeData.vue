@@ -644,27 +644,22 @@ export default {
       })
       const temperatureDifferencePoint = resolveBatteryPoint(list, {
         dataIdSuffix: TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
-        aliases: ['温差'],
         gatewayId: this.formData.equipmentCode
       })
       const pressurePoint = resolveBatteryPoint(list, {
         dataIdSuffix: PRESSURE_POINT_DATA_ID,
-        aliases: ['压差'],
         gatewayId: this.formData.equipmentCode
       })
       const remainingDischargePoint = resolveBatteryPoint(list, {
         dataIdSuffix: REMAINING_DISCHARGE_TIME_POINT_DATA_ID,
-        exactNames: ['放电时长'],
         gatewayId: this.formData.equipmentCode
       })
       const totalDischargePoint = resolveBatteryPoint(list, {
         dataIdSuffix: TOTAL_DISCHARGE_CAPACITY_POINT_DATA_ID,
-        aliases: ['累计放电量'],
         gatewayId: this.formData.equipmentCode
       })
       const totalChargePoint = resolveBatteryPoint(list, {
         dataIdSuffix: TOTAL_CHARGE_CAPACITY_POINT_DATA_ID,
-        aliases: ['累计充电量'],
         gatewayId: this.formData.equipmentCode
       })
       this.temperatureDifference = '-'
@@ -678,7 +673,6 @@ export default {
       const cycleCountItem = this.batteryHealthInfo.find(infoItem => infoItem.title === '循环次数')
       const cycleCountPoint = resolveBatteryPoint(list, {
         dataIdSuffix: CYCLE_COUNT_POINT_DATA_ID,
-        aliases: ['循环次数'],
         gatewayId: this.formData.equipmentCode
       })
       if (cycleCountItem) {

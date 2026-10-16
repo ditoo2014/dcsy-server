@@ -15,7 +15,7 @@ var (
 
 	// 统计数据点 - 对应代码
 	DP_STATISTIC_CODE_MAP = map[string]string{
-		// 数据点编码和中文统计代码均沿用原版，继续使用已有汇总数据。
+		// 英文数据点 ID 对应既有中文统计代码，汇总记录中的统计代码保持不变。
 		pointid.TotalDischargeCapacity: "累计放电量",
 		pointid.CycleCount:             "循环次数",
 		pointid.TotalChargeCapacity:    "累计充电量",

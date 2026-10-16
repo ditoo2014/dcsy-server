@@ -2,23 +2,25 @@
 
 ## 数据点业务编码
 
-前端、业务后端和独立解析程序沿用原版数据点 ID：
+前端、业务后端和独立解析程序统一使用以下英文数据点 ID：
 
 | 中文含义 | 数据点 ID |
 | --- | --- |
-| 剩余放电时长 | `alg_fangdianshichang` |
-| 热失控风险等级 | `alg_rekongfengxianstage` |
-| 温差 | `ditoo_wencha` |
-| 压差 | `ditoo_yacha` |
-| 累计放电量 | `tt_fangdiandianliang` |
-| 循环次数 | `tt_chongdiancishu` |
-| 累计充电量 | `tt_chongdiandianliang` |
+| 剩余放电时长 | `alg_remaining_discharge_time` |
+| 热失控风险等级 | `alg_thermal_runaway_risk_level` |
+| 温差 | `ditoo_temperature_difference` |
+| 压差 | `ditoo_voltage_difference` |
+| 累计放电量 | `tt_total_discharge_capacity` |
+| 循环次数 | `cycle_count` |
+| 累计充电量 | `tt_total_charge_capacity` |
 
-前端常量集中在 `yewuCloud/src/utils/battery-point-ids.js`；业务后端和独立解析程序分别在 `dicloud/util/pointid`、`deal/util/pointid` 维护相同编码，保持独立构建。数据点 ID 支持 TTDC 地址前缀，例如 `02_ditoo_wencha`。
+前端常量集中在 `yewuCloud/src/utils/battery-point-ids.js`；业务后端和独立解析程序分别在 `dicloud/util/pointid`、`deal/util/pointid` 维护相同编码，保持独立构建。实际通道数据点继续使用 TTDC 地址前缀，例如 `02_ditoo_temperature_difference`、`02_cycle_count`。42 模板自动生成的循环次数 ID 与业务常量使用同一个 `cycle_count` 定义。
 
-模板新建、编辑和导入沿用原版算法 ID 校验；优先按数据点 ID 识别算法结果，历史模板仍可通过 `algorithm_key` 关联算法输出。前端识别和统计查询恢复原来的中文名称回退，查询时保留实际通道、标签的数据点 ID。中文名称、统计代码、数值主键及数据库结构保持原样。
+前端优先按英文 ID 及通道地址前缀识别这七项固定业务数据点。为保留现有数据库配置，累计充电量和累计放电量在未匹配到英文 ID 时，允许按当前设备已绑定标签的完整名称读取其真实数据点；实时卡片、历史选项及曲线沿用原标签 ID，不改写现有数据。后端大屏汇总和定时统计也对这两项采用相同的英文 ID 优先、名称回退规则，分别识别充电与放电，沿用已有网关及数据点绑定；通道名称允许两位十六进制地址前缀。同一指标不混用英文点和名称回退点，多个有效候选沿用最新读数选择规则。其余固定业务点的识别规则保持不变。四个固定算法点的 `algorithm_key` 为空或与其英文数据点 ID 一致，不能将其他数据点 ID 映射到这四个算法结果。中文显示名称和已有汇总数据中的统计代码保持原样。
 
-本次代码恢复不会自动改写数据库、Redis 或时序历史数据。此前已手动改为英文编码的模板点、实际通道、数据池标签和其他关联配置需单独核对，确保与原版 ID 一致。部署时同步更新 `deal`、`dicloud` 相关服务及完整前端产物。
+代码更新不会自动改写已有数据库配置、Redis 或时序历史数据。上线前须同步核对模板、实际通道、网关数据点、数据池标签及告警规则中的 ID 值，具体步骤见 [已有数据点配置对齐说明](dicloud/scripts/align-battery-point-ids.md)。数据库表名、字段名及记录的数值主键保持原样。历史时序数据需要继续按新 ID 查询时，应另行安排迁移，不能仅通过更新配置获得连续历史。
+
+部署时同步更新 `deal`、`dicloud` 中的 `business`、`tolink`、`statistic` 服务及完整前端产物；已有数据配置与新 ID 对齐后再恢复数据处理和统计任务。
 
 ## 数据库初始化顺序
 

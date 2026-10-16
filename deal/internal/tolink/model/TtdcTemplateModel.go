@@ -26,17 +26,31 @@ func TtdcAlgorithmDataType(key string) (int, bool) {
 	}
 }
 
-// TtdcAlgorithmResultKey 优先按原版数据点 ID 识别算法输出。
-// 历史模板使用自定义 ID 时，沿用 algorithm_key 关联算法结果的回退逻辑。
+// TtdcAlgorithmResultKey 识别算法输出，四个固定英文数据点的显式映射必须与 ID 一致。
+// 四个固定算法结果必须使用标准英文 ID，不通过 algorithm_key 接受其他编码。
 func TtdcAlgorithmResultKey(baseDataID string, algorithmKey *string) (string, int, bool) {
 	baseDataID = strings.TrimSpace(baseDataID)
 	if dataType, ok := TtdcAlgorithmDataType(baseDataID); ok {
+		switch baseDataID {
+		case pointid.RemainingDischargeTime, pointid.ThermalRunawayRiskLevel, pointid.TemperatureDifference, pointid.VoltageDifference:
+			if algorithmKey != nil {
+				key := strings.TrimSpace(*algorithmKey)
+				if key != "" && key != baseDataID {
+					return "", 0, false
+				}
+			}
+		}
 		return baseDataID, dataType, true
 	}
 	if algorithmKey == nil {
 		return "", 0, false
 	}
 	key := strings.TrimSpace(*algorithmKey)
+	switch key {
+	case pointid.RemainingDischargeTime, pointid.ThermalRunawayRiskLevel, pointid.TemperatureDifference, pointid.VoltageDifference:
+		return "", 0, false
+	}
+	// 其他算法点保留既有自定义映射能力，不扩大本次固定数据点的调整范围。
 	dataType, ok := TtdcAlgorithmDataType(key)
 	return key, dataType, ok
 }
