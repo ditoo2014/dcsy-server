@@ -35,18 +35,13 @@ func Activate(ctx *gin.Context, username string, token string) error {
 }
 
 // Touch 校验 Redis 登录会话是否仍然存在；存在则刷新空闲过期时间。
-// 如果 Redis 中没有该会话，或会话所属用户与 token 中用户不一致，则认为登录已超时。
-func Touch(ctx *gin.Context, username string, token string) bool {
+// 会话不存在或用户不匹配时返回 false；Redis 故障通过 error 单独返回，不能误判为过期。
+func Touch(ctx *gin.Context, username string, token string) (bool, error) {
 	if username == "" || token == "" {
-		return false
+		return false, nil
 	}
 	key := sessionKey(token)
-	storedUsername, err := cache.Get(ctx, key)
-	if err != nil || storedUsername != username {
-		return false
-	}
-	cache.ExpireKey(ctx, key, IdleTimeout)
-	return true
+	return cache.MatchAndExpire(ctx, key, username, IdleTimeout)
 }
 
 // Clear 在退出登录时删除 Redis 登录会话。

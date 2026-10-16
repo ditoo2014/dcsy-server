@@ -44,6 +44,27 @@ func Incr(ctx *gin.Context, key string) (int64, error) {
 	return GetRedisClient(ctx).Incr(key).Result()
 }
 
+// MatchAndExpire 校验缓存值并续期，区分键已失效和缓存服务故障。
+// 使用 EXPIRE 而非重新 SET，避免并发退出后重新创建已删除的会话。
+func MatchAndExpire(ctx *gin.Context, key, expectedValue string, expiration time.Duration) (bool, error) {
+	client := GetRedisClient(ctx)
+	if client == nil {
+		return false, fmt.Errorf("缓存连接未初始化")
+	}
+	key = fmt.Sprintf(prefix, key)
+	value, err := client.Get(key).Result()
+	if err == redis.Nil {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if value != expectedValue {
+		return false, nil
+	}
+	return client.Expire(key, expiration).Result()
+}
+
 func TTL(ctx *gin.Context, key string) (time.Duration, error) {
 	key = fmt.Sprintf(prefix, key)
 	return GetRedisClient(ctx).TTL(key).Result()

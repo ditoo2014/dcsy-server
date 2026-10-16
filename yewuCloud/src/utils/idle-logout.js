@@ -5,16 +5,22 @@ import { requirePasswordChange } from '@/utils/password-change.js'
 import { PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
 import {
   expireSession,
+  getSessionToken,
   LAST_ACTIVITY_KEY,
   SESSION_TIMEOUT_EVENT_KEY
 } from '@/utils/session-expiration'
+import { isCurrentSessionTimeout } from '@/utils/session-events'
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000
+const SESSION_REFRESH_INTERVAL_MS = 5 * 60 * 1000
 const ACTIVITY_EVENTS = ['click', 'keydown', 'mousedown', 'mousemove', 'scroll', 'touchstart', 'wheel']
 
 let timer = null
 let redirecting = false
 let lastRecordedAt = 0
+let lastRefreshAt = 0
+let lastRefreshToken = ''
+let refreshingToken = ''
 
 function currentRoute() {
   return router.currentRoute && router.currentRoute.value
@@ -66,7 +72,8 @@ function timeoutLogout(options = {}) {
   expireSession({
     broadcast,
     notifyBackend: broadcast,
-    redirectPath: redirect
+    redirectPath: redirect,
+    token: getSessionToken()
   }).finally(() => {
     // 单页应用重新登录不会重新加载本模块，下一次超时仍需能够退出。
     redirecting = false
@@ -96,20 +103,37 @@ function markActivity() {
   lastRecordedAt = now
   writeLastActivity(now)
   scheduleCheck()
+  refreshActiveSession()
+}
+
+/** 仅实际操作触发续期；后台轮询和自动刷新不会延长前端的无操作时间。 */
+function refreshActiveSession(force = false) {
+  const token = getToken()
+  const now = Date.now()
+  if (redirecting || !token || isLoginRoute() || document.visibilityState === 'hidden' ||
+      now - readLastActivity() >= IDLE_TIMEOUT_MS || refreshingToken === token) return
+  if (!force && lastRefreshToken === token && now - lastRefreshAt < SESSION_REFRESH_INTERVAL_MS) return
+
+  // 失败也按本次尝试计时，防止服务故障时每次移动鼠标都重复请求。
+  lastRefreshToken = token
+  lastRefreshAt = now
+  refreshingToken = token
+  store.dispatch('user/checkPasswordChange').then(status => {
+    if (getToken() === token && status.passwordChangeRequired) requirePasswordChange(status, token)
+  }).catch(error => {
+    if (getToken() === token && error?.errorCode === PASSWORD_CHANGE_REQUIRED) {
+      requirePasswordChange(error.responseData, token)
+    }
+  }).finally(() => {
+    if (refreshingToken === token) refreshingToken = ''
+  })
 }
 
 function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
     checkIdle()
-    // 后台标签重新激活时查询真实状态，避免跨季度仍停留在旧业务画面。
-    const token = getToken()
-    if (token && !isLoginRoute()) {
-      store.dispatch('user/checkPasswordChange').then(status => {
-        if (status.passwordChangeRequired) requirePasswordChange(status, token)
-      }).catch(error => {
-        if (error?.errorCode === PASSWORD_CHANGE_REQUIRED) requirePasswordChange(error.responseData, token)
-      })
-    }
+    // 恢复到前台时同时核验季度改密状态，不更新人工操作时间。
+    refreshActiveSession(true)
   }
 }
 
@@ -118,7 +142,7 @@ function handleStorage(event) {
     scheduleCheck()
     return
   }
-  if (event.key === SESSION_TIMEOUT_EVENT_KEY && event.newValue) {
+  if (event.key === SESSION_TIMEOUT_EVENT_KEY && isCurrentSessionTimeout(event.newValue, getSessionToken())) {
     timeoutLogout({ broadcast: false })
   }
 }

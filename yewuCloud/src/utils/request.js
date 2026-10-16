@@ -73,7 +73,7 @@ service.interceptors.response.use(
         type: 'warning',
         duration: 3 * 1000
       })
-      expireSession()
+      expireSession({ token: requestBearerToken(error.config) })
     } else {
       const serverMsg = error.response?.data?.msg ||
         error.response?.data?.message ||

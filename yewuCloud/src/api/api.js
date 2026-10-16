@@ -111,7 +111,7 @@ export function http(params) {
           res.msg === '登录超时，请重新登录'
         if (Number(res.code) === 401) {
           Message({
-            message: `账号在其他地方登录，请重新登录`,
+            message: errMsg,
             type: 'warning',
             duration: 3 * 1000
           })
@@ -127,7 +127,7 @@ export function http(params) {
           reject(businessError)
         }
         if (sessionInvalid && requestBearerToken(requestParams) === (getToken() || '')) {
-          expireSession()
+          expireSession({ token: requestBearerToken(requestParams) })
         }
       } else {
         resolve(res)
