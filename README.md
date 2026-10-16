@@ -1,5 +1,25 @@
 # dcsy-server
 
+## 数据点业务编码
+
+前端、业务后端和独立解析程序沿用原版数据点 ID：
+
+| 中文含义 | 数据点 ID |
+| --- | --- |
+| 剩余放电时长 | `alg_fangdianshichang` |
+| 热失控风险等级 | `alg_rekongfengxianstage` |
+| 温差 | `ditoo_wencha` |
+| 压差 | `ditoo_yacha` |
+| 累计放电量 | `tt_fangdiandianliang` |
+| 循环次数 | `tt_chongdiancishu` |
+| 累计充电量 | `tt_chongdiandianliang` |
+
+前端常量集中在 `yewuCloud/src/utils/battery-point-ids.js`；业务后端和独立解析程序分别在 `dicloud/util/pointid`、`deal/util/pointid` 维护相同编码，保持独立构建。数据点 ID 支持 TTDC 地址前缀，例如 `02_ditoo_wencha`。
+
+模板新建、编辑和导入沿用原版算法 ID 校验；优先按数据点 ID 识别算法结果，历史模板仍可通过 `algorithm_key` 关联算法输出。前端识别和统计查询恢复原来的中文名称回退，查询时保留实际通道、标签的数据点 ID。中文名称、统计代码、数值主键及数据库结构保持原样。
+
+本次代码恢复不会自动改写数据库、Redis 或时序历史数据。此前已手动改为英文编码的模板点、实际通道、数据池标签和其他关联配置需单独核对，确保与原版 ID 一致。部署时同步更新 `deal`、`dicloud` 相关服务及完整前端产物。
+
 ## 数据库初始化顺序
 
 首次部署或升级时，先以单实例方式启动 `dicloud` 的 `auth` 程序。只有认证程序会创建共享的缺失表和执行经过审核的增量迁移；`business`、`tolink`、`trigger`、`statistic`、`apiserver` 只读校验数据库结构。认证程序初始化成功后，再启动告警程序及其他服务。

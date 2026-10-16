@@ -7,6 +7,7 @@ import (
 	"dicloud/internal/common/grpc/tolink_grpc"
 	tolinkdao "dicloud/internal/tolink/dao"
 	tolinkmodel "dicloud/internal/tolink/model"
+	"dicloud/util/pointid"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -27,8 +28,8 @@ var chargeDischargePointDefinitions = []struct {
 	Code    string
 	Aliases []string
 }{
-	{DataID: "tt_fangdiandianliang", Code: ChargeDischargeCodeDischarge, Aliases: []string{"累计放电量", "累计放电容量"}},
-	{DataID: "tt_chongdiandianliang", Code: ChargeDischargeCodeCharge, Aliases: []string{"累计充电量", "累计充电容量"}},
+	{DataID: pointid.TotalDischargeCapacity, Code: ChargeDischargeCodeDischarge, Aliases: []string{"累计放电量", "累计放电容量"}},
+	{DataID: pointid.TotalChargeCapacity, Code: ChargeDischargeCodeCharge, Aliases: []string{"累计充电量", "累计充电容量"}},
 }
 
 type chargeDischargePoint struct {
@@ -46,8 +47,8 @@ func resolveChargeDischargePoints(ctx *gin.Context, equipments []businessmodel.E
 		points := resolveChargeDischargeStreamPoints(equipment, streams[strings.TrimSpace(equipment.ApiKey)])
 		if len(points) == 0 && strings.TrimSpace(equipment.EquipmentCode) != "" {
 			legacyPoints := []statisticDataPoint{
-				{DataID: "tt_fangdiandianliang", Code: dto.DP_STATISTIC_CODE_MAP["tt_fangdiandianliang"]},
-				{DataID: "tt_chongdiandianliang", Code: dto.DP_STATISTIC_CODE_MAP["tt_chongdiandianliang"]},
+				{DataID: pointid.TotalDischargeCapacity, Code: dto.DP_STATISTIC_CODE_MAP[pointid.TotalDischargeCapacity]},
+				{DataID: pointid.TotalChargeCapacity, Code: dto.DP_STATISTIC_CODE_MAP[pointid.TotalChargeCapacity]},
 			}
 			for _, point := range legacyResolver.resolve(equipment.EquipmentCode, legacyPoints) {
 				points = append(points, chargeDischargePoint{
@@ -141,10 +142,11 @@ func findEquipmentStatisticStream(ctx *gin.Context, apiKey string) (*tolink_grpc
 	return response.Stream, true
 }
 
+// chargeDischargeCodeForPoint 按原版 ID 及通道前缀识别充放电点，并保留名称回退。
 func chargeDischargeCodeForPoint(dataID, name, dataName string) string {
 	normalizedID := strings.ToLower(strings.TrimSpace(dataID))
 	for _, definition := range chargeDischargePointDefinitions {
-		if normalizedID == definition.DataID || strings.HasSuffix(normalizedID, "_"+definition.DataID) {
+		if pointid.Matches(normalizedID, definition.DataID) {
 			return definition.Code
 		}
 		for _, candidateName := range []string{name, dataName} {

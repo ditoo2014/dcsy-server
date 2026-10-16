@@ -23,7 +23,7 @@ export function isDcsyTracePlatform(platform, port) {
   return false
 }
 
-export function getYztUserid(config) {
+export function getCloudConfigurationHost(config) {
   if (config.platform === PLATFORM.DCSY_INTRANET) {
     if (config.port === '8003' || config.port === '80') {
       return `${config.ip}:8004`

@@ -20,32 +20,32 @@ func LogicalOperators(logicStr string) (value bool, msg string) {
 	digits := []float64{}
 	result := []bool{}
 
-	_wei := []int{}
+	operatorIndexes := []int{}
 	_formula := []string{}
 
 	for idx := range logicStr {
 		switch logicStr[idx] {
 		case '<', '>', '=', '|', '&':
 			compar = append(compar, logicStr[idx])
-			_wei = append(_wei, idx)
+			operatorIndexes = append(operatorIndexes, idx)
 		}
 	}
 
-	length := len(_wei)
+	length := len(operatorIndexes)
 
 	if 0 == length {
 		msg = "请输入正确的比较式"
 		return
 	}
 
-	for idx := range _wei {
+	for idx := range operatorIndexes {
 		if 0 == idx {
-			_formula = append(_formula, logicStr[0:_wei[idx]])
+			_formula = append(_formula, logicStr[0:operatorIndexes[idx]])
 		} else {
-			_formula = append(_formula, logicStr[_wei[idx-1]+1:_wei[idx]])
+			_formula = append(_formula, logicStr[operatorIndexes[idx-1]+1:operatorIndexes[idx]])
 		}
 	}
-	_formula = append(_formula, logicStr[_wei[length-1]+1:])
+	_formula = append(_formula, logicStr[operatorIndexes[length-1]+1:])
 
 	for idx := range _formula {
 

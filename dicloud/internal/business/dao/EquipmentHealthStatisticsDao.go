@@ -296,12 +296,12 @@ func isEquipmentHealthSOHDataID(dataID string) bool {
 func classifyEquipmentHealthSOH(soh float64) string {
 	switch {
 	case soh > 90:
-		return commonmodel.StatisticHealthCode_YOU
+		return commonmodel.StatisticHealthCodeExcellent
 	case soh >= 80:
-		return commonmodel.StatisticHealthCode_LIANG
+		return commonmodel.StatisticHealthCodeGood
 	case soh >= 60:
-		return commonmodel.StatisticHealthCode_ZHONG
+		return commonmodel.StatisticHealthCodeFair
 	default:
-		return commonmodel.StatisticHealthCode_CHA
+		return commonmodel.StatisticHealthCodePoor
 	}
 }

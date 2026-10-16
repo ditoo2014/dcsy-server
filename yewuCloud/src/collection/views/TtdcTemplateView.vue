@@ -1,8 +1,11 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+// 显式导入原版操作图标，避免只有图标的编辑、删除和导出按钮显示为空白。
+import { Delete, Download, Edit, Plus, Upload } from '@element-plus/icons-vue';
 import { useAuthStore } from '../stores/auth';
 import { TTDC_TEMPLATE_PERMISSIONS } from '../constants/permissions';
+import { normalizeBatteryPointId, REMAINING_DISCHARGE_TIME_POINT_DATA_ID, THERMAL_RUNAWAY_RISK_POINT_DATA_ID, TEMPERATURE_DIFFERENCE_POINT_DATA_ID, PRESSURE_POINT_DATA_ID } from '../../utils/battery-point-ids.js';
 import { deleteTtdcGroup, deleteTtdcAlarmRule, deleteTtdcTemplate, exportTtdcTemplate, fetchTtdcGroupDetail, fetchTtdcGroupPage, fetchTtdcAlarmRuleDetail, fetchTtdcAlarmRulePage, fetchTtdcTemplateDetail, importTtdcTemplate, saveTtdcGroup, saveTtdcAlarmRule, saveTtdcTemplate, setTtdcGroupState, setTtdcAlarmRuleEnabled, setTtdcTemplateManualEnabled, } from '../api/ttdc-template';
 const auth = useAuthStore();
 const loading = ref(false);
@@ -327,11 +330,11 @@ function removePoint(point) {
         pointPage.value = max;
 }
 function onSocPointIDChange(point) {
-    const key = point.baseDataId.trim();
-    if (/^alg_cell(?:0[1-9]|[1-9][0-9]{1,2})_soc$/.test(key) || ['alg_fangdianshichang', 'alg_soc', 'alg_soh', 'ditoo_wencha', 'ditoo_yacha'].includes(key)) {
+    const key = normalizeBatteryPointId(point.baseDataId);
+    if (/^alg_cell(?:0[1-9]|[1-9][0-9]{1,2})_soc$/.test(key) || [REMAINING_DISCHARGE_TIME_POINT_DATA_ID, 'alg_soc', 'alg_soh', TEMPERATURE_DIFFERENCE_POINT_DATA_ID, PRESSURE_POINT_DATA_ID].includes(key)) {
         point.dataType = 1;
     }
-    else if (key === 'alg_rekongfengxianstage') {
+    else if (key === THERMAL_RUNAWAY_RISK_POINT_DATA_ID) {
         point.dataType = 2;
     }
 }

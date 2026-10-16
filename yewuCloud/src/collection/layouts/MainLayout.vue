@@ -8,7 +8,6 @@ import { Connection, Expand, Fold, Grid, Monitor, Moon, Sunny, UserFilled } from
 import { useAuthStore } from '../stores/auth'
 import { useTagsViewStore } from '../stores/tagsView.js'
 import { redirectToMainLogin } from '../utils/mainLoginRedirect'
-import { TTDC_TEMPLATE_PERMISSIONS } from '../constants/permissions'
 import { mountCollectionPageStyles } from '../../styles/pageStyles'
 
 // 原采集云全局样式只在布局存活时生效，包含挂载到 body 的弹层。
@@ -28,7 +27,10 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const tagsStore = useTagsViewStore()
-const showTtdcTemplateManagement = computed(() => authStore.hasAnyPermission(TTDC_TEMPLATE_PERMISSIONS.view))
+// 临时仅向 ditoo 显示模板入口，等待登录信息加载完成以避免旧账号缓存造成误显示。
+const showTtdcTemplateManagement = computed(
+  () => authStore.accessLoaded && authStore.account === 'ditoo'
+)
 
 const sidebarCollapsed = ref(localStorage.getItem(COLLAPSE_KEY) === '1')
 const isDarkTheme = ref(localStorage.getItem(THEME_KEY) === 'dark')
@@ -140,10 +142,10 @@ watch(() => route.fullPath, () => {
           <el-icon><Monitor /></el-icon>
           <span>数据池管理</span>
         </el-menu-item>
-<!--        <el-menu-item v-if="showTtdcTemplateManagement" index="ttdc-templates">-->
-<!--          <el-icon><Grid /></el-icon>-->
-<!--          <span>TTDC公共模板</span>-->
-<!--        </el-menu-item>-->
+        <el-menu-item v-if="showTtdcTemplateManagement" index="ttdc-templates">
+          <el-icon><Grid /></el-icon>
+          <span>TTDC公共模板</span>
+        </el-menu-item>
       </el-menu>
     </aside>
 

@@ -4,6 +4,7 @@ import (
 	"deal/internal/batterylog"
 	"deal/internal/tolink/model"
 	"deal/util"
+	"deal/util/pointid"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -250,7 +251,7 @@ func parsePreparedCID42(prepared PreparedBatteryChannels, info string, ts time.T
 	cellVoltages := make(map[int]float64)
 	cellTemperatures := make(map[int]float64)
 	skippedPoints := 0
-	aiData := DcToAIData{PackNo: prepared.GatewayID, Timestamp: ts.Format("2006-01-02 15:04:05")}
+	aiData := BatteryAIRequest{PackNo: prepared.GatewayID, Timestamp: ts.Format("2006-01-02 15:04:05")}
 
 	for _, item := range module.ModuleDatas {
 		raw, ok := decodeTransport(info, item.Transport)
@@ -305,10 +306,10 @@ func parsePreparedCID42(prepared PreparedBatteryChannels, info string, ts time.T
 	}
 	if remaining, ok := values["remaining_capacity"]; ok {
 		if total, totalOK := values["total_capacity"]; totalOK && total > 0 {
-			aiData.Soc, aiData.DCZRL = remaining, total
+			aiData.Soc, aiData.TotalCapacity = remaining, total
 		}
 	}
-	if aiData.DCZRL == 0 {
+	if aiData.TotalCapacity == 0 {
 		if soc, ok := values["pack_soc"]; ok {
 			aiData.Soc = soc
 		}
@@ -321,10 +322,10 @@ func parsePreparedCID42(prepared PreparedBatteryChannels, info string, ts time.T
 		batterylog.Printf("[BATTERY-AI] skipped gatewayID=%s ADR=%s reportedCells=%d decodedCells=%d: cell voltages are incomplete\n", prepared.GatewayID, adr, cellCount, len(aiData.CellVoltages))
 	}
 	if spread, ok := spreadOfPresent(pointsWithinCount(cellVoltages, cellCount)); ok {
-		algorithms["ditoo_yacha"] = numericAlgorithmResult(spread)
+		algorithms[pointid.VoltageDifference] = numericAlgorithmResult(spread)
 	}
 	if spread, ok := spreadOfPresent(pointsWithinCount(cellTemperatures, temperatureCount)); ok {
-		algorithms["ditoo_wencha"] = numericAlgorithmResult(spread)
+		algorithms[pointid.TemperatureDifference] = numericAlgorithmResult(spread)
 	}
 	appendMappedAlgorithmResults(&result, prepared.SocModule, algorithms, ts)
 	return result
@@ -525,7 +526,7 @@ func parseCID42(module model.GatewayModuleTtdc, topicKind TopicKind, gatewayID s
 	}
 	cellVoltages := make([]float64, 16)
 	cellTemperatures := make([]float64, temperatureSlots)
-	aiData := DcToAIData{
+	aiData := BatteryAIRequest{
 		PackNo:    gatewayID,
 		Timestamp: ts.Format("2006-01-02 15:04:05"),
 	}
@@ -550,8 +551,8 @@ func parseCID42(module model.GatewayModuleTtdc, topicKind TopicKind, gatewayID s
 
 	aiData.CellVoltages = cellVoltages
 	aiData.CellTemperatures = cellTemperatures
-	result.Points = append(result.Points, Point{DataID: adr + "_ditoo_yacha", Value: maxMinusMin(cellVoltages), Status: 1, TS: ts})
-	result.Points = append(result.Points, Point{DataID: adr + "_ditoo_wencha", Value: maxMinusMin(cellTemperatures), Status: 1, TS: ts})
+	result.Points = append(result.Points, Point{DataID: algorithmDataID(adr, pointid.VoltageDifference), Value: maxMinusMin(cellVoltages), Status: 1, TS: ts})
+	result.Points = append(result.Points, Point{DataID: algorithmDataID(adr, pointid.TemperatureDifference), Value: maxMinusMin(cellTemperatures), Status: 1, TS: ts})
 	appendAIResultPoints(&result, adr, aiData, ts)
 	return result
 }
@@ -582,7 +583,7 @@ func parseCID44(module model.GatewayModuleTtdc, gatewayID string, info string, t
 	return result
 }
 
-func fillAIData(adr string, name string, raw float64, value float64, aiData *DcToAIData, cellVoltages []float64, cellTemperatures []float64) {
+func fillAIData(adr string, name string, raw float64, value float64, aiData *BatteryAIRequest, cellVoltages []float64, cellTemperatures []float64) {
 	dataName := strings.TrimPrefix(name, adr+"_")
 	key := normalizePointName(dataName)
 	switch key {
@@ -601,7 +602,7 @@ func fillAIData(adr string, name string, raw float64, value float64, aiData *DcT
 	case "电池剩余容量":
 		aiData.Soc = value
 	case "电池总容量":
-		aiData.DCZRL = value
+		aiData.TotalCapacity = value
 	case "电池组荷电状态(SOC)":
 		aiData.Soc = value
 	}

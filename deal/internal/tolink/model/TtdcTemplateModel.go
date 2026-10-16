@@ -1,6 +1,7 @@
 package model
 
 import (
+	"deal/util/pointid"
 	"fmt"
 	"strconv"
 	"strings"
@@ -16,27 +17,26 @@ func TtdcAlgorithmDataType(key string) (int, bool) {
 		return 1, true
 	}
 	switch key {
-	case "alg_fangdianshichang", "alg_soc", "alg_soh", "ditoo_wencha", "ditoo_yacha":
+	case pointid.RemainingDischargeTime, "alg_soc", "alg_soh", pointid.TemperatureDifference, pointid.VoltageDifference:
 		return 1, true
-	case "alg_rekongfengxianstage":
+	case pointid.ThermalRunawayRiskLevel:
 		return 2, true
 	default:
 		return 0, false
 	}
 }
 
-// TtdcAlgorithmResultKey resolves a 42_SOC point to the result key produced by
-// the battery parser. New templates use baseDataID directly; algorithm_key is
-// retained only as a fallback for templates created before this contract.
-func TtdcAlgorithmResultKey(baseDataID string, legacyAlgorithmKey *string) (string, int, bool) {
+// TtdcAlgorithmResultKey 优先按原版数据点 ID 识别算法输出。
+// 历史模板使用自定义 ID 时，沿用 algorithm_key 关联算法结果的回退逻辑。
+func TtdcAlgorithmResultKey(baseDataID string, algorithmKey *string) (string, int, bool) {
 	baseDataID = strings.TrimSpace(baseDataID)
 	if dataType, ok := TtdcAlgorithmDataType(baseDataID); ok {
 		return baseDataID, dataType, true
 	}
-	if legacyAlgorithmKey == nil {
+	if algorithmKey == nil {
 		return "", 0, false
 	}
-	key := strings.TrimSpace(*legacyAlgorithmKey)
+	key := strings.TrimSpace(*algorithmKey)
 	dataType, ok := TtdcAlgorithmDataType(key)
 	return key, dataType, ok
 }

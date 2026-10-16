@@ -85,13 +85,13 @@ export function onFullscreenChange(handler) {
 }
 
 /** 驾驶舱缩放容器（不含顶部 Banner） */
-export function getJscScreenWrapper() {
+export function getDashboardScreenWrapper() {
   return document.querySelector('.app-wrapper--jsc .screen-wrapper')
 }
 
 /** 是否处于驾驶舱 API 全屏 */
-export function isJscApiFullscreen() {
-  const wrapper = getJscScreenWrapper()
+export function isDashboardApiFullscreen() {
+  const wrapper = getDashboardScreenWrapper()
   return !!(wrapper && getFullscreenElement() === wrapper)
 }
 
@@ -106,11 +106,11 @@ export function looksLikeBrowserF11Fullscreen() {
 }
 
 /** 请求驾驶舱区域全屏（路由切换后等待 .screen-wrapper 挂载） */
-export function requestJscFullscreen(options = {}) {
+export function requestDashboardFullscreen(options = {}) {
   const { maxRetries = 20, interval = 50 } = options
   return new Promise((resolve) => {
     const attempt = (left) => {
-      const el = getJscScreenWrapper()
+      const el = getDashboardScreenWrapper()
       if (el) {
         requestFullscreenSafe(el).then(resolve)
         return
@@ -126,18 +126,18 @@ export function requestJscFullscreen(options = {}) {
 }
 
 /** 切换驾驶舱区域全屏 */
-export function toggleJscFullscreen() {
+export function toggleDashboardFullscreen() {
   if (!isFullscreenSupported()) {
     return Promise.resolve(false)
   }
-  const el = getJscScreenWrapper()
+  const el = getDashboardScreenWrapper()
   if (!el) {
     return Promise.resolve(false)
   }
   if (screenfull.isEnabled) {
     return Promise.resolve(screenfull.toggle(el)).catch(() => false)
   }
-  if (isJscApiFullscreen()) {
+  if (isDashboardApiFullscreen()) {
     return exitFullscreenSafe().then(() => true)
   }
   return requestFullscreenSafe(el)

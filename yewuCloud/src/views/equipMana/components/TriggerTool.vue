@@ -23,8 +23,8 @@
           </el-table-column>
           <el-table-column label="触发类型" align="center">
             <template #default="scope">
-              <span>{{ scope.row.chufaTypeName }}</span>
-              <span v-if="scope.row.chufaTypeName === '周期触发'">，间隔：{{ scope.row.realtimeCycle }}{{ scope.row.cycleTypeName }}</span>
+              <span>{{ scope.row.triggerModeName }}</span>
+              <span v-if="scope.row.triggerModeName === '周期触发'">，间隔：{{ scope.row.realtimeCycle }}{{ scope.row.cycleTypeName }}</span>
             </template>
           </el-table-column>
           <el-table-column :label="`${alarmTypeName}条件`" align="center">
@@ -67,7 +67,7 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item label="是否进行统计">
-                  <el-radio-group v-model="form.isTj" @change="isTjChange">
+                  <el-radio-group v-model="form.statisticsEnabled" @change="handleStatisticsEnabledChange">
                     <el-radio :value="true">是</el-radio><el-radio :value="false">否</el-radio>
                   </el-radio-group>
                 </el-form-item>
@@ -98,12 +98,12 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item label="触发方式">
-                  <el-select v-model="form.chufaType" class="filter-item" placeholder="请选择" filterable @change="cflxChange">
+                  <el-select v-model="form.triggerMode" class="filter-item" placeholder="请选择" filterable @change="handleTriggerModeChange">
                     <el-option :key="1" label="单次触发" :value="1" /><el-option :key="2" label="周期触发" :value="2" />
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col v-if="form.chufaType === 2" :span="24">
+              <el-col v-if="form.triggerMode === 2" :span="24">
                 <el-form-item label="触发间隔" prop="realtimeCycle">
                   <div style="float:left;margin-right:10px;width:100px;"><el-input v-model="form.realtimeCycle" type="number" :min="1" /></div>
                   <div style="float: left;width: 100px;">
@@ -222,7 +222,7 @@ export default {
         code: [{ required: true, whitespace: true, trigger: 'blur', message: `${this.alarmTypeName}代码不能为空` }],
         labelId: [{ required: true, trigger: 'change', message: '请选择数据' }],
         realtimeCycle: [{ trigger: 'blur', validator: (rule, value, callback) => {
-          if (this.form.chufaType !== 2 || (Number.isSafeInteger(Number(value)) && Number(value) > 0)) callback()
+          if (this.form.triggerMode !== 2 || (Number.isSafeInteger(Number(value)) && Number(value) > 0)) callback()
           else callback(new Error('请输入大于0的正整数'))
         } }],
         logics: [{ trigger: 'blur', validator: (rule, value, callback) => {
@@ -233,7 +233,7 @@ export default {
           callback()
         } }],
         'statisticConfig.statisticValue': [{ trigger: 'blur', validator: (rule, value, callback) => {
-          if (!this.form.isTj || !this.form.statisticConfig.useStatisticValue || isFiniteNumber(value)) callback()
+          if (!this.form.statisticsEnabled || !this.form.statisticConfig.useStatisticValue || isFiniteNumber(value)) callback()
           else callback(new Error('统计值请填写有效数字'))
         } }]
       },
@@ -389,7 +389,7 @@ export default {
       const triggerType = Number(source.triggerType) || 0
       return {
         ...source, cycle, cycleType, triggerType,
-        chufaType: cycle ? 2 : 1, chufaTypeName: cycle ? '周期触发' : '单次触发',
+        triggerMode: cycle ? 2 : 1, triggerModeName: cycle ? '周期触发' : '单次触发',
         realtimeCycle: cycle / (cycleType === 3 ? 3600 : (cycleType === 2 ? 60 : 1)),
         cycleTypeName: this.realtimeCycleList.find(item => item.key === cycleType).name,
         logics: (source.logics || []).map(item => ({ ...item })),
@@ -427,15 +427,15 @@ export default {
         ...this.setGettriggerDeatilMsg(row),
         apiKey: row.apiKey || this.formData.apiKey,
         siteId: row.siteId || this.getSiteId(), equipmentId: Number(this.formData.id),
-        isTj: Number(row.triggerType) === 1 || Number(row.triggerType) === 2,
+        statisticsEnabled: Number(row.triggerType) === 1 || Number(row.triggerType) === 2,
         formula: row.formula || 'x', marktrigger: row.marktrigger || '',
         alarmUser: this.normalizeAlarmUser(row.alarmUser, alarmType),
         statisticConfig: this.defaultStatisticConfig(row.statisticConfig || {})
       } : {
         apiKey: this.formData.apiKey, siteId: this.getSiteId(), equipmentId: Number(this.formData.id),
         code: '', labelId: this.labelList[0].key, labelName: this.labelList[0].labelName,
-        chufaType: 1, cycleType: 1, realtimeCycle: 0, cycle: 0, marktrigger: '',
-        triggerType: 2, triggerTypeArr: [this.alarmTypeName, '统计'], isTj: true, formula: 'x',
+        triggerMode: 1, cycleType: 1, realtimeCycle: 0, cycle: 0, marktrigger: '',
+        triggerType: 2, triggerTypeArr: [this.alarmTypeName, '统计'], statisticsEnabled: true, formula: 'x',
         // 与原版一致，由用户明确添加触发条件，不能默认创建大于 0 的规则。
         logics: [], strMatchs: [],
         alarmUser: this.buildDefaultAlarmUser(alarmType), statisticConfig: this.defaultStatisticConfig()
@@ -443,22 +443,22 @@ export default {
       this.$nextTick(() => this.$refs.dataForm && this.$refs.dataForm.clearValidate())
       return true
     },
-    isTjChange() {
-      this.form.triggerType = this.form.isTj ? 2 : 0
-      this.form.triggerTypeArr = this.form.isTj ? [this.alarmTypeName, '统计'] : [this.alarmTypeName]
+    handleStatisticsEnabledChange() {
+      this.form.triggerType = this.form.statisticsEnabled ? 2 : 0
+      this.form.triggerTypeArr = this.form.statisticsEnabled ? [this.alarmTypeName, '统计'] : [this.alarmTypeName]
     },
     labelChange() {
       const label = this.labelList.find(item => sameId(item.key, this.form.labelId))
       this.form.labelName = label ? label.labelName : ''
     },
-    cflxChange() {
-      this.form.realtimeCycle = this.form.chufaType === 2 ? 1 : 0
-      if (this.form.chufaType === 1) this.form.cycleType = 1
+    handleTriggerModeChange() {
+      this.form.realtimeCycle = this.form.triggerMode === 2 ? 1 : 0
+      if (this.form.triggerMode === 1) this.form.cycleType = 1
       this.cycleChange()
     },
     cycleChange() {
       const factor = this.form.cycleType === 3 ? 3600 : (this.form.cycleType === 2 ? 60 : 1)
-      this.form.cycle = this.form.chufaType === 1 ? 0 : Number(this.form.realtimeCycle) * factor
+      this.form.cycle = this.form.triggerMode === 1 ? 0 : Number(this.form.realtimeCycle) * factor
     },
     addlogics() { this.form.logics.push({ logic: '>', triggerValue: 0 }) },
     removelogics(index) { this.form.logics.splice(index, 1) },

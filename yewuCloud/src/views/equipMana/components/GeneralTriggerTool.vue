@@ -37,8 +37,8 @@
           </el-table-column>
           <el-table-column label="触发类型" align="center" min-width="140">
             <template #default="scope">
-              <span>{{ scope.row.chufaTypeName }}</span>
-              <span v-if="scope.row.chufaTypeName === '周期触发'">，间隔：{{ scope.row.realtimeCycle }}{{ scope.row.cycleTypeName }}</span>
+              <span>{{ scope.row.triggerModeName }}</span>
+              <span v-if="scope.row.triggerModeName === '周期触发'">，间隔：{{ scope.row.realtimeCycle }}{{ scope.row.cycleTypeName }}</span>
             </template>
           </el-table-column>
           <el-table-column label="触发条件" align="center" min-width="120">
@@ -130,7 +130,7 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item label="是否进行统计">
-                  <el-radio-group v-model="form.isTj" @change="isTjChange">
+                  <el-radio-group v-model="form.statisticsEnabled" @change="handleStatisticsEnabledChange">
                     <el-radio :label="true">是</el-radio>
                     <el-radio :label="false">否</el-radio>
                   </el-radio-group>
@@ -165,13 +165,13 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item label="触发方式">
-                  <el-select v-model="form.chufaType" class="filter-item" placeholder="请选择" filterable @change="cflxChange">
+                  <el-select v-model="form.triggerMode" class="filter-item" placeholder="请选择" filterable @change="handleTriggerModeChange">
                     <el-option :key="1" label="单次触发" :value="1" />
                     <el-option :key="2" label="周期触发" :value="2" />
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col v-if="form.chufaType === 2" :span="24">
+              <el-col v-if="form.triggerMode === 2" :span="24">
                 <el-form-item label="触发间隔" prop="realtimeCycle">
                   <div style="float:left;margin-right:10px;width:100px;">
                     <el-input v-model="form.realtimeCycle" type="number" :min="1" />
@@ -286,7 +286,7 @@ export default {
   },
   data() {
     const validateRealtimeCycle = (rule, value, callback) => {
-      if (this.form.chufaType !== 2) {
+      if (this.form.triggerMode !== 2) {
         callback()
         return
       }
@@ -544,8 +544,8 @@ export default {
       const row = { ...item }
       const cycle = Number(row.cycle) || 0
       row.cycle = cycle
-      row.chufaType = 1
-      row.chufaTypeName = '单次触发'
+      row.triggerMode = 1
+      row.triggerModeName = '单次触发'
       row.cycleType = 1
       row.realtimeCycle = 0
       row.cycleTypeName = '秒'
@@ -555,8 +555,8 @@ export default {
       row.triggerModel = row.triggerModel ?? 0
       if (cycle !== 0) {
         row.realtimeCycle = cycle
-        row.chufaType = 2
-        row.chufaTypeName = '周期触发'
+        row.triggerMode = 2
+        row.triggerModeName = '周期触发'
       }
       if (cycle !== 0 && cycle % 3600 === 0) {
         row.cycleType = 3
@@ -606,13 +606,13 @@ export default {
           alarmCategory: '告警',
           triggerModel: 0,
           ignoreLogic: false,
-          chufaType: 1,
+          triggerMode: 1,
           cycleType: 1,
           realtimeCycle: 0,
           cycle: 0,
           sustainTime: 0,
           triggerType: 2,
-          isTj: true,
+          statisticsEnabled: true,
           formula: 'x',
           logics: [],
           strMatchs: [],
@@ -645,7 +645,7 @@ export default {
           alarmCategory,
           triggerModel: row.triggerModel ?? 0,
           ignoreLogic: !!row.ignoreLogic,
-          chufaType: row.chufaType,
+          triggerMode: row.triggerMode,
           cycleType: row.cycleType,
           realtimeCycle: row.realtimeCycle,
           cycle: row.cycle,
@@ -667,7 +667,7 @@ export default {
             statisticValueType: statisticConfig.statisticValueType ?? 1
           }
         }
-        this.form.isTj = this.form.triggerType === 1 || this.form.triggerType === 2
+        this.form.statisticsEnabled = this.form.triggerType === 1 || this.form.triggerType === 2
         if (!this.form.ignoreLogic && this.form.triggerModel === 0 && this.form.logics.length === 0) {
           this.addlogics()
         }
@@ -690,15 +690,15 @@ export default {
         this.addStrMatch()
       }
     },
-    isTjChange() {
-      if (this.form.isTj) {
+    handleStatisticsEnabledChange() {
+      if (this.form.statisticsEnabled) {
         this.form.triggerType = 2
       } else {
         this.form.triggerType = 0
       }
     },
-    cflxChange() {
-      switch (this.form.chufaType) {
+    handleTriggerModeChange() {
+      switch (this.form.triggerMode) {
         case 1: this.form.realtimeCycle = 0; this.form.cycleType = 1; break
         case 2: this.form.realtimeCycle = 1; break
       }
@@ -753,12 +753,12 @@ export default {
       delete payload.alarmCategory
       delete payload.limitToCurrentDevice
       delete payload.marktriggers
-      delete payload.chufaType
-      delete payload.chufaTypeName
+      delete payload.triggerMode
+      delete payload.triggerModeName
       delete payload.cycleType
       delete payload.cycleTypeName
       delete payload.realtimeCycle
-      delete payload.isTj
+      delete payload.statisticsEnabled
       delete payload.triggerTypeArr
       payload.sustainTime = Number(payload.sustainTime) || 0
       return payload

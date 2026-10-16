@@ -43,7 +43,8 @@
 }
 
 .el-message-box {
-  max-width: calc(100vw - 32px);
+  /* 保留组件默认或自定义宽度，小窗口仍留出两侧边距，长内容在框内换行。 */
+  max-width: min(var(--el-messagebox-width, 420px), calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   max-height: calc(100dvh - 32px);
   overflow: auto;

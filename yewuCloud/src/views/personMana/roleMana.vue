@@ -308,10 +308,10 @@ export default {
     async getPermisList() { // 获取所有权限
       const res = await permissionList()
       const permisList = objectSort(res.return.data, 'parentId')
-      const cjyPermisList = [] // 采集云权限列表
+      const collectionPermissionList = [] // 采集云权限列表
       permisList.forEach(item => {
         if (item.platId === 0 || item.platId === 1) {
-          cjyPermisList.push({
+          collectionPermissionList.push({
             id: item.id,
             pid: item.parentId, // 父节点id
             label: item.permissionName, // 权限名称
@@ -323,14 +323,14 @@ export default {
       })
 
       const allPagPermis = [] // 全部页面权限
-      cjyPermisList.forEach(item => {
+      collectionPermissionList.forEach(item => {
         if (item.type === 1) { // 页面权限
           allPagPermis.push(item)
         }
       })
       this.allPagPermis = allPagPermis // 全部页面权限
       const allFuncPermis = [] // 全部功能权限
-      cjyPermisList.forEach(item => {
+      collectionPermissionList.forEach(item => {
         // if (item.type === 2) { // 功能权限
         allFuncPermis.push(item)
         // }

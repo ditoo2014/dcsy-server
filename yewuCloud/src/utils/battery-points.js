@@ -1,5 +1,12 @@
-export const PRESSURE_POINT_DATA_ID = 'ditoo_yacha'
-export const TEMPERATURE_DIFFERENCE_POINT_DATA_ID = 'ditoo_wencha'
+import { matchesBatteryPointId } from './battery-point-ids.js'
+export {
+  CYCLE_COUNT_POINT_DATA_ID,
+  TOTAL_DISCHARGE_CAPACITY_POINT_DATA_ID,
+  TOTAL_CHARGE_CAPACITY_POINT_DATA_ID,
+  PRESSURE_POINT_DATA_ID,
+  TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
+  REMAINING_DISCHARGE_TIME_POINT_DATA_ID
+} from './battery-point-ids.js'
 
 export function resolveBatteryHealthStatus(soh) {
   const numericSoh = Number.parseFloat(String(soh).replace('%', '').trim())
@@ -15,9 +22,7 @@ function normalize(value) {
 }
 
 function matchesDataIdSuffix(dataId, suffix) {
-  const normalizedDataId = normalize(dataId)
-  const normalizedSuffix = normalize(suffix)
-  return normalizedDataId === normalizedSuffix || normalizedDataId.endsWith(`_${normalizedSuffix}`)
+  return matchesBatteryPointId(dataId, suffix)
 }
 
 function pointName(item) {
@@ -63,6 +68,7 @@ export function resolveBatteryPoint(list, options = {}) {
     : []
   if (codeMatches.length) return selectBestPoint(codeMatches, gatewayId)
 
+  // 原版 ID 未匹配时，沿用名称回退并保留实际标签中的数据点 ID。
   const normalizedExactNames = exactNames.map(normalize).filter(Boolean)
   const exactNameMatches = normalizedExactNames.length
     ? points.filter(item => normalizedExactNames.includes(pointName(item)))

@@ -70,12 +70,12 @@ func (sd StatisticData) MarshalBinary() ([]byte, error) {
 
 // 健康度统计代码
 var (
-	StatisticHealthCode_YOU   = "SOH优"
-	StatisticHealthCode_LIANG = "SOH良"
-	StatisticHealthCode_ZHONG = "SOH中"
-	StatisticHealthCode_CHA   = "SOH差"
+	StatisticHealthCodeExcellent = "SOH优"
+	StatisticHealthCodeGood      = "SOH良"
+	StatisticHealthCodeFair      = "SOH中"
+	StatisticHealthCodePoor      = "SOH差"
 	// 默认标准代码 - 4个(优良中差)
-	StatisticHealthCodeArr = []string{StatisticHealthCode_YOU, StatisticHealthCode_LIANG, StatisticHealthCode_ZHONG, StatisticHealthCode_CHA}
+	StatisticHealthCodeArr = []string{StatisticHealthCodeExcellent, StatisticHealthCodeGood, StatisticHealthCodeFair, StatisticHealthCodePoor}
 	/* 电池健康度：  soh  >=0.9  优    soh >=0.8   <0.9   良       soh>=0.6   <0.8  中       soh <0.6  差  ，做成可配  */
-	StatisticHealthMap = map[string]int{StatisticHealthCode_YOU: 1, StatisticHealthCode_LIANG: 1, StatisticHealthCode_ZHONG: 1, StatisticHealthCode_CHA: 1}
+	StatisticHealthMap = map[string]int{StatisticHealthCodeExcellent: 1, StatisticHealthCodeGood: 1, StatisticHealthCodeFair: 1, StatisticHealthCodePoor: 1}
 )

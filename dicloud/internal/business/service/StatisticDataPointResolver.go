@@ -3,6 +3,7 @@ package service
 import (
 	"dicloud/internal/tolink/dao"
 	tolinkmodel "dicloud/internal/tolink/model"
+	"dicloud/util/pointid"
 	"log"
 	"sort"
 	"strings"
@@ -10,16 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// statisticDataPoint describes a physical gateway data point and the
-// canonical statistic code used by the statistic tables.
+// statisticDataPoint 关联实际网关数据点与统计代码，统计表中的代码保持不变。
 type statisticDataPoint struct {
 	DataID string
 	Code   string
 }
 
-// statisticDataPointResolver resolves gateway data IDs once per statistic run.
-// Gateway data IDs may contain a channel/address prefix, so the fixed legacy
-// IDs cannot be used for every battery.
+// statisticDataPointResolver 在一次统计任务中缓存网关配置，支持原版 ID 的地址前缀。
 type statisticDataPointResolver struct {
 	ctx   *gin.Context
 	cache map[string][]tolinkmodel.GatewayData
@@ -31,38 +29,38 @@ func newStatisticDataPointResolver(ctx *gin.Context) *statisticDataPointResolver
 }
 
 var statisticPointAliases = map[string][]string{
-	"tt_fangdiandianliang":  {"累计放电量", "累计放电容量"},
-	"tt_chongdiancishu":     {"循环次数", "充电次数"},
-	"tt_chongdiandianliang": {"累计充电量", "累计充电容量"},
-	"alg_soh":               {"SOH"},
+	// 沿用原版名称回退，兼容已有通道的数据点配置。
+	pointid.TotalDischargeCapacity: {"累计放电量", "累计放电容量"},
+	pointid.CycleCount:             {"循环次数", "充电次数"},
+	pointid.TotalChargeCapacity:    {"累计充电量", "累计充电容量"},
+	"alg_soh":                      {"SOH"},
 }
 
 // resolve returns every physical candidate for each canonical statistic code.
 // The caller selects the candidate with the latest valid reading because a
 // gateway can retain data points for more than one channel/address.
-func (r *statisticDataPointResolver) resolve(gatewayID string, legacyPoints []statisticDataPoint) []statisticDataPoint {
+func (r *statisticDataPointResolver) resolve(gatewayID string, standardPoints []statisticDataPoint) []statisticDataPoint {
 	if strings.TrimSpace(gatewayID) == "" {
 		return nil
 	}
 
-	resolved := make([]statisticDataPoint, 0, len(legacyPoints))
+	resolved := make([]statisticDataPoint, 0, len(standardPoints))
 	points, found := r.gatewayData(gatewayID)
 	if !found || len(points) == 0 {
 		log.Printf("[Business-Statistic] gateway data points unavailable, use legacy IDs gateway=%s", gatewayID)
-		for _, point := range legacyPoints {
-			resolved = append(resolved, point)
-		}
+		// 配置暂时不可用时，按原版固定 ID 查询已有数据。
+		resolved = append(resolved, standardPoints...)
 		return resolved
 	}
 
-	for _, legacy := range legacyPoints {
-		candidates := resolveStatisticPoints(points, legacy.DataID)
+	for _, point := range standardPoints {
+		candidates := resolveStatisticPoints(points, point.DataID)
 		if len(candidates) == 0 {
-			log.Printf("[Business-Statistic] statistic data point not found gateway=%s code=%s legacyID=%s", gatewayID, legacy.Code, legacy.DataID)
+			log.Printf("[Business-Statistic] statistic data point not found gateway=%s code=%s dataID=%s", gatewayID, point.Code, point.DataID)
 			continue
 		}
 		for _, candidate := range candidates {
-			resolved = append(resolved, statisticDataPoint{DataID: candidate, Code: legacy.Code})
+			resolved = append(resolved, statisticDataPoint{DataID: candidate, Code: point.Code})
 		}
 	}
 	return resolved
@@ -82,22 +80,22 @@ func (r *statisticDataPointResolver) gatewayData(gatewayID string) ([]tolinkmode
 	return gateway.GatewayDatas, true
 }
 
-func resolveStatisticPoint(points []tolinkmodel.GatewayData, legacyID string) string {
-	candidates := resolveStatisticPoints(points, legacyID)
+func resolveStatisticPoint(points []tolinkmodel.GatewayData, baseID string) string {
+	candidates := resolveStatisticPoints(points, baseID)
 	if len(candidates) == 0 {
 		return ""
 	}
 	return candidates[0]
 }
 
-func resolveStatisticPoints(points []tolinkmodel.GatewayData, legacyID string) []string {
-	legacyID = strings.ToLower(strings.TrimSpace(legacyID))
+func resolveStatisticPoints(points []tolinkmodel.GatewayData, baseID string) []string {
+	baseID = strings.ToLower(strings.TrimSpace(baseID))
 	type candidate struct {
 		dataID string
 		score  int
 	}
 	candidates := make([]candidate, 0)
-	aliases := statisticPointAliases[legacyID]
+	aliases := statisticPointAliases[baseID]
 	for _, point := range points {
 		dataID := strings.TrimSpace(point.DataId)
 		if dataID == "" {
@@ -106,9 +104,9 @@ func resolveStatisticPoints(points []tolinkmodel.GatewayData, legacyID string) [
 		id := strings.ToLower(dataID)
 		score := -1
 		switch {
-		case id == legacyID:
+		case id == baseID:
 			score = 0
-		case strings.HasSuffix(id, "_"+legacyID):
+		case pointid.Matches(id, baseID):
 			score = 1
 		}
 		name := strings.TrimSpace(point.Name)

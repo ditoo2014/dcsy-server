@@ -64,7 +64,7 @@ import config from '@/config.js'
 import { PLATFORM } from '@/constants/platform'
 import { mapGetters } from '@/store/pinia-helpers'
 import screenfull from 'screenfull'
-import { requestJscFullscreen, toggleJscFullscreen } from '@/utils/fullscreen.js'
+import { requestDashboardFullscreen, toggleDashboardFullscreen } from '@/utils/fullscreen.js'
 import { getPageList, getUsername } from '@/utils/auth.js'
 import { findCollectLiveTriggerTempData } from '@/api/jurisdCenter.js'
 import { getBannerHomePath, resolveBannerIdFromPath } from '@/utils/banner-route.js'
@@ -114,13 +114,13 @@ export default {
         { index: 'test', name: '测试', routeName: '', path: '', isShow: false }
       ],
 
-      baoBiaoPageRoutes: [], // 报表中心页面路由
-      jueCePageRoutes: [], // 监控中心页面路由
+      reportPageRoutes: [], // 报表中心页面路由
+      monitoringPageRoutes: [], // 监控中心页面路由
       jurisdCenterRoutes: [], // 告警中心页面路由
       dataManaPageRoutes: [], // 系统管理页面路由
-      ywptPageRoutes: [], // 运维中心页面路由
+      maintenancePageRoutes: [], // 运维中心页面路由
 
-      isShowYunwei: false, // 是否显示运维中心
+      showMaintenanceCenter: false, // 是否显示运维中心
 
       WarningTotal: 0 // 告警信息条数
     }
@@ -205,17 +205,17 @@ export default {
       return this.$router.push({ path: target })
     },
     setRouters() { // 设置路由
-      const baoBiaoPageRoutes = []
-      const jueCePageRoutes = []
+      const reportPageRoutes = []
+      const monitoringPageRoutes = []
       const jurisdCenterRoutes = []
       const dataManaPageRoutes = []
-      const ywptPageRoutes = []
+      const maintenancePageRoutes = []
       this.permission_routes.forEach(route => {
         if (route.baoBiao) { // 报表中心
-          baoBiaoPageRoutes.push(route)
+          reportPageRoutes.push(route)
         }
         if (route.jianKong) { // 监控中心
-          jueCePageRoutes.push(route)
+          monitoringPageRoutes.push(route)
         }
         if (route.baojing) { // 告警中心
           jurisdCenterRoutes.push(route)
@@ -224,14 +224,14 @@ export default {
           dataManaPageRoutes.push(route)
         }
         if (route.yunWei) { // 运维中心
-          ywptPageRoutes.push(route)
+          maintenancePageRoutes.push(route)
         }
       })
-      this.baoBiaoPageRoutes = baoBiaoPageRoutes
-      this.jueCePageRoutes = jueCePageRoutes
+      this.reportPageRoutes = reportPageRoutes
+      this.monitoringPageRoutes = monitoringPageRoutes
       this.jurisdCenterRoutes = jurisdCenterRoutes
       this.dataManaPageRoutes = dataManaPageRoutes
-      this.ywptPageRoutes = ywptPageRoutes
+      this.maintenancePageRoutes = maintenancePageRoutes
     },
     setBannerId(routerPath) {
       this.activeIndex = localStorage.getItem('bannerId')
@@ -372,10 +372,10 @@ export default {
       if (!skipDcsyAutoNav) {
         switch (this.activeIndex) {
           case '1': break
-          case '3': this.pushRouteIfNeeded(this.jueCePageRoutes[0].children[0].path); break
+          case '3': this.pushRouteIfNeeded(this.monitoringPageRoutes[0].children[0].path); break
           case '4': this.pushRouteIfNeeded(this.jurisdCenterRoutes[0].children[0].path); break
-          case '5': this.pushRouteIfNeeded(this.ywptPageRoutes[0].children[0].path); break
-          case '7': this.pushRouteIfNeeded(this.baoBiaoPageRoutes[0].children[0].path); break
+          case '5': this.pushRouteIfNeeded(this.maintenancePageRoutes[0].children[0].path); break
+          case '7': this.pushRouteIfNeeded(this.reportPageRoutes[0].children[0].path); break
           case '6': this.pushRouteIfNeeded(this.dataManaPageRoutes[0].children[0].path); break
         }
       }
@@ -394,16 +394,16 @@ export default {
           targetPath = this.dataManaPageRoutes[0] && this.dataManaPageRoutes[0].children[0].path
           break
         case '3':
-          targetPath = this.jueCePageRoutes[0] && this.jueCePageRoutes[0].children[0].path
+          targetPath = this.monitoringPageRoutes[0] && this.monitoringPageRoutes[0].children[0].path
           break
         case '4':
           targetPath = this.jurisdCenterRoutes[0] && this.jurisdCenterRoutes[0].children[0].path
           break
         case '5':
-          targetPath = this.ywptPageRoutes[0] && this.ywptPageRoutes[0].children[0].path
+          targetPath = this.maintenancePageRoutes[0] && this.maintenancePageRoutes[0].children[0].path
           break
         case '7':
-          targetPath = this.baoBiaoPageRoutes[0] && this.baoBiaoPageRoutes[0].children[0].path
+          targetPath = this.reportPageRoutes[0] && this.reportPageRoutes[0].children[0].path
           break
         case '6':
           targetPath = this.dataManaPageRoutes[0] && this.dataManaPageRoutes[0].children[0].path
@@ -423,19 +423,19 @@ export default {
       if (targetPath) {
         this._bannerNavigating = true
         beginBannerNav()
-        const shouldJscFullscreen = activeIndex === '11'
-        const wasAlreadyOnJsc = shouldJscFullscreen && (
+        const shouldDashboardFullscreen = activeIndex === '11'
+        const wasAlreadyOnDashboard = shouldDashboardFullscreen && (
           this.$route.path === '/jsc' || this.$route.path.startsWith('/jsc/')
         )
         Promise.resolve(this.pushRouteIfNeeded(targetPath)).finally(() => {
           this._bannerNavigating = false
           endBannerNav()
-          if (shouldJscFullscreen) {
+          if (shouldDashboardFullscreen) {
             this.$nextTick(() => {
-              if (wasAlreadyOnJsc) {
-                toggleJscFullscreen()
+              if (wasAlreadyOnDashboard) {
+                toggleDashboardFullscreen()
               } else {
-                requestJscFullscreen()
+                requestDashboardFullscreen()
               }
             })
           }
@@ -563,7 +563,7 @@ export default {
         })
         return false
       }
-      toggleJscFullscreen().catch(() => {})
+      toggleDashboardFullscreen().catch(() => {})
     }
   }
 }

@@ -7,6 +7,7 @@ import (
 	"dicloud/internal/tolink/dao"
 	"dicloud/internal/tolink/model"
 	"dicloud/pkg/cache"
+	"dicloud/util/pointid"
 	"errors"
 	"fmt"
 	"log"
@@ -134,7 +135,7 @@ func formatStream(request *tolink_grpc.Gateway) (bool, model.Stream) {
 			}
 
 			// 字符串数据
-			if len(dto.DP_STRDataMap[dataDto.DataId]) > 0 {
+			if pointid.Matches(dataDto.DataId, pointid.ThermalRunawayRiskLevel) {
 				dataTem.DataType = fmt.Sprint(2)
 				dataTem.GatewayId = dataTem.GatewayId + "STR"
 			}

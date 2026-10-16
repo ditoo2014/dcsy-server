@@ -79,7 +79,7 @@ import { validUsername } from '@/utils/validate' // 账号密码表单验证
 import { getToken, setUsername, setToken, setMydb, setUserId } from '@/utils/auth.js'
 import { parseUserInfo } from '@/utils/safe-json.js'
 import { sendLoginSmsCode } from '@/api/user.js'
-import { statistictaskPlan } from '@/api/lldcsy.js'
+import { statistictaskPlan } from '@/api/batteryTraceability.js'
 import { getRSApassword, getTime, dateConvStamp, dateAddOrSubtract } from '@/utils/utils.js'
 import router from '@/router'
 import { markDynamicRoutesReady } from '@/permission.js'
@@ -159,7 +159,7 @@ export default {
     this._loginInitTimer = setTimeout(() => {
       this.init()
       if (this.platform === PLATFORM.DCSY_INTRANET && this.port === '80') {
-        // this.zfy()
+        // this.startCharacterRain()
       }
     }, 500)
   },
@@ -369,7 +369,7 @@ export default {
       }
       return val
     },
-    zfy() { // 字符雨
+    startCharacterRain() { // 字符雨
       const perColumnNums = 25
       const n = 50
       const animationTime = 4
@@ -432,7 +432,7 @@ export default {
 
       document.head.appendChild(styleEl)
     },
-    async cfdtjPlan() { // 充放电统计计划
+    async createChargeDischargeStatisticsPlan() { // 充放电统计计划
       const userInfo = parseUserInfo({})
       if (userInfo.isadmin === 1) { // 管理员
         const nowDate = getTime()

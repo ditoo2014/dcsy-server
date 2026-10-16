@@ -27,8 +27,8 @@
 </template>
 
 <script>
-import { AppMain, Navbar, SidebarQsmzqgl, SidebarDcjkgl,
-  SidebarJcxxgl, Banner as LayoutBanner } from './components'
+import { AppMain, Navbar, LifecycleSidebar, BatteryHealthSidebar,
+  BasicInformationSidebar, Banner as LayoutBanner } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 import { exitFullscreenSafe } from '@/utils/fullscreen.js'
 import { getDefaultBannerId, resolveBannerIdFromPath } from '@/utils/banner-route.js'
@@ -42,9 +42,9 @@ export default {
   components: {
     AppMain,
     Navbar,
-    SidebarQsmzqgl,
-    SidebarDcjkgl,
-    SidebarJcxxgl,
+    LifecycleSidebar,
+    BatteryHealthSidebar,
+    BasicInformationSidebar,
     LayoutBanner,
   },
   mixins: [ResizeMixin],
@@ -68,9 +68,9 @@ export default {
     },
     activeSidebar() {
       const map = {
-        '12': 'SidebarQsmzqgl',
-        '13': 'SidebarDcjkgl',
-        '14': 'SidebarJcxxgl'
+        '12': 'LifecycleSidebar',
+        '13': 'BatteryHealthSidebar',
+        '14': 'BasicInformationSidebar'
       }
       return map[this.bannerId] || null
     },
@@ -101,10 +101,10 @@ export default {
         openSidebar: this.sidebar.opened,
         withoutAnimation: this.sidebar.withoutAnimation,
         mobile: this.device === 'mobile',
-        'app-wrapper--jsc': this.isJscRoute
+        'app-wrapper--jsc': this.isDashboardRoute
       }
     },
-    isJscRoute() {
+    isDashboardRoute() {
       return this.$route.path === '/jsc'
     }
   },

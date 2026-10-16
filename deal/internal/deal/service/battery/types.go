@@ -31,7 +31,7 @@ type ParsedData struct {
 	StrPoints []PointStr
 }
 
-type DcToAIData struct {
+type BatteryAIRequest struct {
 	PackNo             string    `json:"packNo"`
 	Timestamp          string    `json:"timestamp"`
 	CellNum            float64   `json:"cellNum"`
@@ -43,7 +43,7 @@ type DcToAIData struct {
 	Soc                float64   `json:"soc"`
 	CellVoltages       []float64 `json:"cellVoltages"`
 	CellTemperatures   []float64 `json:"cellTemperatures"`
-	DCZRL              float64   `json:"DCZRL"`
+	TotalCapacity      float64   `json:"DCZRL"`
 }
 
 type AIResult struct {

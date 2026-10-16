@@ -3,6 +3,7 @@ package service
 import (
 	"dicloud/internal/tolink/model"
 	"dicloud/util/opengauss"
+	"dicloud/util/pointid"
 	"dicloud/util/response"
 	"errors"
 	"fmt"
@@ -101,12 +102,12 @@ func AlgorithmKeyOptions() []AlgorithmKeyOption {
 		result = append(result, AlgorithmKeyOption{Key: fmt.Sprintf("alg_cell%02d_soc", i), DataType: 1, Name: fmt.Sprintf("%d号单体SOC", i)})
 	}
 	return append(result,
-		AlgorithmKeyOption{Key: "alg_fangdianshichang", DataType: 1, Name: "放电时长"},
+		AlgorithmKeyOption{Key: pointid.RemainingDischargeTime, DataType: 1, Name: "放电时长"},
 		AlgorithmKeyOption{Key: "alg_soc", DataType: 1, Name: "SOC"},
 		AlgorithmKeyOption{Key: "alg_soh", DataType: 1, Name: "SOH"},
-		AlgorithmKeyOption{Key: "ditoo_wencha", DataType: 1, Name: "温差"},
-		AlgorithmKeyOption{Key: "ditoo_yacha", DataType: 1, Name: "压差"},
-		AlgorithmKeyOption{Key: "alg_rekongfengxianstage", DataType: 2, Name: "热失控风险等级"},
+		AlgorithmKeyOption{Key: pointid.TemperatureDifference, DataType: 1, Name: "温差"},
+		AlgorithmKeyOption{Key: pointid.VoltageDifference, DataType: 1, Name: "压差"},
+		AlgorithmKeyOption{Key: pointid.ThermalRunawayRiskLevel, DataType: 2, Name: "热失控风险等级"},
 	)
 }
 
@@ -196,19 +197,20 @@ func normalizeTemplateRequest(req TtdcTemplateRequest) (model.TtdcTemplate, erro
 		}
 		point := model.TtdcTemplatePoint{ID: requestPoint.ID, GroupID: item.GroupID, SortNo: requestPoint.SortNo, BaseDataID: baseID, Name: name, DataType: requestPoint.DataType, Enabled: requestPoint.Enabled, Description: strings.TrimSpace(requestPoint.Description)}
 		if item.CID2Type == model.TtdcRoleCID42SOC {
-			var legacyKey *string
+			// 沿用原版算法 ID 校验，并兼容历史模板通过算法键关联输出。
+			var algorithmKey *string
 			if value := strings.TrimSpace(requestPoint.AlgorithmKey); value != "" {
 				if _, ok := model.TtdcAlgorithmDataType(value); !ok {
-					return item, fmt.Errorf("第%d个旧算法键不合法", index+1)
+					return item, fmt.Errorf("第%d个算法键不合法", index+1)
 				}
-				legacyKey = stringPointer(value)
+				algorithmKey = stringPointer(value)
 			}
-			key, expected, ok := model.TtdcAlgorithmResultKey(baseID, legacyKey)
+			key, expected, ok := model.TtdcAlgorithmResultKey(baseID, algorithmKey)
 			if !ok || seenAlgorithm[key] || expected != requestPoint.DataType {
 				return item, fmt.Errorf("第%d个42_SOC数据点ID不受支持、重复或数据类型不匹配", index+1)
 			}
 			seenAlgorithm[key] = true
-			point.AlgorithmKey = legacyKey
+			point.AlgorithmKey = algorithmKey
 			point.Transport, point.Formula, point.Unformula = "-", "x", "x"
 		} else {
 			if requestPoint.Address < 0 || requestPoint.Address%2 != 0 || requestPoint.ByteCount <= 0 || requestPoint.ConvertType < 1 || requestPoint.ConvertType > 3 {

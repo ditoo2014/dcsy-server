@@ -1,7 +1,7 @@
 import { login, findSelf, getUserPermissions } from '@/api/user.js'
 import { getToken, setToken, removeToken, setUserInfoStr, setUserId,
   setPageList, removeUsername, removeUserInfoStr, removeUserId,
-  removeRoleId, removePageList, removeCjyToken } from '@/utils/auth.js'
+  removeRoleId, removePageList, removeCollectionToken } from '@/utils/auth.js'
 import { resetRouter, asyncRoutes } from '@/router'
 import { unique, objectSort } from '@/utils/utils.js'
 import { buildRoutesFromPermissions } from '@/utils/build-permission-routes.js'
@@ -24,7 +24,7 @@ function clearStoredSession() {
   removeUserId()
   removeRoleId()
   removePageList()
-  removeCjyToken()
+  removeCollectionToken()
   // The gateway project stores its SSO state under the same production origin.
   localStorage.removeItem('access_token')
   localStorage.removeItem('login_username')
@@ -125,18 +125,18 @@ const actions = {
             routers = buildRoutesFromPermissions(asyncRoutes, pageNameList)
           }
           // DCSY 仅使用本文件顶部声明的锂硫电池路由，不再动态注入运维、报表等旧平台页面。
-          let gysjkRoteIndex = null // 工艺数据库 的路由位置
-          let gysjkRoteMsg = null // 工艺数据库 的路由数据
-          let bbtjRoteIndex = null // 报表统计 的路由位置
-          let bbtjRoteMsg = null // 报表统计 的路由数据
+          let processDataRouteIndex = null // 工艺数据库 的路由位置
+          let processDataRoute = null // 工艺数据库 的路由数据
+          let reportStatisticsRouteIndex = null // 报表统计 的路由位置
+          let reportStatisticsRoute = null // 报表统计 的路由数据
           routers.forEach((item, index) => {
             if (item.path === '/gysjk') {
-              gysjkRoteIndex = index
-              gysjkRoteMsg = item
+              processDataRouteIndex = index
+              processDataRoute = item
             }
             if (item.path === '/bbtj') {
-              bbtjRoteIndex = index
-              bbtjRoteMsg = item
+              reportStatisticsRouteIndex = index
+              reportStatisticsRoute = item
             }
             if (config.platform === PLATFORM.DCSY_INTRANET && config.port === '5002') {
               if (item.path === '/ytbData') { // 不显示 乡镇厂月填报
@@ -145,9 +145,9 @@ const actions = {
             }
           })
 
-          if (gysjkRoteMsg && bbtjRoteMsg && (gysjkRoteIndex < bbtjRoteIndex)) { // 如果工艺数据库在报表统计的上面，则交换顺序
-            routers[bbtjRoteIndex] = gysjkRoteMsg
-            routers[gysjkRoteIndex] = bbtjRoteMsg
+          if (processDataRoute && reportStatisticsRoute && (processDataRouteIndex < reportStatisticsRouteIndex)) { // 如果工艺数据库在报表统计的上面，则交换顺序
+            routers[reportStatisticsRouteIndex] = processDataRoute
+            routers[processDataRouteIndex] = reportStatisticsRoute
           }
           if (import.meta.env.DEV) { // 开发模式
             roles.push('developer')
@@ -243,7 +243,7 @@ const actions = {
     // 到期时清业务菜单、标签及采集权限，保留认证令牌供本人改密。
     commit('SET_ROLES', [])
     removePageList()
-    removeCjyToken()
+    removeCollectionToken()
     useAuthStore().clearAccess()
     useTagsViewStore().clearVisitedViews()
     resetRouter()

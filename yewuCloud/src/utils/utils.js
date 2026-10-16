@@ -117,7 +117,7 @@ export function dateResetObj(dateTime) { // 将日期转化为时间对象 dateT
   return timeStmapReset(dateConvStamp(dateTime))
 }
 
-export function setGlwzTime(time) { // 将格林威治时间转化为日期字符串
+export function formatGmtDateTime(time) { // 将格林威治时间转化为日期字符串
   var date = time.substr(0, 10) // 年月日
   var hours = time.substring(11, 13)
   var minutes = time.substring(14, 16)

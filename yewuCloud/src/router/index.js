@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Layout from '@/layout'
 import { resetDynamicRoutesReady } from '@/utils/dynamic-route-state.js'
-// import { TTDC_TEMPLATE_PERMISSIONS } from '@/collection/constants/permissions.js'
+import { TTDC_TEMPLATE_PERMISSIONS } from '@/collection/constants/permissions.js'
 
 // 保留原业务云的菜单图标；路由精简不应改变原来的侧栏样式。
 const dcsyIcons = {
@@ -16,7 +16,7 @@ const dcsyIcons = {
 export const constantRoutes = [
   { path: '/login', component: () => import('@/views/login/login.vue'), hidden: true },
   { path: '/modifyPas', component: () => import('@/views/personMana/modifyPas.vue'), hidden: true },
-  { path: '/dcDetail', component: () => import('@/views/lldcsy/dcjkgl/dcDetail.vue'), name: 'dcDetail', hidden: true },
+  { path: '/dcDetail', component: () => import('@/views/batteryTraceability/batteryHealth/BatteryDetail.vue'), name: 'dcDetail', hidden: true },
   // 数据接入的“管理”在新窗口打开，固定注册以支持刷新和重新登录。
   { path: '/equipManaPage', component: () => import('@/views/equipMana/equipManaPage.vue'), name: 'equipManaPage', hidden: true, meta: { title: '电池管理' } },
   {
@@ -48,17 +48,18 @@ export const constantRoutes = [
         name: 'stream-detail',
         component: () => import('@/collection/views/StreamDetailView.vue'),
         meta: { title: '数据池详情', collectionCloud: true }
+      },
+      // 恢复模板页面路由，仅在采集云菜单中临时向 ditoo 显示入口。
+      {
+        path: 'ttdc-templates',
+        name: 'ttdc-templates',
+        component: () => import('@/collection/views/TtdcTemplateView.vue'),
+        meta: {
+          title: 'TTDC公共模板',
+          collectionCloud: true,
+          collectionPermission: TTDC_TEMPLATE_PERMISSIONS.view
+        }
       }
-      // {
-      //   path: 'ttdc-templates',
-      //   name: 'ttdc-templates',
-      //   component: () => import('@/collection/views/TtdcTemplateView.vue'),
-      //   meta: {
-      //     title: 'TTDC公共模板',
-      //     collectionCloud: true,
-      //     collectionPermission: TTDC_TEMPLATE_PERMISSIONS.view
-      //   }
-      // }
     ]
   },
   { path: '/', redirect: '/jsc', hidden: true }
@@ -66,35 +67,35 @@ export const constantRoutes = [
 
 /** DCSY权限路由，保留原侧边栏标记以维持现有页面布局。 */
 export const asyncRoutes = [
-  dcsyPage('/jsc', 'jsc', '驾驶舱', () => import('@/views/lldcsy/jsc/jsc.vue'), 'jsc'),
-  dcsyPage('/dczt', 'dczt', '电池状态', () => import('@/views/lldcsy/smzqgl/dczt.vue'), 'qsmzqgl'),
-  dcsyPage('/gjzz', 'gjzz', '轨迹追踪', () => import('@/views/lldcsy/smzqgl/gjzz.vue'), 'qsmzqgl'),
-  dcsyPage('/ywgl', 'ywgl', '运维管理', () => import('@/views/lldcsy/smzqgl/ywgl.vue'), 'qsmzqgl'),
-  dcsyPage('/jkztjc', 'jkztjc', '健康状态监测', () => import('@/views/lldcsy/dcjkgl/jkztjc.vue'), 'dcjkgl'),
-  dcsyPage('/lssjcx', 'lssjcx', '历史数据查询', () => import('@/views/lldcsy/dcjkgl/lssjcx.vue'), 'dcjkgl'),
+  dcsyPage('/jsc', 'jsc', '驾驶舱', () => import('@/views/batteryTraceability/dashboard/Dashboard.vue'), 'jsc'),
+  dcsyPage('/dczt', 'dczt', '电池状态', () => import('@/views/batteryTraceability/lifecycle/BatteryStatus.vue'), 'qsmzqgl'),
+  dcsyPage('/gjzz', 'gjzz', '轨迹追踪', () => import('@/views/batteryTraceability/lifecycle/BatteryTracking.vue'), 'qsmzqgl'),
+  dcsyPage('/ywgl', 'ywgl', '运维管理', () => import('@/views/batteryTraceability/lifecycle/MaintenanceManagement.vue'), 'qsmzqgl'),
+  dcsyPage('/jkztjc', 'jkztjc', '健康状态监测', () => import('@/views/batteryTraceability/batteryHealth/HealthMonitoring.vue'), 'dcjkgl'),
+  dcsyPage('/lssjcx', 'lssjcx', '历史数据查询', () => import('@/views/batteryTraceability/batteryHealth/HistoricalDataQuery.vue'), 'dcjkgl'),
   {
     path: '/gjxx', name: 'layout-gjxx', component: Layout, redirect: '/gjxxssgj', dcjkgl: true,
     meta: { title: '告警信息', icon: 'alarmLog', routeContainer: true },
     children: [
-      dcsyChild('/gjxxssgj', 'gjxxssgj', '实时告警', () => import('@/views/lldcsy/dcjkgl/gjxxssgj.vue'), 'dcjkgl'),
-      dcsyChild('/gjxxlsgj', 'gjxxlsgj', '历史告警', () => import('@/views/lldcsy/dcjkgl/gjxxlsgj.vue'), 'dcjkgl')
+      dcsyChild('/gjxxssgj', 'gjxxssgj', '实时告警', () => import('@/views/batteryTraceability/batteryHealth/RealtimeAlarms.vue'), 'dcjkgl'),
+      dcsyChild('/gjxxlsgj', 'gjxxlsgj', '历史告警', () => import('@/views/batteryTraceability/batteryHealth/AlarmHistory.vue'), 'dcjkgl')
     ]
   },
   {
     path: '/yjxx', name: 'layout-yjxx', component: Layout, redirect: '/yjxxssyj', dcjkgl: true,
     meta: { title: '预警信息', icon: 'warning', routeContainer: true },
     children: [
-      dcsyChild('/yjxxssyj', 'yjxxssyj', '实时预警', () => import('@/views/lldcsy/dcjkgl/yjxxssyj.vue'), 'dcjkgl'),
-      dcsyChild('/yjxxlsyj', 'yjxxlsyj', '历史预警', () => import('@/views/lldcsy/dcjkgl/yjxxlsyj.vue'), 'dcjkgl')
+      dcsyChild('/yjxxssyj', 'yjxxssyj', '实时预警', () => import('@/views/batteryTraceability/batteryHealth/RealtimeWarnings.vue'), 'dcjkgl'),
+      dcsyChild('/yjxxlsyj', 'yjxxlsyj', '历史预警', () => import('@/views/batteryTraceability/batteryHealth/WarningHistory.vue'), 'dcjkgl')
     ]
   },
   {
     path: '/jcxxgl', name: 'layout-jcxxgl', component: Layout, redirect: '/jcxxgl/kfxxgl', jcxxgl: true,
     meta: { title: '基础信息管理', icon: 'basicmanage', routeContainer: true },
     children: [
-      dcsyChild('kfxxgl', 'kfxxgl', '库房信息管理', () => import('@/views/lldcsy/jcxxgl/kfxxgl.vue'), 'jcxxgl'),
-      dcsyChild('/zdxxgl/index', 'zdxxgl', '站点信息管理', () => import('@/views/lldcsy/jcxxgl/zdxxgl.vue'), 'jcxxgl'),
-      dcsyChild('/scxxgl/index', 'scxxgl', '电池出厂信息', () => import('@/views/lldcsy/jcxxgl/scxxgl.vue'), 'jcxxgl'),
+      dcsyChild('kfxxgl', 'kfxxgl', '库房信息管理', () => import('@/views/batteryTraceability/basicInformation/WarehouseManagement.vue'), 'jcxxgl'),
+      dcsyChild('/zdxxgl/index', 'zdxxgl', '站点信息管理', () => import('@/views/batteryTraceability/basicInformation/SiteManagement.vue'), 'jcxxgl'),
+      dcsyChild('/scxxgl/index', 'scxxgl', '电池出厂信息', () => import('@/views/batteryTraceability/basicInformation/BatteryFactoryInformation.vue'), 'jcxxgl'),
       {
         path: '/dcsjgl', redirect: '/dcsjgl/jrgl', alwaysShow: true, jcxxgl: true,
         meta: { title: '电池数据管理', icon: 'collectCloud' },
@@ -102,26 +103,26 @@ export const asyncRoutes = [
           {
             path: 'wgpz',
             name: 'collection-launcher',
-            component: () => import('@/views/lldcsy/jcxxgl/wgpz.vue'),
+            component: () => import('@/views/batteryTraceability/basicInformation/GatewayConfigLauncher.vue'),
             jcxxgl: true,
             meta: { title: '网关配置', icon: 'procSet', noCache: true }
           },
-          dcsyChild('jrgl', 'jrgl', '数据接入', () => import('@/views/lldcsy/jcxxgl/jrgl.vue'), 'jcxxgl'),
-          dcsyChild('tycfqgl', 'tycfqgl', '通用触发器管理', () => import('@/views/lldcsy/jcxxgl/tycfqgl.vue'), 'jcxxgl')
+          dcsyChild('jrgl', 'jrgl', '数据接入', () => import('@/views/batteryTraceability/basicInformation/DataAccess.vue'), 'jcxxgl'),
+          dcsyChild('tycfqgl', 'tycfqgl', '通用触发器管理', () => import('@/views/batteryTraceability/basicInformation/GeneralTriggerManagement.vue'), 'jcxxgl')
         ]
       },
       {
         path: '/rygl', redirect: '/rygl/yhgl', alwaysShow: true, jcxxgl: true,
         meta: { title: '人员管理', icon: 'peoples' },
         children: [
-          dcsyChild('jsgl', 'jsgl', '角色管理', () => import('@/views/lldcsy/jcxxgl/jsgl.vue'), 'jcxxgl'),
-          dcsyChild('yhgl', 'yhgl', '用户管理', () => import('@/views/lldcsy/jcxxgl/yhgl.vue'), 'jcxxgl')
+          dcsyChild('jsgl', 'jsgl', '角色管理', () => import('@/views/batteryTraceability/basicInformation/RoleManagement.vue'), 'jcxxgl'),
+          dcsyChild('yhgl', 'yhgl', '用户管理', () => import('@/views/batteryTraceability/basicInformation/UserManagement.vue'), 'jcxxgl')
         ]
       },
       {
         path: '/jcsj', redirect: '/jcsj/xtrz', alwaysShow: true, jcxxgl: true,
         meta: { title: '基础数据', icon: 'chart' },
-        children: [dcsyChild('xtrz', 'xtrz', '系统日志', () => import('@/views/lldcsy/jcxxgl/xtrz.vue'), 'jcxxgl')]
+        children: [dcsyChild('xtrz', 'xtrz', '系统日志', () => import('@/views/batteryTraceability/basicInformation/SystemLogs.vue'), 'jcxxgl')]
       }
     ]
   }

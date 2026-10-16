@@ -3,6 +3,7 @@ package battery
 import (
 	"bytes"
 	"deal/internal/batterylog"
+	"deal/util/pointid"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,7 +17,7 @@ import (
 
 const unavailableRemainingDischargeTime float64 = 999
 
-func appendAIResultPoints(result *ParsedData, adr string, req DcToAIData, receivedAt time.Time) {
+func appendAIResultPoints(result *ParsedData, adr string, req BatteryAIRequest, receivedAt time.Time) {
 	if !viper.GetBool("battery.ai.enabled") {
 		return
 	}
@@ -30,21 +31,21 @@ func appendAIResultPoints(result *ParsedData, adr string, req DcToAIData, receiv
 		// finished. This keeps retries and delayed consumption idempotent.
 		ts := receivedAt
 		result.StrPoints = append(result.StrPoints, PointStr{
-			DataID: adr + "_alg_rekongfengxianstage",
+			DataID: algorithmDataID(adr, pointid.ThermalRunawayRiskLevel),
 			Value:  item.ThermalRunawayRisk,
 			Status: 1,
 			TS:     ts,
 		})
 
 		soc := item.Soc
-		if req.DCZRL != 0 {
-			soc = math.Round((req.Soc / req.DCZRL) * 100)
+		if req.TotalCapacity != 0 {
+			soc = math.Round((req.Soc / req.TotalCapacity) * 100)
 		}
 		result.Points = append(result.Points,
 			Point{DataID: adr + "_alg_soc", Value: soc, Status: 1, TS: ts},
 			//Point{DataID: adr + "_alg_soh", Value: item.Soh, Status: 1, TS: ts},
 			Point{DataID: adr + "_alg_soh", Value: 100, Status: 1, TS: ts}, //2026.08.11 硬编码100  ,上限就取消上面的注释
-			Point{DataID: adr + "_alg_fangdianshichang", Value: remainingDischargeTimeValue(item.RemainingDischargeTime), Status: 1, TS: ts},
+			Point{DataID: algorithmDataID(adr, pointid.RemainingDischargeTime), Value: remainingDischargeTimeValue(item.RemainingDischargeTime), Status: 1, TS: ts},
 		)
 
 		for _, cell := range item.BatteryEvaluationList {
@@ -69,7 +70,7 @@ type algorithmResult struct {
 
 // evaluateAI returns stable algorithm keys. The caller maps those keys through
 // the current template group's actual 42_SOC channel.
-func evaluateAI(req DcToAIData) map[string]algorithmResult {
+func evaluateAI(req BatteryAIRequest) map[string]algorithmResult {
 	if !viper.GetBool("battery.ai.enabled") {
 		return make(map[string]algorithmResult)
 	}
@@ -79,14 +80,14 @@ func evaluateAI(req DcToAIData) map[string]algorithmResult {
 
 		return make(map[string]algorithmResult)
 	}
-	if req.DCZRL != 0 {
-		results[0].Soc = math.Round((req.Soc / req.DCZRL) * 100) //2026.08.28临时使用需要
+	if req.TotalCapacity != 0 {
+		results[0].Soc = math.Round((req.Soc / req.TotalCapacity) * 100) //2026.08.28临时使用需要
 	}
 
 	return algorithmResultsFromAI(req, results)
 }
 
-func algorithmResultsFromAI(req DcToAIData, results []AIResult) map[string]algorithmResult {
+func algorithmResultsFromAI(req BatteryAIRequest, results []AIResult) map[string]algorithmResult {
 	values := make(map[string]algorithmResult)
 	if len(results) == 0 {
 		return values
@@ -97,11 +98,11 @@ func algorithmResultsFromAI(req DcToAIData, results []AIResult) map[string]algor
 
 	item := results[0]
 	risk := item.ThermalRunawayRisk
-	values["alg_rekongfengxianstage"] = algorithmResult{Text: &risk}
+	values[pointid.ThermalRunawayRiskLevel] = algorithmResult{Text: &risk}
 	values["alg_soc"] = numericAlgorithmResult(item.Soc)
 	//values["alg_soh"] = numericAlgorithmResult(item.Soh)
 	values["alg_soh"] = numericAlgorithmResult(100) //2026.08.28临时使用需要
-	values["alg_fangdianshichang"] = numericAlgorithmResult(remainingDischargeTimeValue(item.RemainingDischargeTime))
+	values[pointid.RemainingDischargeTime] = numericAlgorithmResult(remainingDischargeTimeValue(item.RemainingDischargeTime))
 
 	expectedCellCount := int(req.CellNum)
 	seenCells := make(map[int]bool, expectedCellCount)
@@ -126,7 +127,7 @@ func algorithmResultsFromAI(req DcToAIData, results []AIResult) map[string]algor
 
 func numericAlgorithmResult(value float64) algorithmResult { return algorithmResult{Number: &value} }
 
-func postAI(req DcToAIData) ([]AIResult, error) {
+func postAI(req BatteryAIRequest) ([]AIResult, error) {
 	url := viper.GetString("battery.ai.url")
 	if url == "" {
 		url = "http://172.17.7.191:12024/api/batteryEvaluation"
@@ -136,7 +137,7 @@ func postAI(req DcToAIData) ([]AIResult, error) {
 		timeout = 3 * time.Second
 	}
 
-	body, err := json.Marshal([]DcToAIData{req})
+	body, err := json.Marshal([]BatteryAIRequest{req})
 	if err != nil {
 		return nil, err
 	}

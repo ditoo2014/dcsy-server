@@ -92,19 +92,19 @@ export function removeMydb() {
   localStorage.removeItem(mydbKey)
 }
 
-const cjyTokenKey = 'cjyToken'
-export function getCjyToken() {
-  return localStorage.getItem(cjyTokenKey) || ''
+const collectionTokenStorageKey = 'cjyToken'
+export function getCollectionToken() {
+  return localStorage.getItem(collectionTokenStorageKey) || ''
 }
-export function setCjyToken(token) {
+export function setCollectionToken(token) {
   if (!token) {
-    localStorage.removeItem(cjyTokenKey)
+    localStorage.removeItem(collectionTokenStorageKey)
     return
   }
-  localStorage.setItem(cjyTokenKey, token)
+  localStorage.setItem(collectionTokenStorageKey, token)
 }
-export function removeCjyToken() {
-  localStorage.removeItem(cjyTokenKey)
+export function removeCollectionToken() {
+  localStorage.removeItem(collectionTokenStorageKey)
 }
 
 const pagelistKey = 'pagelist'

@@ -1537,8 +1537,6 @@ onUnmounted(() => {
 .workbench {
   width: 100%;
   max-width: 100%;
-  /* 按正文实际可用宽度适配，侧栏展开和浏览器缩放也能触发。 */
-  container-type: inline-size;
   padding: 16px 20px;
   box-sizing: border-box;
 }
@@ -1549,6 +1547,8 @@ onUnmounted(() => {
 
 .card {
   --content-x: 24px;
+  /* 仅列表卡片参与宽度查询，避免同级抽屉和遮罩被限制在列表高度内。 */
+  container-type: inline-size;
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
@@ -1633,6 +1633,12 @@ onUnmounted(() => {
 
 .gateway-drawer-form {
   padding-right: 8px;
+}
+
+.workbench :deep(.el-drawer__header),
+.workbench :deep(.el-drawer__footer) {
+  /* 小窗口只滚动抽屉正文，标题和操作按钮保持完整。 */
+  flex-shrink: 0;
 }
 
 .drawer-full {

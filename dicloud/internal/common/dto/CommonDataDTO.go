@@ -3,6 +3,7 @@ package dto
 import (
 	"dicloud/internal/business/model"
 	"dicloud/internal/common/grpc/tolink_grpc"
+	"dicloud/util/pointid"
 )
 
 type CommonDataDTO struct {
@@ -58,40 +59,40 @@ var (
 
 	// 算法计算数据, +部分内部固定数据, +铁塔未确定数据
 	DP_DefaultNormalDataMap = map[string]string{
-		"alg_soc":                 "SOC",
-		"alg_soh":                 "SOH",
-		"alg_fangdianshichang":    "放电时长",
-		"alg_rekongfengxianstage": "热失控风险等级",
-		"tt_fangdiandianliang":    "累计放电量",
-		"tt_chongdiancishu":       "循环次数", // 20251124.将充电次数 - 改为循环次数
-		"tt_chongdiandianliang":   "累计充电量",
-		"tt_envtemp":              "环境温度",
-		"tt_mostemp":              "MOS温度",
-		"ditoo_ecores":            "单体电池支数",
-		"ditoo_yacha":             "压差",
-		"ditoo_tempnum":           "温度采集数",
-		"ditoo_wencha":            "温差",
-		"alg_cell01_soc":          "1号单体SOC",
-		"alg_cell02_soc":          "2号单体SOC",
-		"alg_cell03_soc":          "3号单体SOC",
-		"alg_cell04_soc":          "4号单体SOC",
-		"alg_cell05_soc":          "5号单体SOC",
-		"alg_cell06_soc":          "6号单体SOC",
-		"alg_cell07_soc":          "7号单体SOC",
-		"alg_cell08_soc":          "8号单体SOC",
-		"alg_cell09_soc":          "9号单体SOC",
-		"alg_cell10_soc":          "10号单体SOC",
-		"alg_cell11_soc":          "11号单体SOC",
-		"alg_cell12_soc":          "12号单体SOC",
-		"alg_cell13_soc":          "13号单体SOC",
-		"alg_cell14_soc":          "14号单体SOC",
-		"alg_cell15_soc":          "15号单体SOC",
-		"alg_cell16_soc":          "16号单体SOC",
+		"alg_soc":                       "SOC",
+		"alg_soh":                       "SOH",
+		pointid.RemainingDischargeTime:  "放电时长",
+		pointid.ThermalRunawayRiskLevel: "热失控风险等级",
+		pointid.TotalDischargeCapacity:  "累计放电量",
+		pointid.CycleCount:              "循环次数",
+		pointid.TotalChargeCapacity:     "累计充电量",
+		"tt_envtemp":                    "环境温度",
+		"tt_mostemp":                    "MOS温度",
+		"ditoo_ecores":                  "单体电池支数",
+		pointid.VoltageDifference:       "压差",
+		"ditoo_tempnum":                 "温度采集数",
+		pointid.TemperatureDifference:   "温差",
+		"alg_cell01_soc":                "1号单体SOC",
+		"alg_cell02_soc":                "2号单体SOC",
+		"alg_cell03_soc":                "3号单体SOC",
+		"alg_cell04_soc":                "4号单体SOC",
+		"alg_cell05_soc":                "5号单体SOC",
+		"alg_cell06_soc":                "6号单体SOC",
+		"alg_cell07_soc":                "7号单体SOC",
+		"alg_cell08_soc":                "8号单体SOC",
+		"alg_cell09_soc":                "9号单体SOC",
+		"alg_cell10_soc":                "10号单体SOC",
+		"alg_cell11_soc":                "11号单体SOC",
+		"alg_cell12_soc":                "12号单体SOC",
+		"alg_cell13_soc":                "13号单体SOC",
+		"alg_cell14_soc":                "14号单体SOC",
+		"alg_cell15_soc":                "15号单体SOC",
+		"alg_cell16_soc":                "16号单体SOC",
 	}
 
 	// 字符串数据点
 	DP_STRDataMap = map[string]string{
-		"alg_rekongfengxianstage": "热失控风险等级",
+		pointid.ThermalRunawayRiskLevel: "热失控风险等级",
 	}
 
 	// 默认健康度数据点ID - 算法平台返回数据

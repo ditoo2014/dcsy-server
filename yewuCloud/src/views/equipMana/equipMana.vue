@@ -20,7 +20,7 @@
         >
           <el-table-column label="序号" width="50" align="center">
             <template #default="scope">
-              <span>{{ scope.row.xh }}</span>
+              <span>{{ scope.row.rowNumber }}</span>
             </template>
           </el-table-column>
           <el-table-column label="电池ID" align="center">
@@ -121,7 +121,7 @@ import { findSiteListExactMatch } from '@/api/siteMana.js'
 import { findEquipmentListExactMatch, saveEquipment, deleteEquipment, modifyEquipment,
   saveDataDetails, getlabel
 } from '@/api/equipMana.js'
-import { equipmentExport, equipmentImport } from '@/api/lldcsy.js'
+import { equipmentExport, equipmentImport } from '@/api/batteryTraceability.js'
 import { chinaRegions } from '@/components/a_myComp/mapComplex/index.js'
 import config from '@/config.js'
 import lodash from 'lodash'
@@ -220,7 +220,7 @@ export default {
       siteList: [], // 电池列表
       apiKeys: [], // 电池实际使用的apiKey列表
 
-      tbjgTypeList: [ // 填报间隔类型列表
+      reportIntervalUnitOptions: [ // 填报间隔类型列表
         { key: '小时', name: '小时' },
         { key: '日', name: '日' },
         { key: '月', name: '月' },
@@ -379,7 +379,7 @@ export default {
         const list = res.return.data
         this.total = res.return.total
         list.forEach((item, index) => {
-          item.xh = (this.page - 1) * this.limit + index + 1
+          item.rowNumber = (this.page - 1) * this.limit + index + 1
           this.treeList.forEach(treeItem => {
             if (item.corpId === treeItem.id) {
               item.corpName = treeItem.name

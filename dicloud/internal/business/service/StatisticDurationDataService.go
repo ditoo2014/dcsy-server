@@ -213,7 +213,7 @@ func latestStatisticSequenceData(ctx *gin.Context, gatewayID string, points []st
 func healthDataCumulative(ctx *gin.Context, equipmentTem model.Equipment, countTime int64, dbName interface{}, equipmentHealthStandard *model.EquipmentHealthStandard, pointResolver *statisticDataPointResolver) bool {
 
 	// 调用gRPC, 获取统计周期时间数据
-	legacyPoint := statisticDataPoint{DataID: dto.DP_DEFAULT_SOH_DATAID, Code: commonmodel.StatisticHealthCode_YOU}
+	legacyPoint := statisticDataPoint{DataID: dto.DP_DEFAULT_SOH_DATAID, Code: commonmodel.StatisticHealthCodeExcellent}
 	resolvedPoints := pointResolver.resolve(equipmentTem.EquipmentCode, []statisticDataPoint{legacyPoint})
 	if len(resolvedPoints) == 0 {
 		return true
@@ -238,8 +238,8 @@ func healthDataCumulative(ctx *gin.Context, equipmentTem model.Equipment, countT
 		End:                statisticTime,
 		DataSourceType:     3,
 		StatisticType:      "0",
-		StatisticCode:      commonmodel.StatisticHealthCode_YOU,
-		StatisticName:      commonmodel.StatisticHealthCode_YOU,
+		StatisticCode:      commonmodel.StatisticHealthCodeExcellent,
+		StatisticName:      commonmodel.StatisticHealthCodeExcellent,
 		StatisticValue:     1,
 		StatisticValueType: 0,
 		DbName:             fmt.Sprint(dbName),
