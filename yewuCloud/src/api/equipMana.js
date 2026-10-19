@@ -65,6 +65,8 @@ export function findEquipmentListExactMatch(params) { // 查询设备
   const pageSize = params.pageSize ? params.pageSize : 10
   let query = `?pageNum=${pageNum}&pageSize=${pageSize}&filterFunc=${filterFunc}`
   if (params.includeLatestCirculation) query += '&includeLatestCirculation=1'
+  // 轨迹列表沿用发生时间、日志编号的排序；其他页面保持原有取值规则。
+  if (params.latestCirculationOrder === 'time') query += '&latestCirculationOrder=time'
   return JsonPost(`business/equipment/find${query}`, data)
 }
 

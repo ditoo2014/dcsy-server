@@ -301,7 +301,15 @@ func respondEquipmentList(ctx *gin.Context, equipments []model.Equipment, total 
 			equipmentIDs = append(equipmentIDs, int(equipment.ID))
 		}
 
-		latestLogs, ok := dao.NewEquipmentCirculationLogDao(ctx).FindLatestByEquipmentIDs(equipmentIDs)
+		logDao := dao.NewEquipmentCirculationLogDao(ctx)
+		var latestLogs []model.EquipmentCirculationLog
+		var ok bool
+		if ctx.Query("latestCirculationOrder") == "time" {
+			// 轨迹列表与完整历史的末条记录保持一致；其他调用方仍按原有编号取值。
+			latestLogs, ok = logDao.FindLatestByEquipmentIDsByTime(equipmentIDs)
+		} else {
+			latestLogs, ok = logDao.FindLatestByEquipmentIDs(equipmentIDs)
+		}
 		if !ok {
 			response.Fail(ctx, "查询设备流转信息失败", nil)
 			return

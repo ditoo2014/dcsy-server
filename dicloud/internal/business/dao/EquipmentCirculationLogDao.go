@@ -107,6 +107,27 @@ func (dao *EquipmentCirculationLogDao) FindLatestByEquipmentIDs(equipmentIDs []i
 	return eclList, true
 }
 
+// FindLatestByEquipmentIDsByTime 仅查询本页设备的最后一条流转记录。
+// 与历史接口 create_time ASC、id ASC 的末条一致，补录旧记录不会覆盖较新的位置。
+func (dao *EquipmentCirculationLogDao) FindLatestByEquipmentIDsByTime(equipmentIDs []int) ([]model.EquipmentCirculationLog, bool) {
+	logs := []model.EquipmentCirculationLog{}
+	if len(equipmentIDs) == 0 {
+		return logs, true
+	}
+	// 正序查询的 NULL 在最后，因此倒序取首条时显式 NULLS FIRST，保持旧数据显示一致。
+	ranked := dao.db.Table("public.equipment_circulation_log").
+		Select("id, ROW_NUMBER() OVER (PARTITION BY equipment_id ORDER BY create_time DESC NULLS FIRST, id DESC) AS row_num").
+		Where("equipment_id IN ?", equipmentIDs)
+	latestIDs := dao.db.Table("(?) AS ranked_logs", ranked).Select("id").Where("row_num = ?", 1)
+	err := dao.db.Table("public.equipment_circulation_log").
+		Where("id IN (?)", latestIDs).Order("equipment_id ASC").Scan(&logs).Error
+	if err != nil {
+		log.Println("[EquipmentCirculationLogDao] 按时间批量查询最后流转记录失败: ", err)
+		return logs, false
+	}
+	return logs, true
+}
+
 // fillCirculationLogEquipmentTypeNames 批量填充流转记录的电池类型名称
 func fillCirculationLogEquipmentTypeNames(db *gorm.DB, data []model.EquipmentCirculationLog) {
 	if len(data) == 0 {

@@ -214,7 +214,10 @@ export default {
           equipmentTypeName,
           positionStatus: selectedStatus,
           pageNum: this.page,
-          pageSize: this.limit
+          pageSize: this.limit,
+          // 列表只读取最后一条流转记录，完整轨迹留到点击详情时查询。
+          includeLatestCirculation: true,
+          latestCirculationOrder: 'time'
         })
         if (!isCurrent()) return
         let rowNumber = (this.page - 1) * this.limit
@@ -247,29 +250,16 @@ export default {
                 statusName = '检测待用'
                 break
             }
-            const logres = await findEquipmentcirlog({
-              equipmentId: item.id
-            })
-            if (!isCurrent()) return
-            let data = {
+            const latestLog = item.latestCirculationLog
+            const data = {
               equipmentId: item.id,
               rowNumber: rowNumber,
               equipmentCode: item.equipmentCode,
               equipmentTypeName: item.equipmentTypeName || '',
               batteryCode: item.equipmentCode,
               statusName: statusName,
-              location: '无'
-            }
-            if (logres.return && logres.return.data.length !== 0) {
-              data = {
-                equipmentId: item.id,
-                rowNumber: rowNumber,
-                equipmentCode: item.equipmentCode,
-                equipmentTypeName: item.equipmentTypeName || '',
-                batteryCode: item.equipmentCode,
-                statusName: statusName,
-                location: logres.return.data[logres.return.data.length - 1].operateDetails.locate
-              }
+              // 无记录显示“无”；有记录但没有地址时保持空白，不回退到其他历史位置。
+              location: latestLog ? latestLog.operateDetails?.locate : '无'
             }
             tableData.push(data)
           }
