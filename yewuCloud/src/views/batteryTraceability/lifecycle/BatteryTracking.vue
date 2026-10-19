@@ -58,8 +58,8 @@
         </el-table>
         <Pagination
           v-show="total>0"
-          v-model:page="page"
-          v-model:limit="limit"
+          :page="page"
+          :limit="limit"
           :total="total"
           @pagination="getMsgList"
         />
@@ -81,6 +81,8 @@
 
 <script>
 import Pagination from '@/components/Pagination' // 分页组件
+import refreshPage from './refresh-page.js'
+import { Message } from '@/utils/element-shim'
 import Banner from '@/components/ccpcComp/Banner.vue'
 import MapDriving from '@/components/a_myComp/mapDriving/MapDriving'
 import MyElTree from '@/components/a_myComp/elTree/MyElTree.vue' // 左侧导航
@@ -91,6 +93,7 @@ import { findEquipmentcirlog } from '@/api/basicData.js'
 import { parseUserInfo } from '@/utils/safe-json.js'
 
 export default {
+  mixins: [refreshPage],
   // 保留改名前的组件名称，使既有路由缓存继续生效。
   name: 'gjzz',
   components: {
@@ -142,13 +145,9 @@ export default {
       dialogMap: false
     }
   },
-  mounted() {
-    this.init()
-  },
   methods: {
     async init() {
       await this.getTreeList()
-      this.getDataList()
     },
     async getTreeList() {
       const treeList = []
@@ -193,101 +192,115 @@ export default {
       this.search()
     },
     async getDataList() {
+      if (!this.pageActive) return
+      const requestId = ++this.queryVersion
+      const isCurrent = () => this.pageActive && requestId === this.queryVersion
       this.showLoading = true
-      let equipmentCode = ''
-      let equipmentTypeName = ''
-      let selectedStatus = '' // 选择的状态
-      this.bannerList.forEach(item => {
-        switch (item.placeholder) {
-          case '请输入电池ID': equipmentCode = item.input; break
-          case '请输入电池类型': equipmentTypeName = item.input; break
-          case '请选择状态': selectedStatus = item.value; break
-        }
-      })
-      const tableData = []
-      const res = await findEquipmentListExactMatch({
-        corpId: this.targetGroupNowForm.id,
-        equipmentCode,
-        equipmentTypeName,
-        positionStatus: selectedStatus,
-        pageNum: this.page,
-        pageSize: this.limit
-      })
-      let rowNumber = 0
-      if (res.return && res.return.data) {
-        const list = res.return.data
-        this.total = res.return.total
-        for (const item of list) {
-          rowNumber = rowNumber + 1
-          let statusName = ''
-          switch (item.positionStatus) {
-            case 0:
-              statusName = '未知状态'
-              break
-            case 1:
-              statusName = '入库'
-              break
-            case 2:
-              statusName = '出库'
-              break
-            case 3:
-              statusName = '上站入网'
-              break
-            case 4:
-              statusName = '退网下站'
-              break
-            case 6:
-              statusName = '检测淘汰(结束)'
-              break
-            case 5:
-              statusName = '检测待用'
-              break
+      try {
+        let equipmentCode = ''
+        let equipmentTypeName = ''
+        let selectedStatus = '' // 选择的状态
+        this.bannerList.forEach(item => {
+          switch (item.placeholder) {
+            case '请输入电池ID': equipmentCode = item.input; break
+            case '请输入电池类型': equipmentTypeName = item.input; break
+            case '请选择状态': selectedStatus = item.value; break
           }
-          const logres = await findEquipmentcirlog({
-            equipmentId: item.id
-          })
-          let data = {
-            equipmentId: item.id,
-            rowNumber: rowNumber,
-            equipmentCode: item.equipmentCode,
-            equipmentTypeName: item.equipmentTypeName || '',
-            batteryCode: item.equipmentCode,
-            statusName: statusName,
-            location: '无'
-          }
-          if (logres.return && logres.return.data.length !== 0) {
-            data = {
+        })
+        const tableData = []
+        const res = await findEquipmentListExactMatch({
+          corpId: this.targetGroupNowForm.id,
+          equipmentCode,
+          equipmentTypeName,
+          positionStatus: selectedStatus,
+          pageNum: this.page,
+          pageSize: this.limit
+        })
+        if (!isCurrent()) return
+        let rowNumber = (this.page - 1) * this.limit
+        if (res.return && res.return.data) {
+          const list = res.return.data
+          this.total = res.return.total
+          for (const item of list) {
+            rowNumber = rowNumber + 1
+            let statusName = ''
+            switch (item.positionStatus) {
+              case 0:
+                statusName = '未知状态'
+                break
+              case 1:
+                statusName = '入库'
+                break
+              case 2:
+                statusName = '出库'
+                break
+              case 3:
+                statusName = '上站入网'
+                break
+              case 4:
+                statusName = '退网下站'
+                break
+              case 6:
+                statusName = '检测淘汰(结束)'
+                break
+              case 5:
+                statusName = '检测待用'
+                break
+            }
+            const logres = await findEquipmentcirlog({
+              equipmentId: item.id
+            })
+            if (!isCurrent()) return
+            let data = {
               equipmentId: item.id,
               rowNumber: rowNumber,
               equipmentCode: item.equipmentCode,
               equipmentTypeName: item.equipmentTypeName || '',
               batteryCode: item.equipmentCode,
               statusName: statusName,
-              location: logres.return.data[logres.return.data.length - 1].operateDetails.locate
+              location: '无'
             }
+            if (logres.return && logres.return.data.length !== 0) {
+              data = {
+                equipmentId: item.id,
+                rowNumber: rowNumber,
+                equipmentCode: item.equipmentCode,
+                equipmentTypeName: item.equipmentTypeName || '',
+                batteryCode: item.equipmentCode,
+                statusName: statusName,
+                location: logres.return.data[logres.return.data.length - 1].operateDetails.locate
+              }
+            }
+            tableData.push(data)
           }
-          tableData.push(data)
+        } else {
+          this.total = 0
         }
-      } else {
+        this.bannerList.forEach(item => {
+          if (item.style === 'infoNum') {
+            item.num = this.total.toString()
+          }
+        })
+        this.tableData = tableData
+      } catch {
+        if (!isCurrent()) return
+        this.tableData = []
         this.total = 0
+        this.bannerList[0].num = '0'
+        Message({ message: '轨迹追踪加载失败，请稍后重试', type: 'error' })
+      } finally {
+        if (isCurrent()) this.showLoading = false
       }
-      this.bannerList.forEach(item => {
-        if (item.style === 'infoNum') {
-          item.num = this.total.toString()
-        }
-      })
-      this.tableData = tableData
-      this.showLoading = false
     },
     getMsgList(e) {
       // 页码改变时触发
-      this.page = e.page
+      this.page = this.limit === e.limit ? e.page : 1
       this.limit = e.limit
       this.getDataList()
     },
     clickBannerBtn(item) { // 点击banner的按钮
       if (item.buttonName === '查询') {
-        this.getDataList()
+        this.search()
       } else if (item.buttonName === '重置') {
         this.resetData()
       }
@@ -300,7 +313,7 @@ export default {
     },
     search() {
       this.page = 1
-      this.getDataList()
+      return this.getDataList()
     },
     chooseTargetgroup(e) { // 点击左侧导航
       this.targetGroupNowForm = {

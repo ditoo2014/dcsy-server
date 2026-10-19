@@ -78,8 +78,8 @@
         </el-table>
         <Pagination
           v-show="total>0"
-          v-model:page="page"
-          v-model:limit="limit"
+          :page="page"
+          :limit="limit"
           :total="total"
           @pagination="getMsgList"
         />
@@ -100,6 +100,8 @@
 
 <script>
 import Pagination from '@/components/Pagination' // 分页组件
+import refreshPage from './refresh-page.js'
+import { Message } from '@/utils/element-shim'
 import Banner from '@/components/ccpcComp/Banner.vue'
 import MyElTree from '@/components/a_myComp/elTree/MyElTree.vue' // 左侧导航
 import LifecycleRecords from './comp/LifecycleRecords.vue'
@@ -115,6 +117,7 @@ import middleImage from './imgs/中间.png'
 import endImage from './imgs/终点.png'
 
 export default {
+  mixins: [refreshPage],
   // 保留改名前的组件名称，使既有路由缓存继续生效。
   name: 'dczt',
   components: {
@@ -167,14 +170,9 @@ export default {
       circulationDialogVisible: false
     }
   },
-  mounted() {
-    this.init()
-  },
   methods: {
     async init() {
       await this.getTreeList()
-      await this.getAllSiteList()
-      this.getDataList()
     },
     async getTreeList() {
       this.tableData = []
@@ -241,89 +239,102 @@ export default {
       this.search()
     },
     async getDataList() {
+      if (!this.pageActive) return
+      const requestId = ++this.queryVersion
+      const isCurrent = () => this.pageActive && requestId === this.queryVersion
       this.showLoading = true
-      let equipmentCode = ''
-      let equipmentTypeName = ''
-      let selectedStatus = '' // 选择的状态
-      this.bannerList.forEach(item => {
-        switch (item.placeholder) {
-          case '请输入电池ID': equipmentCode = item.input; break
-          case '请输入电池类型': equipmentTypeName = item.input; break
-          case '请选择状态': selectedStatus = item.value; break
-        }
-      })
-      const tableData = []
-      const query = {
-        equipmentCode,
-        equipmentTypeName,
-        pageNum: this.page,
-        pageSize: this.limit,
-        includeLatestCirculation: true
-      }
-      if (this.targetGroupNowForm.id !== undefined && this.targetGroupNowForm.id !== null && this.targetGroupNowForm.id !== '') {
-        query.corpId = this.targetGroupNowForm.id
-      }
-      if (selectedStatus !== '' && selectedStatus !== null && selectedStatus !== undefined) {
-        query.positionStatus = Number(selectedStatus)
-      }
-      const res = await findEquipmentListExactMatch(query)
-      if (res.return && res.return.data) {
-        const list = res.return.data
-        this.total = res.return.total
-        list.forEach((item, index) => {
-          this.siteList.forEach(siteItem => {
-            if (item.belongToSiteId === siteItem.id) {
-              item.siteLocation = siteItem.siteDetails.addr
-            }
-          })
-
-          item.rowNumber = (this.page - 1) * this.limit + index + 1
-          const latestLog = item.latestCirculationLog || {}
-          const operateDetails = latestLog.operateDetails || {}
-          item.responsiblePerson = operateDetails.commander || '-'
-          item.phoneNumber = operateDetails.phone || '-'
-          item.operationTime = this.formatCirculationTime(operateDetails.createTime || latestLog.createTime)
-          let statusName = ''
-          switch (item.positionStatus) {
-            case 0:
-              statusName = '未知状态'
-              break
-            case 1:
-              statusName = '入库'
-              break
-            case 2:
-              statusName = '出库'
-              break
-            case 3:
-              statusName = '上站入网'
-              break
-            case 4:
-              statusName = '退网下站'
-              break
-            case 6:
-              statusName = '检测淘汰(结束)'
-              break
-            case 5:
-              statusName = '检测待用'
-              break
+      try {
+        let equipmentCode = ''
+        let equipmentTypeName = ''
+        let selectedStatus = '' // 选择的状态
+        this.bannerList.forEach(item => {
+          switch (item.placeholder) {
+            case '请输入电池ID': equipmentCode = item.input; break
+            case '请输入电池类型': equipmentTypeName = item.input; break
+            case '请选择状态': selectedStatus = item.value; break
           }
-          item.statusName = statusName
-          tableData.push(item)
         })
-      } else {
-        this.total = 0
-      }
-      this.bannerList.forEach(item => {
-        if (item.style === 'infoNum') {
-          item.num = this.total.toString()
+        const tableData = []
+        const query = {
+          equipmentCode,
+          equipmentTypeName,
+          pageNum: this.page,
+          pageSize: this.limit,
+          includeLatestCirculation: true
         }
-      })
-      this.tableData = tableData
-      this.showLoading = false
+        if (this.targetGroupNowForm.id !== undefined && this.targetGroupNowForm.id !== null && this.targetGroupNowForm.id !== '') {
+          query.corpId = this.targetGroupNowForm.id
+        }
+        if (selectedStatus !== '' && selectedStatus !== null && selectedStatus !== undefined) {
+          query.positionStatus = Number(selectedStatus)
+        }
+        const res = await findEquipmentListExactMatch(query)
+        if (!isCurrent()) return
+        if (res.return && res.return.data) {
+          const list = res.return.data
+          this.total = res.return.total
+          list.forEach((item, index) => {
+            this.siteList.forEach(siteItem => {
+              if (item.belongToSiteId === siteItem.id) {
+                item.siteLocation = siteItem.siteDetails?.addr || ''
+              }
+            })
+
+            item.rowNumber = (this.page - 1) * this.limit + index + 1
+            const latestLog = item.latestCirculationLog || {}
+            const operateDetails = latestLog.operateDetails || {}
+            item.responsiblePerson = operateDetails.commander || '-'
+            item.phoneNumber = operateDetails.phone || '-'
+            item.operationTime = this.formatCirculationTime(operateDetails.createTime || latestLog.createTime)
+            let statusName = ''
+            switch (item.positionStatus) {
+              case 0:
+                statusName = '未知状态'
+                break
+              case 1:
+                statusName = '入库'
+                break
+              case 2:
+                statusName = '出库'
+                break
+              case 3:
+                statusName = '上站入网'
+                break
+              case 4:
+                statusName = '退网下站'
+                break
+              case 6:
+                statusName = '检测淘汰(结束)'
+                break
+              case 5:
+                statusName = '检测待用'
+                break
+            }
+            item.statusName = statusName
+            tableData.push(item)
+          })
+        } else {
+          this.total = 0
+        }
+        this.bannerList.forEach(item => {
+          if (item.style === 'infoNum') {
+            item.num = this.total.toString()
+          }
+        })
+        this.tableData = tableData
+      } catch {
+        if (!isCurrent()) return
+        this.tableData = []
+        this.total = 0
+        this.bannerList[0].num = '0'
+        Message({ message: '电池状态加载失败，请稍后重试', type: 'error' })
+      } finally {
+        if (isCurrent()) this.showLoading = false
+      }
     },
     getMsgList(e) {
       // 页码改变时触发
-      this.page = e.page
+      this.page = this.limit === e.limit ? e.page : 1
       this.limit = e.limit
       this.getDataList()
     },
@@ -344,7 +355,7 @@ export default {
     },
     search() {
       this.page = 1
-      this.getDataList()
+      return this.getDataList()
     },
     formatCirculationTime(value) {
       if (value === undefined || value === null || value === '') {

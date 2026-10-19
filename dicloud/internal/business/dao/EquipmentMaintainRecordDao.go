@@ -120,6 +120,13 @@ func (dao *EquipmentMaintainRecordDao) maintainRecordQuery(filter MaintainRecord
 	return query
 }
 
+// CountEquipmentScoped 按相同权限和筛选条件统计电池数，不受当前页大小影响。
+func (dao *EquipmentMaintainRecordDao) CountEquipmentScoped(filter MaintainRecordFilter) (int64, error) {
+	var count int64
+	err := dao.maintainRecordQuery(filter).Distinct("r.equipment_id").Count(&count).Error
+	return count, err
+}
+
 // FindScoped 查询指定权限内的记录。limit 为 0 时用于完整导出，不截断为固定条数。
 func (dao *EquipmentMaintainRecordDao) FindScoped(filter MaintainRecordFilter, offset, limit int) ([]MaintainRecordRow, int64, error) {
 	rows := make([]MaintainRecordRow, 0)

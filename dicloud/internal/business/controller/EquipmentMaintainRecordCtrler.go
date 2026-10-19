@@ -158,13 +158,20 @@ func (EquipmentMaintainRecordCtrler) Find(ctx *gin.Context) {
 	if pageSize > 10000 {
 		pageSize = 10000
 	}
-	rows, total, err := dao.NewEquipmentMaintainRecordDao(ctx).FindScoped(filter, (page-1)*pageSize, pageSize)
+	recordDao := dao.NewEquipmentMaintainRecordDao(ctx)
+	rows, total, err := recordDao.FindScoped(filter, (page-1)*pageSize, pageSize)
 	if err != nil {
 		log.Printf("[BUSINESS] 查询运维记录失败: %v", err)
 		response.Fail(ctx, "查询运维记录失败", nil)
 		return
 	}
-	response.Success(ctx, "查询成功", gin.H{"data": rows, "total": total})
+	equipmentCount, err := recordDao.CountEquipmentScoped(filter)
+	if err != nil {
+		log.Printf("[BUSINESS] 统计运维电池数失败: %v", err)
+		response.Fail(ctx, "统计运维电池数失败", nil)
+		return
+	}
+	response.Success(ctx, "查询成功", gin.H{"data": rows, "total": total, "equipmentCount": equipmentCount})
 }
 
 // ExportExcel 直接返回工作簿流，不依赖 Linux 临时目录或额外的静态下载服务器。

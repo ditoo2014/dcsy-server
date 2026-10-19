@@ -179,8 +179,10 @@ import { findSelf, corpList } from '@/api/user.js'
 import { equipmentmitrcdExport, equipmentmitrcdImport } from '@/api/batteryTraceability.js'
 import totalImage from '@/assets/imgs/总量.png'
 import { loadMaintenanceTable, readMaintenanceFilters, maintenanceErrorMessage } from './maintenance-data.js'
+import refreshPage from './refresh-page.js'
 
 export default {
+  mixins: [refreshPage],
   // 保留改名前的组件名称，使既有路由缓存继续生效。
   name: 'ywgl',
   components: {
@@ -237,7 +239,6 @@ export default {
     }
     return {
       showLoading: false,
-      queryVersion: 0, // 仅允许最近一次查询更新页面，离开页面后作废未完成请求。
       queryError: '',
       submitting: false, // 新增与导入共用提交锁，避免连点和切换表单重复写入。
       bannerList: [
@@ -279,7 +280,6 @@ export default {
       detail: {},
       currentPage: 1,
       pageSize: 10,
-      tableAllData: [],
 
       searchSiteList: [], // 用于查询的站址列表
       searchSiteId: '', // 查询的站址
@@ -360,16 +360,9 @@ export default {
       deep: true // 设为true时监听对象属性值变化
     }
   },
-  mounted() {
-    this.init()
-  },
-  beforeUnmount() {
-    this.queryVersion++
-  },
   methods: {
     async init() {
       // 运维页没有部门树，不再因无关的部门接口失败而阻断运维查询。
-      return this.search()
     },
     async getTreeList() {
       const treeList = []
@@ -504,7 +497,7 @@ export default {
         if (Number(result?.code) !== 200) throw new Error(result?.msg || '运维记录添加失败')
         this.showDrawer = false
         Message({ message: '添加成功', type: 'success', duration: 1000 })
-        await this.getEquipmentmitrcd()
+        await this.search()
       } catch (error) {
         Message({
           message: maintenanceErrorMessage(error, '运维记录添加失败，请检查网络或稍后重试'),
@@ -523,7 +516,7 @@ export default {
       return this.search()
     },
     inputBannerChange() {
-      return this.search()
+      // 文本通过组件双向绑定更新；点击查询或回车时才提交，避免逐字请求。
     },
     inputBannerKeyupEnter() {
       return this.search()
@@ -546,28 +539,26 @@ export default {
       this.endTime = ''
       return this.search()
     },
-    updateVisibleRows() {
-      const maxPage = Math.max(1, Math.ceil(this.tableAllData.length / this.pageSize))
-      this.currentPage = Math.min(Math.max(1, this.currentPage), maxPage)
-      const offset = (this.currentPage - 1) * this.pageSize
-      this.tableData = this.tableAllData.slice(offset, offset + this.pageSize)
-    },
     handleCurrentChange(value) {
+      if (this.currentPage === value) return
       this.currentPage = value
-      this.updateVisibleRows()
+      return this.getEquipmentmitrcd()
     },
     handleSizeChange(value) {
       this.pageSize = value
       this.currentPage = 1
-      this.updateVisibleRows()
+      return this.getEquipmentmitrcd()
     },
     async getEquipmentmitrcd() {
+      if (!this.pageActive) return
       const requestId = ++this.queryVersion
-      const isCurrent = () => requestId === this.queryVersion
+      const isCurrent = () => this.pageActive && requestId === this.queryVersion
       this.showLoading = true
       this.queryError = ''
       try {
         const filters = readMaintenanceFilters(this.bannerList)
+        filters.pageNum = this.currentPage
+        filters.pageSize = this.pageSize
         this.equipmentCode = filters.equipmentCode
         this.startTime = filters.startTime
         this.endTime = filters.endTime
@@ -577,15 +568,19 @@ export default {
           findSite: findSiteListExactMatch
         }, filters, isCurrent)
         if (!isCurrent() || !result) return
-        this.tableAllData = result.rows
-        this.total = result.rows.length
+        this.total = result.total
+        // 删除记录或并发更新导致当前页越界时，回到实际最后一页重新请求。
+        const maxPage = Math.max(1, Math.ceil(this.total / this.pageSize))
+        if (this.currentPage > maxPage) {
+          this.currentPage = maxPage
+          return this.getEquipmentmitrcd()
+        }
+        this.tableData = result.rows
         this.bannerList[0].num = String(this.total)
         this.bannerList[1].num = String(result.equipmentCount)
-        this.updateVisibleRows()
       } catch (error) {
         if (!isCurrent()) return
         this.queryError = maintenanceErrorMessage(error)
-        this.tableAllData = []
         this.tableData = []
         this.total = 0
         this.bannerList[0].num = '0'
@@ -616,7 +611,7 @@ export default {
       // this.getSiteList() // 获取站址列表
     },
     setTableData() { // 设置显示的表格数据
-      this.updateVisibleRows()
+      return this.getEquipmentmitrcd()
     },
     getMsgList(e) {
       // 页码改变时触发

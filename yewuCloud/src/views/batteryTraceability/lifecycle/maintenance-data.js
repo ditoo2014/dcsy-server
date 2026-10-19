@@ -1,5 +1,4 @@
-// 运维查询分批读取，避免旧版只取第一页或固定 10000 条而漏掉后续记录。
-const QUERY_PAGE_SIZE = 500
+// 仅补充当前页缺失的关联资料，避免一次加载全部运维记录。
 const LOOKUP_CONCURRENCY = 4
 
 export function maintenanceErrorMessage(error, fallback = '运维数据加载失败，请检查网络或稍后重试') {
@@ -92,37 +91,22 @@ async function lookupAll(ids, lookup, isCurrent) {
 
 /** 先取得真实运维记录，再补齐电池/站点信息；同一次查询内每个实体只请求一次。 */
 export async function loadMaintenanceTable(api, filters, isCurrent = () => true) {
-  const records = []
-  const recordIds = new Set()
-  for (let pageNum = 1; isCurrent(); pageNum++) {
-    const response = await api.findRecords({
-      pageNum, pageSize: QUERY_PAGE_SIZE,
-      startTime: filters.startTime, endTime: filters.endTime,
-      equipmentCode: filters.equipmentCode,
-      equipmentTypeName: filters.equipmentTypeName,
-      minimumCount: filters.minimumCount
-    })
-    if (!isCurrent()) return null
-    const rows = readRows(response)
-    if (rows.length === 0) break
-    // 接口若忽略页码并重复返回同一页，明确报错，避免无限循环和重复计数。
-    const ids = rows.filter(row => row.id != null).map(row => String(row.id))
-    if (ids.length === rows.length && ids.every(id => recordIds.has(id))) {
-      throw new Error('运维接口返回了重复的分页数据，请稍后重试')
-    }
-    rows.forEach(row => {
-      if (row.id != null) {
-        if (recordIds.has(String(row.id))) return
-        recordIds.add(String(row.id))
-      }
-      records.push(row)
-    })
-    const total = Number(response?.return?.total)
-    if (Number.isFinite(total) && total >= 0) {
-      if (records.length >= total) break
-    } else if (rows.length < QUERY_PAGE_SIZE) break
-  }
+  const pageNum = filters.pageNum || 1
+  const pageSize = filters.pageSize || 10
+  const response = await api.findRecords({
+    pageNum, pageSize,
+    startTime: filters.startTime, endTime: filters.endTime,
+    equipmentCode: filters.equipmentCode,
+    equipmentTypeName: filters.equipmentTypeName,
+    minimumCount: filters.minimumCount
+  })
   if (!isCurrent()) return null
+  const records = readRows(response)
+  const total = Number(response?.return?.total)
+  const equipmentCount = Number(response?.return?.equipmentCount)
+  if (!Number.isFinite(total) || total < 0 || !Number.isFinite(equipmentCount) || equipmentCount < 0) {
+    throw new Error('运维统计数据暂不可用，请稍后重试')
+  }
 
   const equipmentIds = [...new Set(records.map(row => row.equipmentId).filter(id => Number(id) > 0))]
   // 新接口会在运维记录中直接返回设备资料。先使用这些字段，只有确实缺字段时才补查设备。
@@ -212,7 +196,8 @@ export async function loadMaintenanceTable(api, filters, isCurrent = () => true)
 
   // 次数、编码和类型筛选已由后端统一处理；这里只负责分页整理和统计展示。
   return {
-    rows: rows.map((row, index) => ({ ...row, rowNumber: index + 1 })),
-    equipmentCount: new Set(rows.map(row => String(row.equipmentId))).size
+    rows: rows.map((row, index) => ({ ...row, rowNumber: (pageNum - 1) * pageSize + index + 1 })),
+    total,
+    equipmentCount
   }
 }
