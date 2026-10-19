@@ -1,17 +1,17 @@
 <template>
   <div>
-    <EquipMana />
+    <EquipmentManagement />
   </div>
 </template>
 
 <script>
-import EquipMana from '@/views/equipMana/equipMana.vue'
+import EquipmentManagement from '@/views/equipment/EquipmentManagement.vue'
 
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'jrgl',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'DataAccess',
   components: {
-    EquipMana
+    EquipmentManagement
   }
 }
 </script>

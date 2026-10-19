@@ -28,14 +28,14 @@
 </template>
 
 <script>
-import { mapGetters } from '@/store/pinia-helpers'
+import { mapGetters } from '@/store/piniaHelpers'
 import Logo from './Logo'
 import SidebarItem from './SidebarItem'
 import variables from '@/styles/variables.js'
-import { resolveSidebarActiveMenu } from '@/utils/sidebar-active-menu.js'
+import { resolveSidebarActiveMenu } from '@/utils/sidebarActiveMenu.js'
 
 /** 合并路由前各子模块曾为独立 Layout 的 path，仅作菜单回退 */
-const BASIC_INFORMATION_LEGACY_ROOT_PATHS = ['/jcxxgl', '/zdxxgl', '/scxxgl', '/dcsjgl', '/rygl', '/jcsj']
+const BASIC_INFORMATION_LEGACY_ROOT_PATHS = ['/basicInformation', '/sites', '/batteryFactory', '/batteryData', '/accounts', '/basicData']
 
 export default {
   components: { SidebarItem, Logo },
@@ -46,13 +46,13 @@ export default {
     ]),
     basicInformationMenuRoutes() {
       const layoutRoute = this.permission_routes.find(
-        route => route.jcxxgl && route.path === '/jcxxgl' && Array.isArray(route.children)
+        route => route.basicInformationSection && route.path === '/basicInformation' && Array.isArray(route.children)
       )
       if (layoutRoute && layoutRoute.children.length) {
-        return layoutRoute.children.filter(child => child.jcxxgl && !child.hidden)
+        return layoutRoute.children.filter(child => child.basicInformationSection && !child.hidden)
       }
       return this.permission_routes.filter(
-        route => route.jcxxgl && BASIC_INFORMATION_LEGACY_ROOT_PATHS.includes(route.path)
+        route => route.basicInformationSection && BASIC_INFORMATION_LEGACY_ROOT_PATHS.includes(route.path)
       )
     },
     activeMenu() {
@@ -76,7 +76,7 @@ export default {
       if (route.path.startsWith('/')) {
         return route.path
       }
-      return '/jcxxgl'
+      return '/basicInformation'
     },
     handleMenuSelect(index) {
       const path = String(index || '')

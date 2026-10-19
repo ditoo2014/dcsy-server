@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 
 export default {
   name: 'GatewayConfigLauncher',
@@ -16,7 +16,7 @@ export default {
     openCollectionCloud() {
       // 两套界面共用当前站点和登录令牌，仅在新标签页切换到采集云独立布局。
       const target = this.$router.resolve({
-        name: 'collection-home',
+        name: 'collectionHome',
         query: { module: 'gateway' }
       }).href
       const collectionWindow = window.open(new URL(target, window.location.href).toString(), '_blank')

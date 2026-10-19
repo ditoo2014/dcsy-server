@@ -71,20 +71,20 @@
 </template>
 
 <script>
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 import Cookies from 'js-cookie'
 import config from '@/config.js'
 import { PLATFORM, isDcsyLoginUi, isDcsyMainUi } from '@/constants/platform'
 import { validUsername } from '@/utils/validate' // 账号密码表单验证
 import { getToken, setUsername, setToken, setMydb, setUserId } from '@/utils/auth.js'
-import { parseUserInfo } from '@/utils/safe-json.js'
+import { parseUserInfo } from '@/utils/safeJson.js'
 import { sendLoginSmsCode } from '@/api/user.js'
 import { statistictaskPlan } from '@/api/batteryTraceability.js'
 import { getRSApassword, getTime, dateConvStamp, dateAddOrSubtract } from '@/utils/utils.js'
 import router from '@/router'
 import { markDynamicRoutesReady } from '@/permission.js'
-import { resolveAccessiblePath } from '@/utils/resolve-accessible-route.js'
-import { getDefaultBannerId, resolveBannerIdFromPath } from '@/utils/banner-route.js'
+import { resolveAccessiblePath } from '@/utils/resolveAccessibleRoute.js'
+import { getDefaultBannerId, resolveBannerIdFromPath } from '@/utils/bannerRoute.js'
 import dcsyLogoImage from './dcsyLogo.png'
 import backgroundImage from './background.png'
 
@@ -327,7 +327,7 @@ export default {
       const roleInfo = await this.$store.dispatch('user/getInfo')
       if (getToken() !== requestedToken) return
       if (roleInfo.passwordChangeRequired) {
-        await this.$router.replace({ path: '/modifyPas' })
+        await this.$router.replace({ path: '/modifyPassword' })
         return
       }
       const accessRoutes = await this.$store.dispatch('permission/generateRoutes', roleInfo)
@@ -380,7 +380,7 @@ export default {
 
       for (let i = 0; i < n; i++) {
         const p = document.createElement('p')
-        p.className = 'zfyPCss'
+        p.className = 'loginParticleCss'
         container.appendChild(p)
 
         const content = this.randomChars(perColumnNums)
@@ -390,7 +390,7 @@ export default {
         const alpha = (Math.random() * 0.4 + 0.6).toFixed(2)
 
         styleEl.innerHTML += `
-          .containerRefCss .zfyPCss:nth-child(${i + 1})::before {
+          .containerRefCss .loginParticleCss:nth-child(${i + 1})::before {
             content: '${content}';
             color: rgb(179, 255, 199);
             text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 5px currentColor, 0 0 10px currentColor;
@@ -404,7 +404,7 @@ export default {
             overflow: hidden;
           }
 
-          .containerRefCss .zfyPCss:nth-child(${i + 1})::after {
+          .containerRefCss .loginParticleCss:nth-child(${i + 1})::after {
             content: '';
             background: linear-gradient(rgba(0, 0, 0, ${alpha}), rgba(0, 0, 0, ${alpha}), rgba(0, 0, 0, ${alpha}), transparent 75%, transparent);
             background-size: 100% 220%;
@@ -681,7 +681,7 @@ img {
 </style>
 
 <style lang="stylus">
-  .zfyContentCss {
+  .loginParticleContentCss {
     margin 0
     padding 0
     width 100%
@@ -696,7 +696,7 @@ img {
       justify-content space-between
       flex-wrap nowrap
       flex-direction row
-      .zfyPCss {
+      .loginParticleCss {
         position relative
         width 2vw
         height 100vh

@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { resolveRoutePath } from '@/utils/resolve-route-path'
+import { resolveRoutePath } from '@/utils/resolveRoutePath'
 import closeImage from './close.png'
 import closePrimaryImage from './closePrimary.png'
 

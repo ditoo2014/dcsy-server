@@ -156,25 +156,25 @@
 </template>
 
 <script>
-import { Message } from '@/utils/element-shim'
-import MyElTree from '@/components/a_myComp/elTree/MyElTree.vue' // 左侧导航
+import { Message } from '@/utils/elementShim'
+import MyElTree from '@/components/sharedComponents/elTree/MyElTree.vue' // 左侧导航
 import Pagination from '@/components/Pagination' // 分页组件
 import Banner from '@/components/ccpcComp/Banner.vue'
-import SelectMapArea from '@/components/a_myComp/selectMap/SelectMapArea.vue'
-import ExportExcel from '@/components/a_myComp/exportExcel/ExportExcel.vue'
-import UploadFile from '@/components/a_myComp/uploadFile/UploadFile.vue'
+import SelectMapArea from '@/components/sharedComponents/selectMap/SelectMapArea.vue'
+import ExportExcel from '@/components/sharedComponents/exportExcel/ExportExcel.vue'
+import UploadFile from '@/components/sharedComponents/uploadFile/UploadFile.vue'
 import { corpList } from '@/api/user.js'
-import { findSiteListExactMatch, saveSite, deleteSite, modifySite } from '@/api/siteMana.js'
+import { findSiteListExactMatch, saveSite, deleteSite, modifySite } from '@/api/sites.js'
 import { meAlert, objectSort, exportBlobFile } from '@/utils/utils.js'
-import { parseUserInfo } from '@/utils/safe-json.js'
+import { parseUserInfo } from '@/utils/safeJson.js'
 import { siteExport, siteImport, siteImportTemplate } from '@/api/batteryTraceability.js'
-import { chinaRegions } from '@/components/a_myComp/mapComplex/index.js'
+import { chinaRegions } from '@/components/sharedComponents/mapComplex/index.js'
 import lodash from 'lodash'
-import totalImage from '@/assets/imgs/总量.png'
+import totalImage from '@/assets/imgs/total.png'
 
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'zdxxgl',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'SiteManagement',
   components: {
     MyElTree,
     Pagination,

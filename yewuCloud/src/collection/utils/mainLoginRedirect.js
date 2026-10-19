@@ -1,6 +1,6 @@
-import { expireSession } from '@/utils/session-expiration'
+import { expireSession } from '@/utils/sessionExpiration'
 
-export { LAST_ACTIVITY_KEY, SESSION_TIMEOUT_EVENT_KEY } from '@/utils/session-events'
+export { LAST_ACTIVITY_KEY, SESSION_TIMEOUT_EVENT_KEY } from '@/utils/sessionEvents'
 
 /** 采集界面复用主平台退出流程，统一清理状态和发送带会话标识的通知。 */
 export function redirectToMainLogin(options = {}) {

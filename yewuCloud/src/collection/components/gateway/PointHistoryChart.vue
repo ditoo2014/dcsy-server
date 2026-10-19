@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 // 采集云使用与原项目一致的图表版本，保留历史曲线的样式和交互。
 import * as echarts from 'echarts-collection/core'
-import { createContainerResizeWatcher } from '../../../utils/container-resize'
+import { createContainerResizeWatcher } from '../../../utils/containerResize'
 
 import { LineChart, ScatterChart } from 'echarts-collection/charts'
 import {
@@ -13,7 +13,7 @@ import {
   TooltipComponent
 } from 'echarts-collection/components'
 import { CanvasRenderer } from 'echarts-collection/renderers'
-import { fetchGatewayHistoryCount, fetchGatewayHistoryPaged } from '../../api/gateway-realtime'
+import { fetchGatewayHistoryCount, fetchGatewayHistoryPaged } from '../../api/gatewayRealtime'
 
 echarts.use([
   LineChart,

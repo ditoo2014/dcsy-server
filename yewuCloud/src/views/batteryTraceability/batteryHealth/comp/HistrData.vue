@@ -1,6 +1,6 @@
 <template>
   <div class="hisDataCss">
-    <div v-if="isDevelopment" class="bzxxCss">
+    <div v-if="isDevelopment" class="historyNotesCss">
       <el-tooltip
         class="item"
         effect="dark"
@@ -10,42 +10,42 @@
         <el-button size="small" type="primary">备注信息</el-button>
       </el-tooltip>
     </div>
-    <div class="csxzContentCss">
+    <div class="parameterSelectionContentCss">
       <div class="titleCss">【参数选择】</div>
-      <div class="csxzCss">
-        <div class="csxzTitleCss">电池组参数：</div>
-        <div class="csxzSelectCss">
+      <div class="parameterSelectionCss">
+        <div class="parameterSelectionTitleCss">电池组参数：</div>
+        <div class="parameterSelectionOptionsCss">
           <MyCheckbox
             :check-list="batteryParameterOptions"
             @select-change="handleBatteryParameterSelectionChange"
           />
         </div>
-        <div class="csxzFooterCss" />
+        <div class="parameterSelectionFooterCss" />
       </div>
-      <div class="csxzCss">
-        <div class="csxzTitleCss">单体电压：</div>
-        <div class="csxzSelectCss">
+      <div class="parameterSelectionCss">
+        <div class="parameterSelectionTitleCss">单体电压：</div>
+        <div class="parameterSelectionOptionsCss">
           <MyCheckbox
             :check-list="cellVoltageOptions"
             @select-change="handleCellVoltageSelectionChange"
           />
         </div>
-        <div class="csxzFooterCss" />
+        <div class="parameterSelectionFooterCss" />
       </div>
     </div>
-    <div class="sjxzContentCss">
+    <div class="sliceSelectionContentCss">
       <div class="titleCss">【切片快速选择】</div>
       <div
         v-loading="dischargeSliceLoading"
-        class="sjxzCss"
+        class="sliceSelectionCss"
         element-loading-background="rgba(255, 255, 255, 0.75)"
       >
-        <div class="ksxzTitleCss">放电切片快速选择</div>
-        <div class="ksxzLsjlContentCss">
-          <div class="ksxzLsjlCss">
-            <div class="ksxzLsjlTitleCss">历史放电记录</div>
-            <div class="ksxzLsjlDateContentCss">
-              <div class="ksxzLsjlDateCss">
+        <div class="quickSelectionTitleCss">放电切片快速选择</div>
+        <div class="sliceHistoryContentCss">
+          <div class="sliceHistoryCss">
+            <div class="sliceHistoryTitleCss">历史放电记录</div>
+            <div class="sliceHistoryDateContentCss">
+              <div class="sliceHistoryDateCss">
                 <el-date-picker
                   v-model="dischargeTimeRange"
                   size="small"
@@ -59,22 +59,22 @@
                 />
               </div>
             </div>
-            <div class="fdcsCss">放电次数<span class="fdcsNumCss">{{ allDischargeRecords.length }}</span>次</div>
+            <div class="dischargeCountCss">放电次数<span class="dischargeCountValueCss">{{ allDischargeRecords.length }}</span>次</div>
           </div>
-          <div class="fdjlContentCss">
-            <div class="fdjlTitleCss">放电记录</div>
-            <div class="fdjlCss">
-              <div class="fdjlTabCss">
-                <div v-if="dischargeRecords.length > 0" class="fdjlListCss">
+          <div class="dischargeRecordsContentCss">
+            <div class="dischargeRecordsTitleCss">放电记录</div>
+            <div class="dischargeRecordsCss">
+              <div class="dischargeRecordsTabCss">
+                <div v-if="dischargeRecords.length > 0" class="dischargeRecordsListCss">
                   <div
                     v-for="(item, index) in dischargeRecords"
                     :key="index"
-                    class="fdjlItemCss cursorPointer"
-                    :class="item.selected ? 'fdjlItemSelectedCss': ''"
+                    class="dischargeRecordItemCss cursorPointer"
+                    :class="item.selected ? 'dischargeRecordSelectedCss': ''"
                     @click="clickTable1(item)"
                   >{{ item.dateArr }}</div>
                 </div>
-                <div v-else class="fdjlListCss wsjCss">无</div>
+                <div v-else class="dischargeRecordsListCss emptyDataCss">无</div>
                 <div class="pagCss">
                   <Pagination
                     v-show="total1>0"
@@ -92,19 +92,19 @@
             </div>
           </div>
         </div>
-        <div class="sjxzFooterCss" />
+        <div class="sliceSelectionFooterCss" />
       </div>
       <div
         v-loading="chargeSliceLoading"
-        class="sjxzCss"
+        class="sliceSelectionCss"
         element-loading-background="rgba(255, 255, 255, 0.75)"
       >
-        <div class="ksxzTitleCss">充电切片快速选择</div>
-        <div class="ksxzLsjlContentCss">
-          <div class="ksxzLsjlCss">
-            <div class="ksxzLsjlTitleCss">历史充电记录</div>
-            <div class="ksxzLsjlDateContentCss">
-              <div class="ksxzLsjlDateCss">
+        <div class="quickSelectionTitleCss">充电切片快速选择</div>
+        <div class="sliceHistoryContentCss">
+          <div class="sliceHistoryCss">
+            <div class="sliceHistoryTitleCss">历史充电记录</div>
+            <div class="sliceHistoryDateContentCss">
+              <div class="sliceHistoryDateCss">
                 <el-date-picker
                   v-model="chargeTimeRange"
                   size="small"
@@ -118,22 +118,22 @@
                 />
               </div>
             </div>
-            <div class="fdcsCss">充电次数<span class="fdcsNumCss">{{ allChargeRecords.length }}</span>次</div>
+            <div class="dischargeCountCss">充电次数<span class="dischargeCountValueCss">{{ allChargeRecords.length }}</span>次</div>
           </div>
-          <div class="fdjlContentCss">
-            <div class="fdjlTitleCss">充电记录</div>
-            <div class="fdjlCss">
-              <div class="fdjlTabCss">
-                <div v-if="chargeRecords.length > 0" class="fdjlListCss">
+          <div class="dischargeRecordsContentCss">
+            <div class="dischargeRecordsTitleCss">充电记录</div>
+            <div class="dischargeRecordsCss">
+              <div class="dischargeRecordsTabCss">
+                <div v-if="chargeRecords.length > 0" class="dischargeRecordsListCss">
                   <div
                     v-for="(item, index) in chargeRecords"
                     :key="index"
-                    class="fdjlItemCss cursorPointer"
-                    :class="item.selected ? 'fdjlItemSelectedCss': ''"
+                    class="dischargeRecordItemCss cursorPointer"
+                    :class="item.selected ? 'dischargeRecordSelectedCss': ''"
                     @click="clickTable2(item)"
                   >{{ item.dateArr }}</div>
                 </div>
-                <div v-else class="fdjlListCss wsjCss">无</div>
+                <div v-else class="dischargeRecordsListCss emptyDataCss">无</div>
                 <div class="pagCss">
                   <Pagination
                     v-show="total2>0"
@@ -151,26 +151,26 @@
             </div>
           </div>
         </div>
-        <div class="sjxzFooterCss" />
+        <div class="sliceSelectionFooterCss" />
       </div>
     </div>
 
     <div
       v-loading="curveSliceLoading"
-      class="bhqxContentCss"
+      class="trendCurveContentCss"
       element-loading-background="rgba(255, 255, 255, 0.75)"
     >
-      <div class="bhqxHeadContentCss">
-        <div class="bhqxTitleCss">【变化曲线】</div>
-        <div class="bhqxZtCss">
-          <div class="ztIconCss ztIcon1Css" />
-          <div class="ztNameCss">浮充</div>
-          <div class="ztIconCss ztIcon2Css" />
-          <div class="ztNameCss">放电</div>
-          <div class="ztIconCss ztIcon3Css" />
-          <div class="ztNameCss">充电</div>
+      <div class="trendCurveHeaderCss">
+        <div class="trendCurveTitleCss">【变化曲线】</div>
+        <div class="trendCurveLegendCss">
+          <div class="statusIconCss statusIcon1Css" />
+          <div class="statusNameCss">浮充</div>
+          <div class="statusIconCss statusIcon2Css" />
+          <div class="statusNameCss">放电</div>
+          <div class="statusIconCss statusIcon3Css" />
+          <div class="statusNameCss">充电</div>
         </div>
-        <div class="cxjgSelDateCss">
+        <div class="queryIntervalDateCss">
           <el-date-picker
             v-model="timeArr"
             type="datetimerange"
@@ -183,8 +183,8 @@
             @change="timeChange('')"
           />
         </div>
-        <div class="cxjgCss">
-          <div class="cxjgTitleCss">查询间隔：</div>
+        <div class="queryIntervalCss">
+          <div class="queryIntervalTitleCss">查询间隔：</div>
           <div class="inputContentCss">
             <el-input
               v-model="timeLength"
@@ -226,19 +226,19 @@
 </template>
 
 <script>
-import MixChart from '@/components/a_myComp/echarts/MixChart.vue'
+import MixChart from '@/components/sharedComponents/echarts/MixChart.vue'
 import Pagination from '@/components/Pagination' // 分页组件
-import MyCheckbox from '@/components/a_myComp/myCheckbox/MyCheckbox.vue'
-import { getdata } from '@/api/moniList.js'
+import MyCheckbox from '@/components/sharedComponents/myCheckbox/MyCheckbox.vue'
+import { getdata } from '@/api/monitoring.js'
 import {
   TOTAL_DISCHARGE_CAPACITY_POINT_DATA_ID,
   TOTAL_CHARGE_CAPACITY_POINT_DATA_ID,
   PRESSURE_POINT_DATA_ID,
   TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
   resolveBatteryPoint
-} from '@/utils/battery-points.js'
+} from '@/utils/batteryPoints.js'
 import { getTime, formatDateString, dateConvStamp, format0800CSTDateString } from '@/utils/utils.js'
-import { parseUserInfo } from '@/utils/safe-json.js'
+import { parseUserInfo } from '@/utils/safeJson.js'
 
 // 接口统一使用秒；界面仍保留原版的秒、分钟、小时和天选择。
 const HISTORY_INTERVAL_SECONDS = { second: 1, minute: 60, hour: 3600, day: 86400 }
@@ -711,7 +711,7 @@ export default {
     },
     exportExcel() {
       const chartData = this.pointChartData
-      import('@/vendor/Export2Excel').then(excel => {
+      import('@/vendor/exportToExcel').then(excel => {
         const tHeader = ['时间']
         chartData.series.forEach(item => {
           tHeader.push(item.name)
@@ -1366,7 +1366,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
   // 按详情正文实际宽度适配，弹窗和浏览器缩放都使用相同的布局规则。
   container-type inline-size
   container-name battery-history
-  .bzxxCss {
+  .historyNotesCss {
     position absolute
     top 5px
     right 10px
@@ -1378,7 +1378,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
     font-size clamp(16px, 1.2vw, 24px)
     font-weight bold
   }
-  .csxzContentCss {
+  .parameterSelectionContentCss {
     margin 0.5vw 0.2%
     width 99.6%
     min-height 8.8vw
@@ -1387,7 +1387,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
     box-sizing border-box
     box-shadow boxShadow
     border-radius 0.2vw
-    .csxzCss {
+    .parameterSelectionCss {
       position relative
       display flex
       align-items flex-start
@@ -1422,7 +1422,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         border-right 2px solid #02a6b5
         border-radius 20%
       }
-      .csxzTitleCss {
+      .parameterSelectionTitleCss {
         flex 0 0 unquote('max(10%, 110px)')
         padding 6px clamp(8px, 1vw, 20px) 0 0
         box-sizing border-box
@@ -1431,14 +1431,14 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         font-weight bold
         text-align right
       }
-      .csxzSelectCss {
+      .parameterSelectionOptionsCss {
         flex 1
         min-width 0
         min-height 3vw
         height auto
         padding 6px 0
       }
-      .csxzFooterCss {
+      .parameterSelectionFooterCss {
         position absolute
         left 0
         bottom 0
@@ -1468,7 +1468,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       }
     }
   }
-  .sjxzContentCss {
+  .sliceSelectionContentCss {
     margin 0.5vw 0.2%
     width 99.6%
     // 切片记录换行或分页增加高度时，外框随内容增长，避免压住变化曲线。
@@ -1484,7 +1484,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       grid-column 1 / -1
       padding-left 0
     }
-    .sjxzCss {
+    .sliceSelectionCss {
       position relative
       min-width 0
       padding unquote('max(8px, 0.5vw)')
@@ -1515,23 +1515,23 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         border-right 2px solid #02a6b5
         border-radius 20%
       }
-      .ksxzTitleCss {
+      .quickSelectionTitleCss {
         width 100%
         font-size clamp(14px, 1vw, 20px)
         line-height 1.6
         font-weight bold
       }
-      .ksxzLsjlContentCss {
+      .sliceHistoryContentCss {
         width 100%
         display flex
         align-items stretch
-        .ksxzLsjlCss {
+        .sliceHistoryCss {
           flex 0 0 44%
           min-width 0
           margin-right 1%
           min-height 14vw
           border-right 1px solid #ccc
-          .ksxzLsjlTitleCss {
+          .sliceHistoryTitleCss {
             margin-top 0.5vw
             width 100%
             min-height unquote('max(24px, 1.5vw)')
@@ -1539,46 +1539,46 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
             font-size clamp(12px, 0.8vw, 16px)
             font-weight bold
           }
-          .ksxzLsjlDateContentCss {
+          .sliceHistoryDateContentCss {
             width 100%
             min-height 40px
-            .ksxzLsjlDateCss {
+            .sliceHistoryDateCss {
               width 99%
               min-width 0
             }
           }
-          .fdcsCss {
+          .dischargeCountCss {
             width 100%
             line-height 1.6
             font-size clamp(12px, 0.7vw, 16px)
-            .fdcsNumCss {
+            .dischargeCountValueCss {
               padding 0 0.2vw
             }
           }
         }
-        .fdjlContentCss {
+        .dischargeRecordsContentCss {
           margin-top -0.5vw
           flex 1
           min-width 0
 
-          .fdjlTitleCss {
+          .dischargeRecordsTitleCss {
             width 100%
             min-height unquote('max(24px, 1.2vw)')
             line-height 1.6
             font-size clamp(12px, 0.8vw, 16px)
             font-weight bold
           }
-          .fdjlCss {
+          .dischargeRecordsCss {
             width 100%
-            .fdjlTabCss {
+            .dischargeRecordsTabCss {
               width 100%
               min-width 0
               background-color #fff
-              .fdjlListCss {
+              .dischargeRecordsListCss {
                 padding-left 0.5vw
                 width 100%
                 box-sizing border-box
-                .fdjlItemCss {
+                .dischargeRecordItemCss {
                   width 100%
                   // 保留完整切片起止时间；长时间文字换行时同步撑高记录行。
                   min-height unquote('max(24px, 1.2vw)')
@@ -1590,11 +1590,11 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
                   font-size clamp(12px, 0.7vw, 16px)
                   border-bottom 1px solid #EBEEF5
                 }
-                .fdjlItemSelectedCss {
+                .dischargeRecordSelectedCss {
                   background-color rgba(0,109,255, 0.4)
                 }
               }
-              .wsjCss {
+              .emptyDataCss {
                 padding-top 0.5vw
                 line-height 1.6
                 text-align center
@@ -1608,7 +1608,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
           }
         }
       }
-      .sjxzFooterCss {
+      .sliceSelectionFooterCss {
         position absolute
         left 0
         bottom 0
@@ -1638,7 +1638,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       }
     }
   }
-  .bhqxContentCss {
+  .trendCurveContentCss {
     margin 0.5vw 0.2%
     width 99.6%
     min-height 14.5vw
@@ -1646,7 +1646,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
     box-sizing border-box
     box-shadow boxShadow
     border-radius 0.2vw
-    .bhqxHeadContentCss {
+    .trendCurveHeaderCss {
       width 100%
       // 筛选项按可用宽度换行，每一行的高度由日期框和按钮决定。
       display flex
@@ -1656,51 +1656,51 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       padding 6px 1%
       box-sizing border-box
       min-height 2vw
-      .bhqxTitleCss {
+      .trendCurveTitleCss {
         flex 0 0 auto
         line-height 1.5
         font-size clamp(16px, 1.2vw, 24px)
         font-weight bold
       }
-      .bhqxZtCss {
+      .trendCurveLegendCss {
         display flex
         align-items center
         flex 0 0 auto
         margin 0 clamp(4px, 1vw, 20px)
-        .ztIconCss {
+        .statusIconCss {
           flex-shrink 0
           margin-right clamp(4px, 0.3vw, 8px)
           width clamp(10px, 1vw, 20px)
           height clamp(10px, 1vw, 20px)
           border-radius 50%
         }
-        .ztIcon1Css {
+        .statusIcon1Css {
           background-color #339900
         }
-        .ztIcon2Css {
+        .statusIcon2Css {
           background-color #ff0000
         }
-        .ztIcon3Css {
+        .statusIcon3Css {
           background-color #ffff00
         }
-        .ztNameCss {
+        .statusNameCss {
           margin-right clamp(8px, 1vw, 20px)
           line-height 1.6
           font-size clamp(12px, 0.8vw, 16px)
         }
       }
-      .cxjgSelDateCss {
+      .queryIntervalDateCss {
         flex 0 1 340px
         min-width 0
         max-width 100%
       }
-      .cxjgCss {
+      .queryIntervalCss {
         display flex
         flex-wrap wrap
         align-items center
         gap 4px
         min-width 0
-        .cxjgTitleCss {
+        .queryIntervalTitleCss {
           line-height 1.6
           font-size clamp(12px, 0.8vw, 16px)
         }
@@ -1815,10 +1815,10 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
 
 // 先让单张切片卡片内部纵向排列，再在详情更窄时将充、放电卡片上下排列。
 @container battery-history-slice (max-width: 630px) {
-  .hisDataCss .sjxzContentCss .sjxzCss .ksxzLsjlContentCss {
+  .hisDataCss .sliceSelectionContentCss .sliceSelectionCss .sliceHistoryContentCss {
     flex-direction column
     gap 8px
-    .ksxzLsjlCss {
+    .sliceHistoryCss {
       flex-basis auto
       min-height 0
       margin-right 0
@@ -1826,26 +1826,26 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
       border-right 0
       border-bottom 1px solid #ccc
     }
-    .fdjlContentCss {
+    .dischargeRecordsContentCss {
       margin-top 0
     }
   }
 }
 @container battery-history (max-width: 980px) {
-  .hisDataCss .sjxzContentCss {
+  .hisDataCss .sliceSelectionContentCss {
     grid-template-columns minmax(0, 1fr)
   }
 }
 @container battery-history (max-width: 460px) {
-  .hisDataCss .csxzContentCss .csxzCss {
+  .hisDataCss .parameterSelectionContentCss .parameterSelectionCss {
     flex-direction column
-    .csxzTitleCss {
+    .parameterSelectionTitleCss {
       flex-basis auto
       min-height 0
       padding-right 0
       text-align left
     }
-    .csxzSelectCss {
+    .parameterSelectionOptionsCss {
       width 100%
     }
   }
@@ -1854,10 +1854,10 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
 // 不支持容器查询的旧浏览器使用窗口断点，仍允许内容撑高和工具栏换行。
 @supports not (container-type: inline-size) {
   @media (max-width: 1440px) {
-    .hisDataCss .sjxzContentCss .sjxzCss .ksxzLsjlContentCss {
+    .hisDataCss .sliceSelectionContentCss .sliceSelectionCss .sliceHistoryContentCss {
       flex-direction column
       gap 8px
-      .ksxzLsjlCss {
+      .sliceHistoryCss {
         flex-basis auto
         min-height 0
         margin-right 0
@@ -1865,26 +1865,26 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
         border-right 0
         border-bottom 1px solid #ccc
       }
-      .fdjlContentCss {
+      .dischargeRecordsContentCss {
         margin-top 0
       }
     }
   }
   @media (max-width: 1100px) {
-    .hisDataCss .sjxzContentCss {
+    .hisDataCss .sliceSelectionContentCss {
       grid-template-columns minmax(0, 1fr)
     }
   }
   @media (max-width: 600px) {
-    .hisDataCss .csxzContentCss .csxzCss {
+    .hisDataCss .parameterSelectionContentCss .parameterSelectionCss {
       flex-direction column
-      .csxzTitleCss {
+      .parameterSelectionTitleCss {
         flex-basis auto
         min-height 0
         padding-right 0
         text-align left
       }
-      .csxzSelectCss {
+      .parameterSelectionOptionsCss {
         width 100%
       }
     }
@@ -1893,7 +1893,7 @@ boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
 </style>
 
 <style lang="stylus">
-.ksxzLsjlDateCss {
+.sliceHistoryDateCss {
   .el-date-editor {
     width 100%
   }

@@ -493,7 +493,7 @@ export function checkIsColor(color) { // 校验 bgVal 是否是颜色的值
 }
 
 // 中文转英文方法 start
-import PinYin from './ChineseHelperStr.js' // 引入字符编码（JSON）
+import PinYin from './chineseCharacterMap.js' // 引入字符编码（JSON）
 export const loadPinYinInit = {} // 定义方法
 loadPinYinInit.GetPinyinStr = () => { // 获取所有编码
   return PinYin

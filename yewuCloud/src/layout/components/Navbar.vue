@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { mapGetters } from '@/store/pinia-helpers'
+import { mapGetters } from '@/store/piniaHelpers'
 import Hamburger from '@/components/Hamburger'
 import Breadcrumb from '@/components/Breadcrumb'
 import TagsView from './TagsView'

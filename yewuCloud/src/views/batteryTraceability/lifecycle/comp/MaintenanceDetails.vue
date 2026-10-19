@@ -1,32 +1,32 @@
 <template>
-  <div class="lzjlCss">
+  <div class="lifecycleRecordsCss">
     <div class="titleCss">
       <div class="titleTextCss">电池信息</div>
     </div>
-    <div class="dcMsgContentCss">
-      <div class="dcMsgCss">电池ID： {{ formData.batteryCode }}</div>
-      <div class="dcMsgCss">所属公司： {{ formData.province_company }}</div>
+    <div class="batteryMessageContentCss">
+      <div class="batteryMessageCss">电池ID： {{ formData.batteryCode }}</div>
+      <div class="batteryMessageCss">所属公司： {{ formData.province_company }}</div>
     </div>
-    <div class="jlContentCss">
+    <div class="recordContentCss">
       <div class="titleContentCss">
         <div class="titleIconCss">
           <svg-icon style="color:#DFDFDF;width:1.2vw;height:1.2vw" icon-class="电池状态icon" />
         </div>
-        <div class="jlTitleCss">电池当前状态</div>
+        <div class="recordTitleCss">电池当前状态</div>
       </div>
-      <div class="dqztCss">
+      <div class="currentStatusCss">
         <img v-if="currentBatteryStateImage" :src="currentBatteryStateImage" :alt="statusName">
         <span v-else>未知状态</span>
       </div>
     </div>
-    <div class="jlContentCss">
+    <div class="recordContentCss">
       <div class="titleContentCss">
         <div class="titleIconCss">
           <svg-icon style="color:#DFDFDF;width:1.2vw;height:1.2vw" icon-class="流转记录icon" />
         </div>
-        <div class="jlTitleCss">运维详情</div>
+        <div class="recordTitleCss">运维详情</div>
       </div>
-      <div class="dqztLzjlCss">
+      <div class="currentStatusRecordsCss">
         <div class="ywcontext">运维时间：{{ formData.maintenanceTime }}</div>
         <div class="ywcontext">运维描述：{{ formData.maintenanceDescription }}</div>
         <div class="ywcontext"><span>运维详情：</span><el-input
@@ -50,12 +50,12 @@
 </template>
 
 <script>
-import inboundImage from '../imgs/lifecycle/入库.png'
-import outboundImage from '../imgs/lifecycle/出库.png'
-import onlineImage from '../imgs/lifecycle/上站入网.png'
-import offlineImage from '../imgs/lifecycle/退网下站.png'
-import readyImage from '../imgs/lifecycle/检测待用.png'
-import retiredImage from '../imgs/lifecycle/检测淘汰.png'
+import inboundImage from '../imgs/lifecycle/stockIn.png'
+import outboundImage from '../imgs/lifecycle/stockOut.png'
+import onlineImage from '../imgs/lifecycle/siteCommissioning.png'
+import offlineImage from '../imgs/lifecycle/siteDecommissioning.png'
+import readyImage from '../imgs/lifecycle/inspectionReady.png'
+import retiredImage from '../imgs/lifecycle/inspectionRetired.png'
 
 // 保留原来的状态图片与布局，只按接口中的当前状态选择图片。
 const lifecycleStates = {
@@ -96,7 +96,7 @@ export default {
     display: flex;
 }
 
-.lzjlCss {
+.lifecycleRecordsCss {
   overflow auto
   width 100%
   .titleCss {
@@ -111,17 +111,17 @@ export default {
       font-size 1.2vw
     }
   }
-  .dcMsgContentCss {
+  .batteryMessageContentCss {
     padding 0.2vw 0 0.2vw 2vw
     border-bottom 1px solid #e7e7e7
-    .dcMsgCss {
+    .batteryMessageCss {
       height 2vw
       line-height 2vw
       font-size 1vw
       font-weight bold
     }
   }
-  .jlContentCss {
+  .recordContentCss {
     padding-bottom 0.5vw
     width 100%
     // border-bottom 1px solid #e7e7e7
@@ -134,18 +134,18 @@ export default {
         float left
         margin 0.25vw 0.2vw 0 0.8vw
       }
-      .jlTitleCss {
+      .recordTitleCss {
         float left
         font-size 1.2vw
         font-weight bold
       }
     }
-    .dqztCss {
+    .currentStatusCss {
       margin-left 2vw
       width 30vw
       height 4.87vw
     }
-    .dqztLzjlCss {
+    .currentStatusRecordsCss {
       padding-left 1vw
       height 20vw
       width 100%

@@ -1,8 +1,8 @@
 import { fetchAuthInfo, fetchTolinkPermissions, readAuthUser } from '../api/auth.js'
 import { useAuthStore } from '../stores/auth.js'
 import { getToken } from '@/utils/auth.js'
-import { isPasswordChangeRequired, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
-import { requirePasswordChange } from '@/utils/password-change.js'
+import { isPasswordChangeRequired, PASSWORD_CHANGE_REQUIRED } from '@/utils/passwordChangeState.js'
+import { requirePasswordChange } from '@/utils/passwordChange.js'
 
 let loadingToken = ''
 let loadingPromise

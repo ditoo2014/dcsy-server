@@ -1,9 +1,9 @@
 import request from '@/utils/request.js'
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 import { getToken } from '@/utils/auth.js'
-import { expireSession } from '@/utils/session-expiration'
-import { requirePasswordChange } from '@/utils/password-change.js'
-import { isPasswordChangeRequired, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
+import { expireSession } from '@/utils/sessionExpiration'
+import { requirePasswordChange } from '@/utils/passwordChange.js'
+import { isPasswordChangeRequired, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/passwordChangeState.js'
 
 export function get(url, data, requestMsg) {
   return http({

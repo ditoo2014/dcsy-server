@@ -1,6 +1,6 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { gatewayDetailPath, modelToDetailSlug, pickGatewayModelField, resolveGatewayDetailSlugParam } from '../config/gateway-detail'
+import { gatewayDetailPath, modelToDetailSlug, pickGatewayModelField, resolveGatewayDetailSlugParam } from '../config/gatewayDetail'
 
 /** 详情页在接口返回后校正 URL 机型段，避免详情页与网关实际机型不一致。 */
 export function useGatewayDetailRouteSync() {

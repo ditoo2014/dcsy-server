@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
 
 import './styles/pageStyles'
 import './styles/responsive.css'
-import './styles/element-variables.styl'
+import './styles/elementVariables.styl'
 
 import App from './App.vue'
 import store from './store'
@@ -32,11 +32,11 @@ import {
 } from 'element-plus'
 
 import { registerGlobalFilters } from './plugins/filters'
-import { registerElementGlobals } from './plugins/element-globals'
-import { registerElementComponents } from './plugins/element-components'
-import { registerElementTable } from './plugins/element-table'
-import { resolveLegacyIcon } from './utils/legacy-element-icons'
-import { setupIdleLogout } from './utils/idle-logout'
+import { registerElementGlobals } from './plugins/elementGlobals'
+import { registerElementComponents } from './plugins/elementComponents'
+import { registerElementTable } from './plugins/elementTable'
+import { resolveLegacyIcon } from './utils/legacyElementIcons'
+import { setupIdleLogout } from './utils/idleLogout'
 
 // 统计脚本默认关闭；确需启用时由部署环境注入地址，避免在源码中固化第三方标识。
 const analyticsUrl = import.meta.env.VITE_ANALYTICS_URL

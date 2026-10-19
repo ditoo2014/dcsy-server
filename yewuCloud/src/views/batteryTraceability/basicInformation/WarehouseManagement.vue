@@ -172,13 +172,13 @@
 </template>
 
 <script>
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 import Pagination from '@/components/Pagination' // 分页组件
 import PageBanner from '@/components/ccpcComp/Banner.vue'
-import MyElTree from '@/components/a_myComp/elTree/MyElTree.vue' // 左侧导航
-import UploadFile from '@/components/a_myComp/uploadFile/UploadFile.vue'
-import SelectMapArea from '@/components/a_myComp/selectMap/SelectMapArea.vue'
-import ExportExcel from '@/components/a_myComp/exportExcel/ExportExcel.vue'
+import MyElTree from '@/components/sharedComponents/elTree/MyElTree.vue' // 左侧导航
+import UploadFile from '@/components/sharedComponents/uploadFile/UploadFile.vue'
+import SelectMapArea from '@/components/sharedComponents/selectMap/SelectMapArea.vue'
+import ExportExcel from '@/components/sharedComponents/exportExcel/ExportExcel.vue'
 import ElDrawerWrap from '@/components/elDrawer/index.vue'
 import { corpList, findSelf } from '@/api/user.js'
 import { checkPhone } from '@/utils/validate.js'
@@ -187,19 +187,19 @@ import {
   buildQueryableCorpKeys,
   findDefaultCorp,
   resolveCorpQueryId
-} from '@/utils/corp-scope.js'
+} from '@/utils/corpScope.js'
 import { processDrawList } from '@/utils/ccpcData.js'
 import { findEquipmentTypeList } from '@/api/basicData.js'
 import { findWarehouseList, saveWarehouse, deleteWarehouse, modifyWarehouse } from '@/api/warehouse.js'
 import { warehouseExport, warehouseImport, warehouseImportTemplate } from '@/api/batteryTraceability.js'
-import { chinaRegions } from '@/components/a_myComp/mapComplex/index.js'
+import { chinaRegions } from '@/components/sharedComponents/mapComplex/index.js'
 import lodash from 'lodash'
-import totalImage from '@/assets/imgs/总量.png'
+import totalImage from '@/assets/imgs/total.png'
 
 export default {
   // KeepAlive include uses the existing lower-case route name.
   // eslint-disable-next-line vue/component-definition-name-casing
-  name: 'kfxxgl',
+  name: 'WarehouseManagement',
   components: {
     Pagination,
     PageBanner,

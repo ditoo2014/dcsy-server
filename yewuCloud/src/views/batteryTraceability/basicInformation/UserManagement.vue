@@ -1,16 +1,16 @@
 <template>
   <div>
-    <userMana />
+    <AccountUserManagement />
   </div>
 </template>
 
 <script>
-import userMana from '@/views/personMana/userMana.vue'
+import AccountUserManagement from '@/views/accounts/UserManagement.vue'
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'yhgl',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'UserManagement',
   components: {
-    userMana
+    AccountUserManagement
   }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="sssjCss">
+  <div class="realtimeDataCss">
     <div class="realTimeLayoutCss">
       <div class="chartContentCss">
         <div class="chartCss">
@@ -39,72 +39,72 @@
           </div>
         </div>
       </div>
-      <div class="dcDetailsMsgContentCss">
+      <div class="batteryDetailsContentCss">
         <template v-if="showBasicInfo">
-          <div class="dcDetailsMsgCss">
-            <div class="dcTitleContentCss">
-              <div class="dcTitleCss">【 电池信息 】</div>
+          <div class="batteryDetailsCss">
+            <div class="batteryTitleContentCss">
+              <div class="batteryTitleCss">【 电池信息 】</div>
             </div>
-            <div class="dcztContentCss">
-              <div class="dcztStatusContentCss">
-                <div class="dcTZtTitleCss">电池状态：</div>
-                <div class="dcXCss">
+            <div class="batteryInfoContentCss">
+              <div class="batteryStatusContentCss">
+                <div class="batteryStatusTitleCss">电池状态：</div>
+                <div class="batteryStatusImageCss">
                   <img v-if="batteryStateImage" :src="batteryStateImage">
                 </div>
-                <div class="dcTZtCss">{{ batteryStateText }}</div>
+                <div class="batteryStatusValueCss">{{ batteryStateText }}</div>
               </div>
-              <div class="dcTypeContentCss">
-                <div class="dcTypeTitleCss">电池类型：</div>
-                <div class="dcTypeMsgCss" :title="formData.equipmentTypeName || '-'">
+              <div class="batteryTypeContentCss">
+                <div class="batteryTypeTitleCss">电池类型：</div>
+                <div class="batteryTypeValueCss" :title="formData.equipmentTypeName || '-'">
                   {{ formData.equipmentTypeName || '-' }}
                 </div>
               </div>
             </div>
-            <div class="dcDetialsGzMsgCss">
-              <div v-for="item in batteryElectricalInfo" :key="item.title" class="dcGzMsgContentCss">
-                <div class="dcGzTitelCss">{{ item.title }}：</div>
-                <div class="dcGzMsgCss">{{ item.msg }}</div>
+            <div class="batteryMetricsCss">
+              <div v-for="item in batteryElectricalInfo" :key="item.title" class="batteryMetricContentCss">
+                <div class="batteryMetricTitleCss">{{ item.title }}：</div>
+                <div class="batteryMetricValueCss">{{ item.msg }}</div>
               </div>
-              <div v-for="item in batteryHealthInfo" :key="item.title" class="dcGzMsgContentCss">
-                <div class="dcGzTitelCss">{{ item.title }}：</div>
-                <div class="dcGzMsgCss">{{ item.title === '剩余放电时长' && item.msg === '-' ? '未放电' : item.msg }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="mbxxDetailsMsgCss">
-            <div class="dczwTitleContentCss">
-              <div class="dczwTitleCss">电池组温度：</div>
-              <div class="dczwXCss">温差：{{ temperatureDifference }}</div>
-            </div>
-            <div class="mbxxContentCss">
-              <div v-for="item in batteryTemperatureItems" :key="item.title" class="mbxxCss">
-                <div class="mbxxTitleCss">{{ item.title + '#' }}</div>
-                <div class="mbxxValCss">{{ item.val }}</div>
+              <div v-for="item in batteryHealthInfo" :key="item.title" class="batteryMetricContentCss">
+                <div class="batteryMetricTitleCss">{{ item.title }}：</div>
+                <div class="batteryMetricValueCss">{{ item.title === '剩余放电时长' && item.msg === '-' ? '未放电' : item.msg }}</div>
               </div>
             </div>
           </div>
-          <div class="qtwdDetailsMsgCss">
-            <div class="qtwdTitleCss">其他温度：</div>
-            <div class="qtwdMsgContentCss">
-              <div class="qtwdMsgCss">
-                <div class="qtwdMsgTitleCss">MOS温度：</div>
-                <div class="qtwdMsgDataCss">{{ mosTemperature }}</div>
-              </div>
-              <div class="qtwdMsgCss">
-                <div class="qtwdMsgTitleCss">环境温度：</div>
-                <div class="qtwdMsgDataCss">{{ environmentTemperature }}</div>
+          <div class="cellTemperatureDetailsCss">
+            <div class="batteryTemperatureTitleContentCss">
+              <div class="batteryTemperatureTitleCss">电池组温度：</div>
+              <div class="temperatureDifferenceCss">温差：{{ temperatureDifference }}</div>
+            </div>
+            <div class="cellTemperatureContentCss">
+              <div v-for="item in batteryTemperatureItems" :key="item.title" class="cellTemperatureItemCss">
+                <div class="cellTemperatureTitleCss">{{ item.title + '#' }}</div>
+                <div class="cellTemperatureValueCss">{{ item.val }}</div>
               </div>
             </div>
           </div>
-          <div class="mbxxDetailsMsgCss">
-            <div class="dczwTitleContentCss">
-              <div class="dczwTitleCss">单体电压：</div>
-              <div class="dczwXCss">压差：{{ voltageDifference }}</div>
+          <div class="otherTemperatureDetailsCss">
+            <div class="otherTemperatureTitleCss">其他温度：</div>
+            <div class="otherTemperatureContentCss">
+              <div class="otherTemperatureItemCss">
+                <div class="otherTemperatureLabelCss">MOS温度：</div>
+                <div class="otherTemperatureValueCss">{{ mosTemperature }}</div>
+              </div>
+              <div class="otherTemperatureItemCss">
+                <div class="otherTemperatureLabelCss">环境温度：</div>
+                <div class="otherTemperatureValueCss">{{ environmentTemperature }}</div>
+              </div>
             </div>
-            <div class="mbxxContentCss">
-              <div v-for="item in cellVoltageItems" :key="item.title" class="mbxxCss">
-                <div class="mbxxTitleCss">{{ item.title + '#' }}</div>
-                <div class="mbxxValCss">{{ item.val }}</div>
+          </div>
+          <div class="cellTemperatureDetailsCss">
+            <div class="batteryTemperatureTitleContentCss">
+              <div class="batteryTemperatureTitleCss">单体电压：</div>
+              <div class="temperatureDifferenceCss">压差：{{ voltageDifference }}</div>
+            </div>
+            <div class="cellTemperatureContentCss">
+              <div v-for="item in cellVoltageItems" :key="item.title" class="cellTemperatureItemCss">
+                <div class="cellTemperatureTitleCss">{{ item.title + '#' }}</div>
+                <div class="cellTemperatureValueCss">{{ item.val }}</div>
               </div>
             </div>
           </div>
@@ -115,8 +115,8 @@
 </template>
 
 <script>
-import MultipleYAxes from '@/components/a_myComp/echarts/MultipleYAxes.vue'
-import { getdata } from '@/api/moniList.js'
+import MultipleYAxes from '@/components/sharedComponents/echarts/MultipleYAxes.vue'
+import { getdata } from '@/api/monitoring.js'
 import { dateConvStamp, format0800CSTDateString, dateAddOrSubtract, formatDateString } from '@/utils/utils.js'
 import {
   CYCLE_COUNT_POINT_DATA_ID,
@@ -127,10 +127,10 @@ import {
   TEMPERATURE_DIFFERENCE_POINT_DATA_ID,
   resolveBatteryPoint,
   resolveBatteryHealthStatus
-} from '@/utils/battery-points.js'
-import floatChargeImage from '../imgs/浮充.png'
-import chargingImage from '../imgs/充电.png'
-import dischargingImage from '../imgs/放电.png'
+} from '@/utils/batteryPoints.js'
+import floatChargeImage from '../imgs/floatCharge.png'
+import chargingImage from '../imgs/charging.png'
+import dischargingImage from '../imgs/discharging.png'
 
 function formatAxisLabel(value, decimalPlaces, unit) {
   const numericValue = Number(value)
@@ -1044,7 +1044,7 @@ export default {
   boxShadow = 0 0 3px 2px rgba(0,109,255, 0.4)
   box2Shadow = 2px 2px 3px 2px rgba(0, 0, 0, 0.2)
 
-  .sssjCss {
+  .realtimeDataCss {
     width 100%
     // 按详情正文的实际宽度适配，侧栏、弹窗和浏览器缩放使用同一套规则。
     container-type inline-size
@@ -1073,63 +1073,63 @@ export default {
         }
       }
     }
-    .dcDetailsMsgContentCss {
+    .batteryDetailsContentCss {
       min-width 0
       width 100%
-      .dcDetailsMsgCss {
+      .batteryDetailsCss {
         width 100%
         min-height 11vw
         padding-bottom unquote('max(6px, 0.3vw)')
         border-radius 5px
         box-shadow boxShadow
-        .dcTitleContentCss {
+        .batteryTitleContentCss {
           width 100%
           min-height 2vw
           line-height unquote('max(24px, 2vw)')
-          .dcTitleCss {
+          .batteryTitleCss {
             font-size clamp(12px, 1vw, 24px)
             font-weight bold
           }
         }
-        .dcztContentCss {
+        .batteryInfoContentCss {
           display flex
           align-items center
           padding 0.1vw 0 0.1vw 1vw
           width 100%
           min-height 1.5vw
           line-height unquote('max(20px, 1.5vw)')
-          .dcztStatusContentCss {
+          .batteryStatusContentCss {
             display flex
             align-items center
             flex-wrap wrap
             width 50%
             min-width 0
           }
-          .dcTZtTitleCss {
+          .batteryStatusTitleCss {
             flex none
             margin 0 0.5vw 0 0
             font-size clamp(12px, 0.8vw, 20px)
           }
-          .dcXCss {
+          .batteryStatusImageCss {
             flex none
             margin 0.1vw 0.1vw 0 0
             width unquote('max(18px, 1.5vw)')
             height unquote('max(14px, 1.2vw)')
           }
-          .dcTZtCss {
+          .batteryStatusValueCss {
             font-size clamp(12px, 0.8vw, 20px)
           }
-          .dcTypeContentCss {
+          .batteryTypeContentCss {
             display flex
             align-items center
             width 50%
             min-width 0
             font-size clamp(12px, 0.8vw, 20px)
-            .dcTypeTitleCss {
+            .batteryTypeTitleCss {
               flex none
               margin-right 0.5vw
             }
-            .dcTypeMsgCss {
+            .batteryTypeValueCss {
               min-width 0
               overflow hidden
               text-overflow ellipsis
@@ -1137,12 +1137,12 @@ export default {
             }
           }
         }
-        .dcDetialsGzMsgCss {
+        .batteryMetricsCss {
           display grid
           grid-template-columns repeat(2, minmax(0, 1fr))
           padding-top unquote('max(6px, 0.5vw)')
           width 100%
-          .dcGzMsgContentCss {
+          .batteryMetricContentCss {
             // 长电量换行后由整行和卡片共同撑高，不再压住温度卡片。
             display flex
             flex-wrap wrap
@@ -1151,11 +1151,11 @@ export default {
             padding-left unquote('max(8px, 1vw)')
             min-height 1.6vw
             line-height unquote('max(20px, 1.6vw)')
-            .dcGzTitelCss {
+            .batteryMetricTitleCss {
               flex none
               margin-right 0.5vw
             }
-            .dcGzMsgCss {
+            .batteryMetricValueCss {
               min-width 0
               max-width 100%
               overflow-wrap anywhere
@@ -1163,14 +1163,14 @@ export default {
           }
         }
       }
-      .mbxxDetailsMsgCss {
+      .cellTemperatureDetailsCss {
         margin 0.5vw 0 0.5vw 0
         width 100%
         // 温度和电压列表保留原卡片比例，缩窗时保证标题和数据行可读。
         height unquote('max(190px, 13.75vw)')
         border-radius 5px
         box-shadow boxShadow
-        .dczwTitleContentCss {
+        .batteryTemperatureTitleContentCss {
           padding-left 1vw
           width 100%
           display flex
@@ -1179,19 +1179,19 @@ export default {
           min-width 0
           height unquote('max(24px, 2vw)')
           line-height unquote('max(24px, 2vw)')
-          .dczwTitleCss {
+          .batteryTemperatureTitleCss {
             flex none
             font-size clamp(12px, 1vw, 24px)
             font-weight bold
           }
-          .dczwXCss {
+          .temperatureDifferenceCss {
             margin 0.1vw 1vw 0 0
             min-width 0
             overflow-wrap anywhere
             font-size clamp(12px, 0.8vw, 20px)
           }
         }
-        .mbxxContentCss {
+        .cellTemperatureContentCss {
           display grid
           grid-template-columns repeat(6, minmax(0, 1fr))
           align-content start
@@ -1201,31 +1201,31 @@ export default {
           width 98%
           height calc(max(190px, 13.75vw) - max(24px, 2vw) - 0.3vw)
           overflow-y auto
-          .mbxxCss {
+          .cellTemperatureItemCss {
             min-width 0
             min-height unquote('max(40px, 2.25vw)')
             text-align center
             font-size clamp(12px, 0.8vw, 20px)
             overflow-wrap anywhere
             box-shadow box2Shadow
-            .mbxxTitleCss {
+            .cellTemperatureTitleCss {
               width 100%
               line-height unquote('max(18px, 1.1vw)')
             }
-            .mbxxValCss {
+            .cellTemperatureValueCss {
               width 100%
               line-height unquote('max(18px, 1vw)')
             }
           }
         }
       }
-      .qtwdDetailsMsgCss {
+      .otherTemperatureDetailsCss {
         margin 0.5vw 0
         min-height 4vw
         padding-bottom unquote('max(6px, 0.3vw)')
         border-radius 5px
         box-shadow boxShadow
-        .qtwdTitleCss {
+        .otherTemperatureTitleCss {
           padding-left 1vw
           width 100%
           min-height 2vw
@@ -1233,7 +1233,7 @@ export default {
           font-size clamp(12px, 1vw, 24px)
           font-weight bold
         }
-        .qtwdMsgContentCss {
+        .otherTemperatureContentCss {
           display flex
           flex-wrap wrap
           padding-left 20%
@@ -1241,15 +1241,15 @@ export default {
           min-height 1.5vw
           line-height unquote('max(20px, 1.5vw)')
           font-size clamp(12px, 0.8vw, 20px)
-          .qtwdMsgCss {
+          .otherTemperatureItemCss {
             display flex
             flex-wrap wrap
             flex 1 1 100px
             min-width 0
-            .qtwdMsgTitleCss {
+            .otherTemperatureLabelCss {
               flex none
             }
-            .qtwdMsgDataCss {
+            .otherTemperatureValueCss {
               min-width 0
               overflow-wrap anywhere
             }
@@ -1261,7 +1261,7 @@ export default {
 
   // 极窄详情采用上下排列，避免强行压缩右侧信息和左侧坐标。
   @container battery-realtime (max-width: 900px) {
-    .sssjCss .realTimeLayoutCss {
+    .realtimeDataCss .realTimeLayoutCss {
       grid-template-columns minmax(0, 1fr)
       gap 12px
     }
@@ -1270,7 +1270,7 @@ export default {
   // 兼容不支持容器查询的旧浏览器，常规桌面仍保留左右排列。
   @supports not (container-type: inline-size) {
     @media (max-width: 1024px) {
-      .sssjCss .realTimeLayoutCss {
+      .realtimeDataCss .realTimeLayoutCss {
         grid-template-columns minmax(0, 1fr)
         gap 12px
       }

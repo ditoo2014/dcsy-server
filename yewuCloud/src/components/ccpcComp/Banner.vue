@@ -192,7 +192,7 @@ import closeSvg from './close.svg'
 import openSvg from './open.svg'
 import waitSvg from './wait.svg'
 import { formatDateString, getTime, dateConvStamp } from '@/utils/utils.js'
-import { resolveLegacyIcon } from '@/utils/legacy-element-icons'
+import { resolveLegacyIcon } from '@/utils/legacyElementIcons'
 
 export default {
   components: {

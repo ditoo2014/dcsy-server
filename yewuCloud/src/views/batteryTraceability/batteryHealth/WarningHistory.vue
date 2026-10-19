@@ -78,13 +78,13 @@
 import Pagination from '@/components/Pagination' // 分页组件
 import Banner from '@/components/ccpcComp/Banner.vue'
 import { dateConvStamp, formatDateString } from '@/utils/utils.js'
-import { findSiteListExactMatch } from '@/api/siteMana.js'
-import { findEquipmentListExactMatch } from '@/api/equipMana.js'
+import { findSiteListExactMatch } from '@/api/sites.js'
+import { findEquipmentListExactMatch } from '@/api/equipment.js'
 import { findAlarmRecord } from '@/api/trigger.js'
 
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'yjxxlsyj',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'WarningHistory',
   components: {
     Pagination,
     Banner
@@ -282,7 +282,7 @@ export default {
     },
     async exportExcel() { // 导出excel表格
       // 本地导出 excel start
-      import('@/vendor/Export2Excel').then(excel => {
+      import('@/vendor/exportToExcel').then(excel => {
         const tHeader = ['预警名称', '电池ID', '站址名称', '预警等级', '数据值', '恢复值', '触发时间', '恢复时间']
         const data = this.formatJson(this.tableData, tHeader.length)
         excel.export_json_to_excel({
@@ -353,7 +353,7 @@ export default {
         })
       }
 
-      import('@/vendor/Export2Excel').then(excel => {
+      import('@/vendor/exportToExcel').then(excel => {
         const tHeader = ['预警名称', '电池ID', '站址名称', '预警等级', '数据值', '恢复值', '触发时间', '恢复时间']
         const data = this.formatJson(tableData, tHeader.length)
         excel.export_json_to_excel({

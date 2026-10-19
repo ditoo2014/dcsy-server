@@ -35,7 +35,7 @@
       trigger="click"
     >
       <div class="funcSelectCss cursorPointer">
-        <div class="borderBottomCss" @click="modifyPas">修改密码</div>
+        <div class="borderBottomCss" @click="openPasswordChange">修改密码</div>
         <div @click="logout">退出登录</div>
       </div>
       <template #reference>
@@ -62,14 +62,14 @@
 <script>
 import config from '@/config.js'
 import { PLATFORM } from '@/constants/platform'
-import { mapGetters } from '@/store/pinia-helpers'
+import { mapGetters } from '@/store/piniaHelpers'
 import screenfull from 'screenfull'
 import { requestDashboardFullscreen, toggleDashboardFullscreen } from '@/utils/fullscreen.js'
 import { getPageList, getUsername } from '@/utils/auth.js'
-import { findCollectLiveTriggerTempData } from '@/api/jurisdCenter.js'
-import { getBannerHomePath, resolveBannerIdFromPath } from '@/utils/banner-route.js'
-import { beginBannerNav, endBannerNav, isBannerNavLocked } from '@/utils/banner-nav-lock.js'
-import { expireSession } from '@/utils/session-expiration'
+import { findCollectLiveTriggerTempData } from '@/api/alarmCenter.js'
+import { getBannerHomePath, resolveBannerIdFromPath } from '@/utils/bannerRoute.js'
+import { beginBannerNav, endBannerNav, isBannerNavLocked } from '@/utils/bannerNavLock.js'
+import { expireSession } from '@/utils/sessionExpiration'
 import groupOneImage from './imgs/group1.png'
 import groupTwoImage from './imgs/group2.png'
 import screenfullImage from './imgs/screenfull.png'
@@ -116,8 +116,8 @@ export default {
 
       reportPageRoutes: [], // 报表中心页面路由
       monitoringPageRoutes: [], // 监控中心页面路由
-      jurisdCenterRoutes: [], // 告警中心页面路由
-      dataManaPageRoutes: [], // 系统管理页面路由
+      alarmCenterRoutes: [], // 告警中心页面路由
+      systemManagementRoutes: [], // 系统管理页面路由
       maintenancePageRoutes: [], // 运维中心页面路由
 
       showMaintenanceCenter: false, // 是否显示运维中心
@@ -207,30 +207,30 @@ export default {
     setRouters() { // 设置路由
       const reportPageRoutes = []
       const monitoringPageRoutes = []
-      const jurisdCenterRoutes = []
-      const dataManaPageRoutes = []
+      const alarmCenterRoutes = []
+      const systemManagementRoutes = []
       const maintenancePageRoutes = []
       this.permission_routes.forEach(route => {
-        if (route.baoBiao) { // 报表中心
+        if (route.reportSection) { // 报表中心
           reportPageRoutes.push(route)
         }
-        if (route.jianKong) { // 监控中心
+        if (route.monitoringSection) { // 监控中心
           monitoringPageRoutes.push(route)
         }
-        if (route.baojing) { // 告警中心
-          jurisdCenterRoutes.push(route)
+        if (route.alarmCenterSection) { // 告警中心
+          alarmCenterRoutes.push(route)
         }
-        if (route.dataMana) { // 系统管理
-          dataManaPageRoutes.push(route)
+        if (route.systemManagementSection) { // 系统管理
+          systemManagementRoutes.push(route)
         }
-        if (route.yunWei) { // 运维中心
+        if (route.maintenanceSection) { // 运维中心
           maintenancePageRoutes.push(route)
         }
       })
       this.reportPageRoutes = reportPageRoutes
       this.monitoringPageRoutes = monitoringPageRoutes
-      this.jurisdCenterRoutes = jurisdCenterRoutes
-      this.dataManaPageRoutes = dataManaPageRoutes
+      this.alarmCenterRoutes = alarmCenterRoutes
+      this.systemManagementRoutes = systemManagementRoutes
       this.maintenancePageRoutes = maintenancePageRoutes
     },
     setBannerId(routerPath) {
@@ -250,16 +250,16 @@ export default {
             if (page.permissionName === platform.name) {
               platform.isShow = true
             }
-            if (page.dataMana && platform.name === '全生命周期管理') {
+            if (page.systemManagementSection && platform.name === '全生命周期管理') {
               platform.isShow = true
             }
-            if (page.yunWei && platform.name === '电池健康管理') {
+            if (page.maintenanceSection && platform.name === '电池健康管理') {
               platform.isShow = true
             }
-            if (page.jianKong && platform.name === '基础信息管理') {
+            if (page.monitoringSection && platform.name === '基础信息管理') {
               platform.isShow = true
             }
-            if (page.baojing && platform.name === '驾驶舱') {
+            if (page.alarmCenterSection && platform.name === '驾驶舱') {
               platform.isShow = true
             }
           })
@@ -373,10 +373,10 @@ export default {
         switch (this.activeIndex) {
           case '1': break
           case '3': this.pushRouteIfNeeded(this.monitoringPageRoutes[0].children[0].path); break
-          case '4': this.pushRouteIfNeeded(this.jurisdCenterRoutes[0].children[0].path); break
+          case '4': this.pushRouteIfNeeded(this.alarmCenterRoutes[0].children[0].path); break
           case '5': this.pushRouteIfNeeded(this.maintenancePageRoutes[0].children[0].path); break
           case '7': this.pushRouteIfNeeded(this.reportPageRoutes[0].children[0].path); break
-          case '6': this.pushRouteIfNeeded(this.dataManaPageRoutes[0].children[0].path); break
+          case '6': this.pushRouteIfNeeded(this.systemManagementRoutes[0].children[0].path); break
         }
       }
       localStorage.setItem('bannerId', this.activeIndex)
@@ -391,13 +391,13 @@ export default {
       let targetPath = null
       switch (activeIndex) {
         case '1':
-          targetPath = this.dataManaPageRoutes[0] && this.dataManaPageRoutes[0].children[0].path
+          targetPath = this.systemManagementRoutes[0] && this.systemManagementRoutes[0].children[0].path
           break
         case '3':
           targetPath = this.monitoringPageRoutes[0] && this.monitoringPageRoutes[0].children[0].path
           break
         case '4':
-          targetPath = this.jurisdCenterRoutes[0] && this.jurisdCenterRoutes[0].children[0].path
+          targetPath = this.alarmCenterRoutes[0] && this.alarmCenterRoutes[0].children[0].path
           break
         case '5':
           targetPath = this.maintenancePageRoutes[0] && this.maintenancePageRoutes[0].children[0].path
@@ -406,7 +406,7 @@ export default {
           targetPath = this.reportPageRoutes[0] && this.reportPageRoutes[0].children[0].path
           break
         case '6':
-          targetPath = this.dataManaPageRoutes[0] && this.dataManaPageRoutes[0].children[0].path
+          targetPath = this.systemManagementRoutes[0] && this.systemManagementRoutes[0].children[0].path
           break
         case '11':
           targetPath = getBannerHomePath('11')
@@ -425,7 +425,7 @@ export default {
         beginBannerNav()
         const shouldDashboardFullscreen = activeIndex === '11'
         const wasAlreadyOnDashboard = shouldDashboardFullscreen && (
-          this.$route.path === '/jsc' || this.$route.path.startsWith('/jsc/')
+          this.$route.path === '/dashboard' || this.$route.path.startsWith('/dashboard/')
         )
         Promise.resolve(this.pushRouteIfNeeded(targetPath)).finally(() => {
           this._bannerNavigating = false
@@ -472,7 +472,7 @@ export default {
       }
     },
     openCollectionCloud() { // 采集云已融合到主前端，站内地址直接使用路由跳转
-      const target = String(config.CJYDomainName || '/dcsjgl/wgpz').trim()
+      const target = String(config.collectionBaseUrl || '/batteryData/gatewayConfig').trim()
       if (!target) {
         return
       }
@@ -490,10 +490,10 @@ export default {
       this.activeIndex = '999'
       this.$emit('bannerClick', this.activeIndex)
     },
-    modifyPas() {
+    openPasswordChange() {
       this.activeIndex = '6'
       this.$emit('bannerClick', this.activeIndex)
-      this.$router.push(`/modifyPas`)
+      this.$router.push(`/modifyPassword`)
     },
     logout() {
       expireSession({
@@ -549,7 +549,7 @@ export default {
       music.pause()
     },
     screenfullClick() {
-      if (this.$route.path !== '/jsc' && !this.$route.path.startsWith('/jsc/')) {
+      if (this.$route.path !== '/dashboard' && !this.$route.path.startsWith('/dashboard/')) {
         this.$message({
           message: '请先进入驾驶舱',
           type: 'info'

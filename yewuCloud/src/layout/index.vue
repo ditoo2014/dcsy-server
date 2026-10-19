@@ -29,10 +29,10 @@
 <script>
 import { AppMain, Navbar, LifecycleSidebar, BatteryHealthSidebar,
   BasicInformationSidebar, Banner as LayoutBanner } from './components'
-import ResizeMixin from './mixin/ResizeHandler'
+import ResizeMixin from './mixin/resizeHandler'
 import { exitFullscreenSafe } from '@/utils/fullscreen.js'
-import { getDefaultBannerId, resolveBannerIdFromPath } from '@/utils/banner-route.js'
-import { mapState } from '@/store/pinia-helpers'
+import { getDefaultBannerId, resolveBannerIdFromPath } from '@/utils/bannerRoute.js'
+import { mapState } from '@/store/piniaHelpers'
 
 const INNER_NAVBAR_IDS = new Set(['12', '13', '14'])
 const SIDEBAR_CONTAINER_IDS = new Set(['12', '13', '14'])
@@ -86,7 +86,7 @@ export default {
     shellClass() {
       return {
         'layout-shell': true,
-        'layout-shell--jsc': this.bannerId === '11'
+        'layout-shell--dashboard': this.bannerId === '11'
       }
     },
     mainWrapClass() {
@@ -101,18 +101,18 @@ export default {
         openSidebar: this.sidebar.opened,
         withoutAnimation: this.sidebar.withoutAnimation,
         mobile: this.device === 'mobile',
-        'app-wrapper--jsc': this.isDashboardRoute
+        'app-wrapper--dashboard': this.isDashboardRoute
       }
     },
     isDashboardRoute() {
-      return this.$route.path === '/jsc'
+      return this.$route.path === '/dashboard'
     }
   },
   watch: {
     '$route.path': {
       immediate: true,
       handler(path, oldPath) {
-        if (oldPath === '/jsc' && path !== '/jsc') {
+        if (oldPath === '/dashboard' && path !== '/dashboard') {
           exitFullscreenSafe()
         }
         this.overrideBannerId = null
@@ -155,7 +155,7 @@ export default {
       position: fixed;
       top: 0;
     }
-    &.app-wrapper--jsc {
+    &.app-wrapper--dashboard {
       background-color: #020B41;
     }
   }
@@ -166,7 +166,7 @@ export default {
     width: 100%;
     display: flex;
     flex-direction: column;
-    &.layout-shell--jsc {
+    &.layout-shell--dashboard {
       flex: 1;
       min-height: 0;
       width: 100%;
@@ -175,7 +175,7 @@ export default {
     }
   }
 
-  .app-wrapper--jsc :deep(.main-container) {
+  .app-wrapper--dashboard :deep(.main-container) {
     margin-left: 0;
     width: 100%;
     flex: 1;
@@ -199,7 +199,7 @@ export default {
     height: calc(100% - var(--business-banner-height)) !important;
   }
 
-  .app-wrapper--jsc :deep(.app-main) {
+  .app-wrapper--dashboard :deep(.app-main) {
     flex: 1;
     min-height: 0;
     height: 100%;
@@ -208,7 +208,7 @@ export default {
     flex-direction: column;
   }
 
-  .app-wrapper--jsc :deep(.app-main > *) {
+  .app-wrapper--dashboard :deep(.app-main > *) {
     flex: 1;
     min-height: 0;
     height: 100%;

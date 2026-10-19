@@ -164,27 +164,27 @@
 </template>
 
 <script>
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 import Banner from '@/components/ccpcComp/Banner.vue'
-import UploadFile from '@/components/a_myComp/uploadFile/UploadFile.vue'
+import UploadFile from '@/components/sharedComponents/uploadFile/UploadFile.vue'
 import { fileIsImg, objectSort, exportBlobFile } from '@/utils/utils.js'
 import { processDrawList } from '@/utils/ccpcData.js'
 import { findEquipmentTypeList, findSiteGroupArr, findEquipmentmitrcd,
   uploadEquipmentmitrcdImage, getCurrentDateTimeString, addEquipmentmitrcd, findEquipmentcirlog } from '@/api/basicData.js'
-import { findSiteListExactMatch } from '@/api/siteMana.js'
-import { findEquipmentListExactMatch } from '@/api/equipMana.js'
+import { findSiteListExactMatch } from '@/api/sites.js'
+import { findEquipmentListExactMatch } from '@/api/equipment.js'
 import { findAlarmUsers, deletetrigger, deleteAlarmUsers } from '@/api/trigger.js'
 import MaintenanceDetails from './comp/MaintenanceDetails.vue'
 import { findSelf, corpList } from '@/api/user.js'
 import { equipmentmitrcdExport, equipmentmitrcdImport } from '@/api/batteryTraceability.js'
-import totalImage from '@/assets/imgs/总量.png'
-import { loadMaintenanceTable, readMaintenanceFilters, maintenanceErrorMessage } from './maintenance-data.js'
-import refreshPage from './refresh-page.js'
+import totalImage from '@/assets/imgs/total.png'
+import { loadMaintenanceTable, readMaintenanceFilters, maintenanceErrorMessage } from './maintenanceData.js'
+import refreshPage from './refreshPage.js'
 
 export default {
   mixins: [refreshPage],
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'ywgl',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'MaintenanceManagement',
   components: {
     Banner,
     UploadFile,

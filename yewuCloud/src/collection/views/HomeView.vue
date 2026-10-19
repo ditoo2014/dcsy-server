@@ -4,11 +4,11 @@ import { useRoute, useRouter } from 'vue-router';
 // 采集云使用原生抽屉，保留源项目的挂载位置与插槽行为。
 import { ElDrawer, ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../stores/auth';
-import { gatewayDetailPath, normalizeGatewayModelString, pickGatewayModelField, } from '../config/gateway-detail';
-import { createDefaultLabelNameResolver } from '../config/default-stream-labels';
-import { createTtdcCid42SocSubmitPoints } from '../config/ttdc-cid42-soc-template';
+import { gatewayDetailPath, normalizeGatewayModelString, pickGatewayModelField, } from '../config/gatewayDetail';
+import { createDefaultLabelNameResolver } from '../config/defaultStreamLabels';
+import { createTtdcCid42SocSubmitPoints } from '../config/ttdcCid42SocTemplate';
 import { addGateway, deleteGateway, fetchGatewayPage, updateGateway } from '../api/gateway';
-import { addGatewayModule, fetchGatewayModules, fetchGatewayOne } from '../api/gateway-module';
+import { addGatewayModule, fetchGatewayModules, fetchGatewayOne } from '../api/gatewayModule';
 import { batchImportStreams, createStream, createStreamLabels, deleteStream, downloadStreamBatchImportTemplate, fetchStreamPage, updateStream, } from '../api/stream';
 import { findEquipmentPage, updateEquipment } from '../api/equipment';
 import { syncEquipmentDataDetailsFromStreamLabels } from '../utils/syncDataDetails';
@@ -135,7 +135,7 @@ function goStreamDetail(row) {
         return;
     }
     void router.push({
-        name: 'stream-detail',
+        name: 'streamDetail',
         params: { streamCode: String(row.streamCode).trim() },
         query: {
             streamId: String(currentStreamId),
@@ -1170,33 +1170,9 @@ async function loadStreamRows() {
         const payload = data?.return ?? {};
         const records = payload?.stream ?? payload?.data ?? payload?.list ?? payload?.rows ?? [];
         const rows = Array.isArray(records) ? records.map(normalizeStreamRow) : [];
-        try {
-            const { data: equipResp } = await findEquipmentPage({
-                token: authStore.token,
-                pageNum: 1,
-                pageSize: 100000,
-                filterFunc: 'BinC',
-            });
-            const equipPayload = equipResp?.return ?? {};
-            const equipList = equipPayload?.data ?? equipPayload?.list ?? equipPayload?.rows ?? [];
-            const streamCodeToEquipmentCode = new Map();
-            if (Array.isArray(equipList)) {
-                for (const item of equipList) {
-                    const equipmentCode = String(item?.equipmentCode ?? item?.streamCode ?? '').trim();
-                    if (equipmentCode && !streamCodeToEquipmentCode.has(equipmentCode)) {
-                        streamCodeToEquipmentCode.set(equipmentCode, equipmentCode);
-                    }
-                }
-            }
-            for (const row of rows) {
-                const streamCode = String(row.streamCode ?? '').trim();
-                row.batteryName = (streamCode && streamCodeToEquipmentCode.get(streamCode)) || row.streamCode;
-            }
-        }
-        catch {
-            for (const row of rows)
-                row.batteryName = row.streamCode;
-        }
+        // 原映射查到与查不到都显示相同编码，直接赋值可避免额外拉取十万条电池记录。
+        for (const row of rows)
+            row.batteryName = row.streamCode;
         streamRows.value = rows;
         streamTotal.value = Number(payload?.total ?? payload?.count ?? streamRows.value.length);
     }
@@ -1207,9 +1183,14 @@ async function loadStreamRows() {
         streamLoading.value = false;
     }
 }
-watch(() => route.query, () => {
-    if (route.name !== 'collection-home')
+// 首次进入和切换模块共用一个加载入口，补齐默认参数后只查询一次。
+watch(() => [route.name, route.query], () => {
+    if (route.name !== 'collectionHome')
         return;
+    if (route.query.module == null) {
+        void router.replace({ path: '/collection', query: { ...route.query, module: 'gateway' } });
+        return;
+    }
     applyStateFromQuery();
     if (activeModule.value === 'gateway') {
         void loadGatewayRows();
@@ -1217,7 +1198,7 @@ watch(() => route.query, () => {
     else {
         void loadStreamRows();
     }
-}, { deep: true });
+}, { deep: true, immediate: true });
 onMounted(() => {
     syncThemeMode();
     themeObserver = new MutationObserver(() => syncThemeMode());
@@ -1233,16 +1214,6 @@ onMounted(() => {
     }
     themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     themeMediaQuery.addEventListener('change', syncThemeMode);
-    if (route.name === 'collection-home' && route.query.module == null) {
-        void router.replace({ path: '/collection', query: { module: 'gateway' } });
-    }
-    applyStateFromQuery();
-    if (activeModule.value === 'gateway') {
-        void loadGatewayRows();
-    }
-    else {
-        void loadStreamRows();
-    }
 });
 onUnmounted(() => {
     themeObserver?.disconnect();

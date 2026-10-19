@@ -124,11 +124,11 @@
       </el-scrollbar>
     </div>
 
-    <div class="jkztjcCss">
+    <div class="healthMonitoringCss">
       <!-- 中间弹出 -->
       <el-dialog
         v-model="showDialog"
-        class="dcDetailDialog"
+        class="batteryDetailDialog"
         title="电池详情"
         width="90%"
         destroy-on-close
@@ -147,28 +147,28 @@
 <script>
 import Pagination from '@/components/Pagination' // 分页组件
 import Banner from '@/components/ccpcComp/Banner.vue'
-import MyElTree from '@/components/a_myComp/elTree/MyElTree.vue' // 左侧导航
+import MyElTree from '@/components/sharedComponents/elTree/MyElTree.vue' // 左侧导航
 import BatteryDetail from './BatteryDetail.vue'
 import { corpList, findSelf } from '@/api/user.js'
 import { processDrawList } from '@/utils/ccpcData.js'
-import { findEquipmentListExactMatch, getEquipAllPoint } from '@/api/equipMana.js'
-import { getapilistdata } from '@/api/moniList.js'
+import { findEquipmentListExactMatch, getEquipAllPoint } from '@/api/equipment.js'
+import { getapilistdata } from '@/api/monitoring.js'
 import { objectSort } from '@/utils/utils.js'
-import { resolveBatteryPoint, REMAINING_DISCHARGE_TIME_POINT_DATA_ID } from '@/utils/battery-points.js'
+import { resolveBatteryPoint, REMAINING_DISCHARGE_TIME_POINT_DATA_ID } from '@/utils/batteryPoints.js'
 import {
   buildQueryableCorpKeys,
   findDefaultCorp,
   resolveCorpQueryId
-} from '@/utils/corp-scope.js'
+} from '@/utils/corpScope.js'
 import { countbyequipment, getAlarmStatusByEquipment } from '@/api/trigger.js'
 import { getCountbycorp } from '@/api/dashboard.js'
-import { chinaRegions } from '@/components/a_myComp/mapComplex/index.js'
+import { chinaRegions } from '@/components/sharedComponents/mapComplex/index.js'
 import lodash from 'lodash'
 
 export default {
   // KeepAlive include uses the existing lower-case route name.
   // eslint-disable-next-line vue/component-definition-name-casing
-  name: 'jkztjc',
+  name: 'HealthMonitoring',
   components: {
     Pagination,
     Banner,
@@ -732,12 +732,12 @@ searchContentHeight = 50px
 </style>
 
 <style lang="stylus">
-.jkztjcCss {
+.healthMonitoringCss {
   height: 100%;
 }
 
 /* The dialog is teleported to body, so these rules target its own class. */
-.dcDetailDialog {
+.batteryDetailDialog {
   display: flex;
   flex-direction: column;
   height: 80vh;

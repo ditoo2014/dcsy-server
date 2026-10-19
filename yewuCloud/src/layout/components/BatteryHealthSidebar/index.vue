@@ -28,13 +28,13 @@
 </template>
 
 <script>
-import { mapGetters } from '@/store/pinia-helpers'
+import { mapGetters } from '@/store/piniaHelpers'
 import Logo from './Logo'
 import SidebarItem from './SidebarItem'
 import variables from '@/styles/variables.js'
-import { resolveSidebarActiveMenu } from '@/utils/sidebar-active-menu.js'
+import { resolveSidebarActiveMenu } from '@/utils/sidebarActiveMenu.js'
 
-const BATTERY_HEALTH_ROOT_PATHS = ['/jkztjc', '/lssjcx', '/gjxx', '/yjxx']
+const BATTERY_HEALTH_ROOT_PATHS = ['/healthMonitoring', '/historicalData', '/alarms', '/warnings']
 
 export default {
   components: { SidebarItem, Logo },
@@ -45,7 +45,7 @@ export default {
     ]),
     batteryHealthMenuRoutes() {
       return this.permission_routes.filter(
-        route => route.dcjkgl && BATTERY_HEALTH_ROOT_PATHS.includes(route.path)
+        route => route.batteryHealthSection && BATTERY_HEALTH_ROOT_PATHS.includes(route.path)
       )
     },
     activeMenu() {

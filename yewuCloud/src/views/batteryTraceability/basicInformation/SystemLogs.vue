@@ -7,8 +7,8 @@
 <script>
 import systemLog from '@/views/basicData/systemLog.vue'
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'xtrz',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'SystemLogs',
   components: {
     systemLog
   }

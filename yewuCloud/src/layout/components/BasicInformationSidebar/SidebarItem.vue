@@ -1,7 +1,7 @@
 <template>
   <!-- 嵌套子项须为 el-sub-menu 的直接子节点，不能包 menu-wrapper -->
   <el-menu-item
-    v-if="isNest && !item.hidden && item.jcxxgl && item.meta"
+    v-if="isNest && !item.hidden && item.basicInformationSection && item.meta"
     :index="resolvePath(item.path)"
     :title="item.meta.title"
   >
@@ -11,7 +11,7 @@
     </template>
   </el-menu-item>
 
-  <template v-else-if="!item.hidden && item.jcxxgl">
+  <template v-else-if="!item.hidden && item.basicInformationSection">
     <template v-if="!showSubmenu">
       <el-menu-item
         v-if="flatChild && flatChild.meta"
@@ -46,14 +46,14 @@
 </template>
 
 <script>
-import { resolveRoutePath } from '@/utils/resolve-route-path'
+import { resolveRoutePath } from '@/utils/resolveRoutePath'
 import Item from './Item'
-import FixiOSBug from './FixiOSBug'
+import fixIosBug from './fixIosBug'
 
 export default {
   name: 'SidebarItem',
   components: { Item },
-  mixins: [FixiOSBug],
+  mixins: [fixIosBug],
   props: {
     item: {
       type: Object,
@@ -74,7 +74,7 @@ export default {
   },
   computed: {
     visibleChildren() {
-      return (this.item.children || []).filter(child => !child.hidden && child.jcxxgl)
+      return (this.item.children || []).filter(child => !child.hidden && child.basicInformationSection)
     },
     showSubmenu() {
       const count = this.visibleChildren.length

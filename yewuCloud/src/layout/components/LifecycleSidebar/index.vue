@@ -28,13 +28,13 @@
 </template>
 
 <script>
-import { mapGetters } from '@/store/pinia-helpers'
+import { mapGetters } from '@/store/piniaHelpers'
 import Logo from './Logo'
 import SidebarItem from './SidebarItem'
 import variables from '@/styles/variables.js'
-import { resolveSidebarActiveMenu } from '@/utils/sidebar-active-menu.js'
+import { resolveSidebarActiveMenu } from '@/utils/sidebarActiveMenu.js'
 
-const LIFECYCLE_ROOT_PATHS = ['/dczt', '/gjzz', '/ywgl']
+const LIFECYCLE_ROOT_PATHS = ['/batteryStatus', '/batteryTracking', '/maintenance']
 
 export default {
   components: { SidebarItem, Logo },
@@ -45,7 +45,7 @@ export default {
     ]),
     lifecycleMenuRoutes() {
       return this.permission_routes.filter(
-        route => route.qsmzqgl && LIFECYCLE_ROOT_PATHS.includes(route.path)
+        route => route.lifecycleSection && LIFECYCLE_ROOT_PATHS.includes(route.path)
       )
     },
     activeMenu() {

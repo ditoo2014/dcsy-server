@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { parseUserInfo as parseUserInfoFromStorage } from '@/utils/safe-json.js'
+import { parseUserInfo as parseUserInfoFromStorage } from '@/utils/safeJson.js'
 
 const TokenKey = 'access_token'
 export function getToken() {

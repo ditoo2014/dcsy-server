@@ -68,12 +68,12 @@ const themeToggleButtonStyle = computed(() => {
 })
 
 const showSideMenu = computed(
-  () => route.name !== 'gateway-detail' && route.name !== 'gateway-detail-legacy'
+  () => route.name !== 'gatewayDetail' && route.name !== 'gatewayDetailLegacy'
 )
 
 const menuActive = computed(() => {
-  if (route.name === 'ttdc-templates') return 'ttdc-templates'
-  if (route.name !== 'collection-home') return ''
+  if (route.name === 'ttdcTemplates') return 'ttdcTemplates'
+  if (route.name !== 'collectionHome') return ''
   return route.query.module === 'stream' ? 'stream' : 'gateway'
 })
 
@@ -82,8 +82,8 @@ function onMenuSelect(index) {
     void router.push({ path: '/collection', query: { module: 'gateway' }})
   } else if (index === 'stream') {
     void router.push({ path: '/collection', query: { module: 'stream' }})
-  } else if (index === 'ttdc-templates' && showTtdcTemplateManagement.value) {
-    void router.push({ name: 'ttdc-templates' })
+  } else if (index === 'ttdcTemplates' && showTtdcTemplateManagement.value) {
+    void router.push({ name: 'ttdcTemplates' })
   }
 }
 
@@ -142,7 +142,7 @@ watch(() => route.fullPath, () => {
           <el-icon><Monitor /></el-icon>
           <span>数据池管理</span>
         </el-menu-item>
-        <el-menu-item v-if="showTtdcTemplateManagement" index="ttdc-templates">
+        <el-menu-item v-if="showTtdcTemplateManagement" index="ttdcTemplates">
           <el-icon><Grid /></el-icon>
           <span>TTDC公共模板</span>
         </el-menu-item>

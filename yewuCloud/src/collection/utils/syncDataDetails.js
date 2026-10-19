@@ -1,4 +1,4 @@
-import { batchAddDataDetails, deleteDataDetails, fetchDataDetails } from '../api/data-details';
+import { batchAddDataDetails, deleteDataDetails, fetchDataDetails } from '../api/dataDetails';
 import { fetchStreamLabelsIntact } from '../api/stream';
 function getList(root) {
     const payload = root?.return ?? root ?? {};

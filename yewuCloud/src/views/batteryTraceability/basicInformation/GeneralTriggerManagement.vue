@@ -5,11 +5,11 @@
 </template>
 
 <script>
-import GeneralTriggerTool from '@/views/equipMana/components/GeneralTriggerTool.vue'
+import GeneralTriggerTool from '@/views/equipment/components/GeneralTriggerTool.vue'
 
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'tycfqgl',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'GeneralTriggerManagement',
   components: {
     GeneralTriggerTool
   }

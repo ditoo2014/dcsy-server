@@ -67,14 +67,14 @@
 import Pagination from '@/components/Pagination' // 分页组件
 import Banner from '@/components/ccpcComp/Banner.vue'
 import { formatDateString } from '@/utils/utils.js'
-import { findSiteListExactMatch } from '@/api/siteMana.js'
-import { findEquipmentListExactMatch } from '@/api/equipMana.js'
+import { findSiteListExactMatch } from '@/api/sites.js'
+import { findEquipmentListExactMatch } from '@/api/equipment.js'
 import { findAlarmRecord } from '@/api/trigger.js'
 
 export default {
   // KeepAlive include uses the existing lower-case route name.
   // eslint-disable-next-line vue/component-definition-name-casing
-  name: 'gjxxssgj',
+  name: 'RealtimeAlarms',
   emits: ['alarm-count-change'],
   components: {
     Pagination,
@@ -313,7 +313,7 @@ export default {
     },
     async exportExcel() { // 导出excel表格
       // 本地导出 excel start
-      import('@/vendor/Export2Excel').then(excel => {
+      import('@/vendor/exportToExcel').then(excel => {
         const tHeader = ['告警名称', '电池ID', '站址名称', '告警等级', '数据值', '触发时间']
         const data = this.formatJson(this.tableData, tHeader.length)
         excel.export_json_to_excel({
@@ -389,7 +389,7 @@ export default {
         })
       }
 
-      import('@/vendor/Export2Excel').then(excel => {
+      import('@/vendor/exportToExcel').then(excel => {
         const tHeader = ['告警名称', '电池ID', '站址名称', '告警等级', '数据值', '触发时间']
         const data = this.formatJson(tableData, tHeader.length)
         excel.export_json_to_excel({

@@ -100,26 +100,26 @@
 
 <script>
 import Pagination from '@/components/Pagination' // 分页组件
-import refreshPage from './refresh-page.js'
-import { Message } from '@/utils/element-shim'
+import refreshPage from './refreshPage.js'
+import { Message } from '@/utils/elementShim'
 import Banner from '@/components/ccpcComp/Banner.vue'
-import MyElTree from '@/components/a_myComp/elTree/MyElTree.vue' // 左侧导航
+import MyElTree from '@/components/sharedComponents/elTree/MyElTree.vue' // 左侧导航
 import LifecycleRecords from './comp/LifecycleRecords.vue'
 import { corpList } from '@/api/user.js'
 import { formatDateString, objectSort } from '@/utils/utils.js'
-import { findEquipmentListExactMatch } from '@/api/equipMana.js'
+import { findEquipmentListExactMatch } from '@/api/equipment.js'
 import { findEquipmentcirlog } from '@/api/basicData.js'
-import { parseUserInfo } from '@/utils/safe-json.js'
-import { findSiteListExactMatch } from '@/api/siteMana.js'
-import totalImage from '@/assets/imgs/总量.png'
-import startImage from './imgs/起点.png'
-import middleImage from './imgs/中间.png'
-import endImage from './imgs/终点.png'
+import { parseUserInfo } from '@/utils/safeJson.js'
+import { findSiteListExactMatch } from '@/api/sites.js'
+import totalImage from '@/assets/imgs/total.png'
+import startImage from './imgs/startPoint.png'
+import middleImage from './imgs/middle.png'
+import endImage from './imgs/endPoint.png'
 
 export default {
   mixins: [refreshPage],
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'dczt',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'BatteryStatus',
   components: {
     Pagination,
     Banner,

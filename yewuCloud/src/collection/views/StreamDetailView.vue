@@ -7,7 +7,7 @@ import { useAuthStore } from '../stores/auth';
 import { createStreamLabels, fetchStreamLabelsIntact, fetchStreamPage } from '../api/stream';
 import { findEquipmentPage } from '../api/equipment';
 import { fetchGatewayPage } from '../api/gateway';
-import { fetchGatewayModules } from '../api/gateway-module';
+import { fetchGatewayModules } from '../api/gatewayModule';
 import { syncEquipmentDataDetailsFromStreamLabels } from '../utils/syncDataDetails';
 import { formatStreamReportType, normalizeStreamDataType } from '../utils/streamDataType';
 const route = useRoute();

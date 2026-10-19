@@ -1,6 +1,6 @@
 import { redirectToMainLogin } from '../utils/mainLoginRedirect'
-import { requirePasswordChange } from '@/utils/password-change.js'
-import { isPasswordChangeFailure, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
+import { requirePasswordChange } from '@/utils/passwordChange.js'
+import { isPasswordChangeFailure, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/passwordChangeState.js'
 import { getToken } from '@/utils/auth.js'
 // 仅兼容旧接口的明确认证错误，普通业务提示不能触发退出。
 const AUTH_INVALID_MESSAGES = [

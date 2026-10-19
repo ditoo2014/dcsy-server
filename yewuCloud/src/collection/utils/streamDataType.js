@@ -1,4 +1,4 @@
-import { THERMAL_RUNAWAY_RISK_POINT_DATA_ID, matchesBatteryPointId } from '../../utils/battery-point-ids.js';
+import { THERMAL_RUNAWAY_RISK_POINT_DATA_ID, matchesBatteryPointId } from '../../utils/batteryPointIds.js';
 
 function text(value) {
     return String(value ?? '').trim();

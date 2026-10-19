@@ -1,6 +1,6 @@
 <template>
   <el-menu-item
-    v-if="isNest && !item.hidden && item.qsmzqgl && item.meta"
+    v-if="isNest && !item.hidden && item.lifecycleSection && item.meta"
     :index="resolvePath(item.path)"
     :title="item.meta.title"
   >
@@ -10,7 +10,7 @@
     </template>
   </el-menu-item>
 
-  <template v-else-if="!item.hidden && item.qsmzqgl">
+  <template v-else-if="!item.hidden && item.lifecycleSection">
     <template v-if="!showSubmenu">
       <el-menu-item
         v-if="flatChild && flatChild.meta"
@@ -44,14 +44,14 @@
 </template>
 
 <script>
-import { resolveRoutePath } from '@/utils/resolve-route-path'
+import { resolveRoutePath } from '@/utils/resolveRoutePath'
 import Item from './Item'
-import FixiOSBug from './FixiOSBug'
+import fixIosBug from './fixIosBug'
 
 export default {
   name: 'SidebarItem',
   components: { Item },
-  mixins: [FixiOSBug],
+  mixins: [fixIosBug],
   props: {
     item: {
       type: Object,
@@ -72,7 +72,7 @@ export default {
   },
   computed: {
     visibleChildren() {
-      return (this.item.children || []).filter(child => !child.hidden && child.qsmzqgl)
+      return (this.item.children || []).filter(child => !child.hidden && child.lifecycleSection)
     },
     showSubmenu() {
       const count = this.visibleChildren.length

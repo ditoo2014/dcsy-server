@@ -8,38 +8,38 @@
     }"
   >
     <div class="screen-scale-box" :style="scaleBoxStyle">
-      <div ref="dashboardRef" class="jscCss" :style="screenStyle">
-        <div class="bigPingCss">
-          <div class="bingPingBackgroundCss">
-            <img src="./imgs/大屏背景1.png">
+      <div ref="dashboardRef" class="dashboardCss" :style="screenStyle">
+        <div class="dashboardScreenCss">
+          <div class="dashboardBackgroundCss">
+            <img src="./imgs/dashboardBackground1.png">
           </div>
           <div class="topBannerCss">
-            <img src="./imgs/顶部背景.png">
+            <img src="./imgs/headerBackground.png">
             <div class="headerCss">
               <div class="titleCss">锂硫电池组溯源平台</div>
             </div>
           </div>
           <div class="msgBorderContentOneCss">
-            <div class="imgBackgroundCss"><img src="./imgs/电池统计.png"></div>
-            <div class="msgBorderTitleCss msgBorderTitleDctjCss" @click="goDetailPage('电池统计')">电池统计</div>
-            <div class="gfxtContentCss">
-              <div v-for="(item, index) in lifecycleSummaryItems" :key="index" class="gfxtDetailCss">
-                <div class="gfxtImgCss">
+            <div class="imgBackgroundCss"><img src="./imgs/batteryStatistics.png"></div>
+            <div class="msgBorderTitleCss batteryStatisticsTitleCss" @click="goDetailPage('电池统计')">电池统计</div>
+            <div class="lifecycleSummaryContentCss">
+              <div v-for="(item, index) in lifecycleSummaryItems" :key="index" class="lifecycleSummaryItemCss">
+                <div class="lifecycleSummaryImageCss">
                   <img :src="item.imgUrl">
                 </div>
-                <div class="gfxtDetailTitleAndMsgCss">
-                  <div class="gfxtDetailTitleMsgCss">{{ item.title }}</div>
-                  <div class="gfxtDetailMsgCss">{{ item.msg }}</div>
+                <div class="lifecycleSummaryLabelCss">
+                  <div class="lifecycleSummaryTitleCss">{{ item.title }}</div>
+                  <div class="lifecycleSummaryValueCss">{{ item.msg }}</div>
                 </div>
               </div>
             </div>
           </div>
           <div class="msgBorderLeftImgCss">
-            <img src="./imgs/三角形左.png">
+            <img src="./imgs/triangleLeft.png">
           </div>
           <div class="msgBorderContentFourCss">
-            <div class="imgBackgroundCss"><img src="./imgs/告警统计.png"></div>
-            <div class="msgBorderTitleCss msgBorderTitleGjtjCss" @click="goDetailPage('告警统计')">告警统计</div>
+            <div class="imgBackgroundCss"><img src="./imgs/alarmStatistics.png"></div>
+            <div class="msgBorderTitleCss alarmStatisticsTitleCss" @click="goDetailPage('告警统计')">告警统计</div>
             <div class="msgBorderContentFourAndFiveCss">
               <DpLineChart
                 id="dpLineChart1Id"
@@ -50,11 +50,11 @@
             </div>
           </div>
           <div class="msgBorderLeftBotoomImgCss">
-            <img src="./imgs/三角形右.png">
+            <img src="./imgs/triangleRight.png">
           </div>
           <div class="msgBorderContentFiveCss">
-            <div class="imgBackgroundCss"><img src="./imgs/预警统计.png"></div>
-            <div class="msgBorderRightTitleCss msgBorderTitleSsgjCss" @click="goDetailPage('实时告警')">
+            <div class="imgBackgroundCss"><img src="./imgs/warningStatistics.png"></div>
+            <div class="msgBorderRightTitleCss realtimeAlarmTitleCss" @click="goDetailPage('实时告警')">
               实时告警（<span class="realtimeAlarmCountCss">{{ alarmCount }}</span>条）
             </div>
             <div class="tableCss">
@@ -67,13 +67,13 @@
           </div>
 
           <div class="msgBorderContentTwoCss msgBorderContentRightCss">
-            <div class="imgBackgroundCss"><img src="./imgs/实时告警.png"></div>
-            <div class="msgBorderRightTitleCss msgBorderTitleDcjkdtjCss" @click="goDetailPage('电池健康度统计')">电池健康度统计</div>
+            <div class="imgBackgroundCss"><img src="./imgs/realtimeAlarms.png"></div>
+            <div class="msgBorderRightTitleCss healthStatisticsTitleCss" @click="goDetailPage('电池健康度统计')">电池健康度统计</div>
             <div class="msgBorderContentSevenContentCss">
               <div class="BasicPieCss">
                 <BasicPie
                   v-if="healthStatisticsStatus === 'ready'"
-                  id="dcjkdtj"
+                  id="batteryHealthStatisticsChart"
                   width="100%"
                   height="100%"
                   :chart-data="batteryHealthChartData"
@@ -85,11 +85,11 @@
             </div>
           </div>
           <div class="msgBorderRightImgCss">
-            <img src="./imgs/三角形右.png">
+            <img src="./imgs/triangleRight.png">
           </div>
           <div class="msgBorderContentSixCss msgBorderContentRightCss">
-            <div class="imgBackgroundCss"><img src="./imgs/实时预警.png"></div>
-            <div class="msgBorderTitleCss msgBorderTitleYjtjCss" @click="goDetailPage('预警统计')">预警统计</div>
+            <div class="imgBackgroundCss"><img src="./imgs/realtimeWarnings.png"></div>
+            <div class="msgBorderTitleCss warningStatisticsTitleCss" @click="goDetailPage('预警统计')">预警统计</div>
             <div class="msgBorderContentFourAndFiveCss">
               <DpLineChart
                 id="dpLineChart2Id"
@@ -100,11 +100,11 @@
             </div>
           </div>
           <div class="msgBorderRightBottomImgCss">
-            <img src="./imgs/三角形左.png">
+            <img src="./imgs/triangleLeft.png">
           </div>
           <div class="msgBorderContentSevenCss msgBorderContentRightCss">
-            <div class="imgBackgroundCss"><img src="./imgs/电池健康度统计.png"></div>
-            <div class="msgBorderRightTitleCss msgBorderTitleSsyjCss" @click="goDetailPage('实时预警')">
+            <div class="imgBackgroundCss"><img src="./imgs/batteryHealthStatistics.png"></div>
+            <div class="msgBorderRightTitleCss realtimeWarningTitleCss" @click="goDetailPage('实时预警')">
               实时预警（<span class="realtimeWarningCountCss">{{ warningCount }}</span>条）
             </div>
             <div class="msgBorderContentSixChartContentCss">
@@ -123,7 +123,7 @@
               <div class="pngAndMsgDataCss">
                 <div class="msgTitleCss">站址数量</div>
                 <div class="msgCss">
-                  <div class="imgBackgroundCss"><img src="./imgs/顶部面板框2.png"></div>
+                  <div class="imgBackgroundCss"><img src="./imgs/headerPanel2.png"></div>
                   <div class="msgNumCss">{{ siteCount }}</div>
                 </div>
               </div>
@@ -132,7 +132,7 @@
               <div class="pngAndMsgDataCss">
                 <div class="msgTitleCss">入网电池数量</div>
                 <div class="msgCss">
-                  <div class="imgBackgroundCss"><img src="./imgs/顶部面板框2.png"></div>
+                  <div class="imgBackgroundCss"><img src="./imgs/headerPanel2.png"></div>
                   <div class="msgNumCss">{{ onlineBatteryCount }}</div>
                 </div>
               </div>
@@ -141,7 +141,7 @@
               <div class="pngAndMsgDataCss">
                 <div class="msgTitleCss">告警数量</div>
                 <div class="msgCss">
-                  <div class="imgBackgroundCss"><img src="./imgs/顶部面板框1.png"></div>
+                  <div class="imgBackgroundCss"><img src="./imgs/headerPanel1.png"></div>
                   <div class="msgNumCss">{{ alarmCount }}</div>
                 </div>
               </div>
@@ -150,7 +150,7 @@
               <div class="pngAndMsgDataCss">
                 <div class="msgTitleCss">预警数量</div>
                 <div class="msgCss">
-                  <div class="imgBackgroundCss"><img src="./imgs/顶部面板框1.png"></div>
+                  <div class="imgBackgroundCss"><img src="./imgs/headerPanel1.png"></div>
                   <div class="msgNumCss">{{ warningCount }}</div>
                 </div>
               </div>
@@ -184,15 +184,15 @@
           </div>
 
           <div class="msgBorderContentThreeCss">
-            <div class="imgBackgroundCss"><img src="./imgs/充放电统计.png"></div>
+            <div class="imgBackgroundCss"><img src="./imgs/chargeDischargeStatistics.png"></div>
             <div class="msgBorderThreeTitleContentCss">
               <div class="msgBorderThreeTitleContentChildCss">
                 <div class="msgBorderThreeTitleLeftImgCss">
-                  <div class="imgBackgroundCss"><img src="./imgs/充放电统计装饰.png"></div>
+                  <div class="imgBackgroundCss"><img src="./imgs/chargeDischargeDecoration.png"></div>
                 </div>
                 <div class="msgBorderThreeTitleCss" @click="goDetailPage('电池健康度统计')">充放电统计</div>
                 <div class="msgBorderThreeTitleRightImgCss">
-                  <div class="imgBackgroundCss"><img src="./imgs/充放电统计装饰.png"></div>
+                  <div class="imgBackgroundCss"><img src="./imgs/chargeDischargeDecoration.png"></div>
                 </div>
               </div>
             </div>
@@ -209,14 +209,14 @@
           </div>
         </div>
 
-        <div class="jkztjcCss">
+        <div class="healthMonitoringCss">
           <!-- 中间弹出 -->
           <el-dialog
             v-if="dialogTeleportReady"
             v-model="showDialog"
             append-to=".screen-wrapper"
-            class="jscDcDetailDialog"
-            modal-class="jscDcDetailOverlay"
+            class="dashboardBatteryDetailDialog"
+            modal-class="dashboardBatteryDetailOverlay"
             title="电池详情"
             width="90%"
             destroy-on-close
@@ -235,42 +235,42 @@
 
 <script>
 import { defineAsyncComponent, markRaw } from 'vue'
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 import lodash from 'lodash'
-import BasicPie from '@/components/a_myComp/echarts/BasicPie.vue'
-import MultipleYAxes from '@/components/a_myComp/echarts/MultipleYAxes.vue'
-import MapComplex from '@/components/a_myComp/mapComplex/MapComplex.vue'
-import { findBestCorpByRegionName, resolveSiteRegionName } from '@/components/a_myComp/mapComplex/index.js'
-import DpLineChart from '@/components/a_myComp/echarts/DpLineChart.vue'
-import { findSiteListExactMatch } from '@/api/siteMana.js'
-import { findEquipmentListExactMatch, getEquipAllPoint } from '@/api/equipMana.js'
-import { getapilistdata } from '@/api/moniList.js'
+import BasicPie from '@/components/sharedComponents/echarts/BasicPie.vue'
+import MultipleYAxes from '@/components/sharedComponents/echarts/MultipleYAxes.vue'
+import MapComplex from '@/components/sharedComponents/mapComplex/MapComplex.vue'
+import { findBestCorpByRegionName, resolveSiteRegionName } from '@/components/sharedComponents/mapComplex/index.js'
+import DpLineChart from '@/components/sharedComponents/echarts/DpLineChart.vue'
+import { findSiteListExactMatch } from '@/api/sites.js'
+import { findEquipmentListExactMatch, getEquipAllPoint } from '@/api/equipment.js'
+import { getapilistdata } from '@/api/monitoring.js'
 import { corpList } from '@/api/user.js'
 import { getCountbycorp, getDailyAlarmStatistics, getDailyWarningStatistics, getChargeDischargeDailyStatistics } from '@/api/dashboard.js'
 import { findAlarmRecord } from '@/api/trigger.js'
-import healthImage from './imgs/健康度图标.png'
-import coldHeatImage from './imgs/冷热总量.png'
-import storageDischargeImage from './imgs/储能放电量.png'
-import dailyHeatImage from './imgs/日热量.png'
-import heatEfficiencyImage from './imgs/热效率.png'
-import dailyColdImage from './imgs/日冷量.png'
-import coldEfficiencyImage from './imgs/冷效率.png'
-import flowOneImage from './imgs/表1流量.png'
-import flowTwoImage from './imgs/表2流量.png'
-import dataDecorationImage from './imgs/储能系统数据装饰.png'
-import inboundImage from './imgs/入库数量.png'
-import outboundImage from './imgs/出库数量.png'
-import stationEntryImage from './imgs/上站入网.png'
-import stationExitImage from './imgs/退网下站.png'
-import pendingInspectionImage from './imgs/检测待用.png'
-import discardedImage from './imgs/检测淘汰.png'
+import healthImage from './imgs/healthIcon.png'
+import coldHeatImage from './imgs/heatingCoolingTotal.png'
+import storageDischargeImage from './imgs/energyStorageDischarge.png'
+import dailyHeatImage from './imgs/dailyHeating.png'
+import heatEfficiencyImage from './imgs/heatingEfficiency.png'
+import dailyColdImage from './imgs/dailyCooling.png'
+import coldEfficiencyImage from './imgs/coolingEfficiency.png'
+import flowOneImage from './imgs/meter1Flow.png'
+import flowTwoImage from './imgs/meter2Flow.png'
+import dataDecorationImage from './imgs/energyStorageDataDecoration.png'
+import inboundImage from './imgs/stockInCount.png'
+import outboundImage from './imgs/stockOutCount.png'
+import stationEntryImage from './imgs/siteCommissioning.png'
+import stationExitImage from './imgs/siteDecommissioning.png'
+import pendingInspectionImage from './imgs/inspectionReady.png'
+import discardedImage from './imgs/inspectionRetired.png'
 import mapAlarmImage from './map.png'
-import alarmImage from './imgs/告警3.png'
-import warningImage from './imgs/预警3.png'
+import alarmImage from './imgs/alarmLevel3.png'
+import warningImage from './imgs/warningLevel3.png'
 import { getTime, formatDateString, dateConvStamp, getRecentlyDate, setNumerOrStrNum } from '@/utils/utils.js'
-import { parseUserInfo } from '@/utils/safe-json.js'
-import { buildQueryableCorpKeys } from '@/utils/corp-scope.js'
-import { linearGradientColor } from '@/utils/echarts-gradient.js'
+import { parseUserInfo } from '@/utils/safeJson.js'
+import { buildQueryableCorpKeys } from '@/utils/corpScope.js'
+import { linearGradientColor } from '@/utils/echartsGradient.js'
 import {
   isDashboardApiFullscreen,
   looksLikeBrowserF11Fullscreen,
@@ -288,8 +288,8 @@ const SITE_PAGE_SIZE = 10000
 const BatteryDetail = defineAsyncComponent(() => import('@/views/batteryTraceability/batteryHealth/BatteryDetail.vue'))
 
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'jsc',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'Dashboard',
   components: {
     BasicPie,
     MultipleYAxes,
@@ -1037,7 +1037,7 @@ export default {
         })
         this.screenResizeObserver.observe(wrapper)
       }
-      const shell = document.querySelector('.layout-shell--jsc')
+      const shell = document.querySelector('.layout-shell--dashboard')
       if (shell && typeof ResizeObserver !== 'undefined') {
         this.shellResizeObserver = new ResizeObserver(() => {
           this.queueScreenScale(true)
@@ -1175,7 +1175,7 @@ export default {
     },
     // 非全屏：Banner 下方区域；全屏：.screen-wrapper 占满全屏视口
     getBannerHeight() {
-      const bannerEl = document.querySelector('.app-wrapper--jsc .bannerCss')
+      const bannerEl = document.querySelector('.app-wrapper--dashboard .bannerCss')
       if (bannerEl && bannerEl.offsetHeight && bannerEl.offsetParent !== null) {
         return bannerEl.offsetHeight
       }
@@ -1867,12 +1867,12 @@ export default {
       let bannerId = ''
       let url = ``
       switch (name) {
-        case '电池统计': bannerId = '12'; url = `/dczt`; break
-        case '实时告警': bannerId = '13'; url = `/gjxxssgj`; break
-        case '电池健康度统计': bannerId = '13'; url = `/jkztjc`; break
-        case '告警统计': bannerId = '13'; url = `/gjxxlsgj`; break
-        case '预警统计': bannerId = '13'; url = `/yjxxlsyj`; break
-        case '实时预警': bannerId = '13'; url = `/yjxxssyj`; break
+        case '电池统计': bannerId = '12'; url = `/batteryStatus`; break
+        case '实时告警': bannerId = '13'; url = `/alarms/realtime`; break
+        case '电池健康度统计': bannerId = '13'; url = `/healthMonitoring`; break
+        case '告警统计': bannerId = '13'; url = `/alarms/history`; break
+        case '预警统计': bannerId = '13'; url = `/warnings/history`; break
+        case '实时预警': bannerId = '13'; url = `/warnings/realtime`; break
       }
       localStorage.setItem('bannerId', bannerId)
       localStorage.setItem('routerPath', url)
@@ -1908,21 +1908,21 @@ export default {
       const warningIcon = warningImage
 
       const dom = document.createElement('div')
-      const contentHtmlStart = `<div class='Mo_banCss'>
-                                  <div class='Mo_ban_boxCss'>
-                                    <div class="Mo_ban_box_closeCss" onclick="closeInfoWindow()">X</div>
-                                    <div class="moLineCss">站址名称：${row.siteName}</div>
-                                    <div class="moLineMsgCss">电池组数量：${row.equipList.length}</div>
-                                    <div class="moLineMsgCss">电池总负载：${row.equipList.length}A</div>
-                                    <div class="moLineAddrCss">站址地址：${row.addr ? row.addr : ''}</div>`
+      const contentHtmlStart = `<div class='mapPopupCss'>
+                                  <div class='mapPopupBodyCss'>
+                                    <div class="mapPopupCloseCss" onclick="closeInfoWindow()">X</div>
+                                    <div class="mapPopupRowCss">站址名称：${row.siteName}</div>
+                                    <div class="mapPopupMessageCss">电池组数量：${row.equipList.length}</div>
+                                    <div class="mapPopupMessageCss">电池总负载：${row.equipList.length}A</div>
+                                    <div class="mapPopupAddressCss">站址地址：${row.addr ? row.addr : ''}</div>`
 
       let contentHtml = ''
       row.equipList.forEach((equipItem, index) => {
-        contentHtml += `<div class="moLineCss">
-                                      <div class="moLine1Css">电池组${index + 1}：${equipItem.equipmentName}</div>`
-        equipItem.hasAlarm ? contentHtml += `<div class="moLineIconCss"><img src="${alarmIcon}" /></div>` : null
-        equipItem.hasWarning ? contentHtml += `<div class="moLineIconCss"><img src="${warningIcon}" /></div>` : null
-        contentHtml += `<div id="Mo_ban_lookCss" onclick="goToDetail(${equipItem.id})">查看详情</div>
+        contentHtml += `<div class="mapPopupRowCss">
+                                      <div class="mapPopupBatteryCss">电池组${index + 1}：${equipItem.equipmentName}</div>`
+        equipItem.hasAlarm ? contentHtml += `<div class="mapPopupIconCss"><img src="${alarmIcon}" /></div>` : null
+        equipItem.hasWarning ? contentHtml += `<div class="mapPopupIconCss"><img src="${warningIcon}" /></div>` : null
+        contentHtml += `<div id="mapPopupDetailsCss" onclick="goToDetail(${equipItem.id})">查看详情</div>
                                     </div>`
       })
       const contentHtmlEnd = `</div>
@@ -2155,12 +2155,12 @@ export default {
     height 100vh
   }
 }
-.jscCss {
+.dashboardCss {
   width 1920px
   height 1080px
   overflow hidden
   will-change transform
-  .bigPingCss {
+  .dashboardScreenCss {
     position relative
     width 100%
     height 100%
@@ -2187,7 +2187,7 @@ export default {
         }
       }
     }
-    .bingPingBackgroundCss {
+    .dashboardBackgroundCss {
       position absolute
       top 0
       left 0
@@ -2218,13 +2218,13 @@ export default {
       cursor pointer
       font-family FZHTK_JSC // 方正黑体
     }
-    .msgBorderTitleDctjCss {
+    .batteryStatisticsTitleCss {
       line-height 38.4px
     }
-    .msgBorderTitleGjtjCss {
+    .alarmStatisticsTitleCss {
       line-height 42.24px
     }
-    .msgBorderTitleYjtjCss {
+    .warningStatisticsTitleCss {
       line-height 44.16px
     }
     .msgBorderRightTitleCss {
@@ -2236,10 +2236,10 @@ export default {
       cursor pointer
       font-family FZHTK_JSC // 方正黑体
     }
-    .msgBorderTitleSsgjCss {
+    .realtimeAlarmTitleCss {
       line-height 44.16px
     }
-    .msgBorderTitleSsyjCss {
+    .realtimeWarningTitleCss {
       line-height 42.24px
     }
     .realtimeAlarmCountCss,
@@ -2252,7 +2252,7 @@ export default {
     .realtimeWarningCountCss {
       color #ffd84d
     }
-    .msgBorderTitleDcjkdtjCss {
+    .healthStatisticsTitleCss {
       line-height 44.16px
     }
     .msgBorderContentOneCss { // 电池统计
@@ -2261,33 +2261,33 @@ export default {
       left 0
       width 489.6px
       height 342.72px
-      .gfxtContentCss {
+      .lifecycleSummaryContentCss {
         width 100%
         height calc(100% - 57.6px)
         color #fff
-        .gfxtDetailCss {
+        .lifecycleSummaryItemCss {
           position relative
           float left
           padding 38.4px 0 0 28.8px
           width 32%
           height 42%
-          .gfxtImgCss {
+          .lifecycleSummaryImageCss {
             float left
             width 57.6px
             height 64.9px
           }
-          .gfxtDetailTitleAndMsgCss {
+          .lifecycleSummaryLabelCss {
             float left
             padding-top 3.84px
             width calc(100% - 67.2px)
-            .gfxtDetailTitleMsgCss {
+            .lifecycleSummaryTitleCss {
               width 100%
               height 28.8px
               line-height 28.8px
               font-size 13.44px
               text-align center
             }
-            .gfxtDetailMsgCss {
+            .lifecycleSummaryValueCss {
               width 100%
               height 28.8px
               line-height 28.8px
@@ -2630,12 +2630,12 @@ img {
 </style>
 
 <style lang="stylus">
-.jkztjcCss {
+.healthMonitoringCss {
   height: 100%;
 }
 
 /* Keep the dialog outside the scaled dashboard and inside its fullscreen root. */
-.jscDcDetailOverlay {
+.dashboardBatteryDetailOverlay {
   position: absolute !important;
   inset: 0;
   overflow: hidden;
@@ -2647,7 +2647,7 @@ img {
   }
 }
 
-.jscDcDetailDialog {
+.dashboardBatteryDetailDialog {
   display: flex;
   flex-direction: column;
   height: 80vh;

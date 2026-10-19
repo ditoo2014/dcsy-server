@@ -3,34 +3,34 @@
     v-loading="detailLoading"
     element-loading-text="正在加载数据"
     element-loading-background="rgba(255, 255, 255, 0.85)"
-    class="dcDetailCss"
+    class="batteryDetailCss"
   >
-    <div class="dcDetailContentCss">
+    <div class="batteryDetailContentCss">
       <div class="closeButCss cursorPointer" @click="clickClose">
         <el-icon style="font-size: 20px"><component :is="$legacyIcon('el-icon-close')" /></el-icon>
       </div>
       <div class="topBannerCss">
-        <div class="zdContentCss">
-          <div class="zdDetailsCss">
+        <div class="siteContentCss">
+          <div class="siteDetailsCss">
             <el-tooltip class="item" effect="light" placement="top-end">
               <template #content>
                 <span class="tooltipCss">{{ formData.belongToSiteName }}</span>
               </template>
-              <div class="zdMsg1Css">站址名称：{{ formData.belongToSiteName }}</div>
+              <div class="siteNameCss">站址名称：{{ formData.belongToSiteName }}</div>
             </el-tooltip>
-            <div class="zdMsg2Css">站址编码：{{ formData.siteCode || '-' }}</div>
+            <div class="siteCodeCss">站址编码：{{ formData.siteCode || '-' }}</div>
           </div>
-          <div class="zdAddrCss" :title="formData.addr || '-'">地址：{{ formData.addr || '-' }}</div>
+          <div class="siteAddressCss" :title="formData.addr || '-'">地址：{{ formData.addr || '-' }}</div>
         </div>
-        <div class="zdBasicCss">
-          <div class="zdLogoCss">
+        <div class="siteBasicInfoCss">
+          <div class="siteLogoCss">
             <img src="./imgs/dcsyLogo.png">
           </div>
-          <div class="zdBCss">电池总负载：{{ siteTotalLoad || '-' }} A</div>
-          <div class="zdBCss">电池组数：{{ batteryGroups.length }}组</div>
-          <div class="dqdczCss">
-            <div class="dczTitileCss">当前电池组</div>
-            <div class="dqdczSelCss">
+          <div class="siteSummaryCss">电池总负载：{{ siteTotalLoad || '-' }} A</div>
+          <div class="siteSummaryCss">电池组数：{{ batteryGroups.length }}组</div>
+          <div class="currentBatteryGroupCss">
+            <div class="batteryGroupTitleCss">当前电池组</div>
+            <div class="currentBatteryGroupSelectCss">
               <el-select v-model="selectedBatteryGroup" filterable @change="handleBatteryGroupChange">
                 <el-option v-for="item in batteryGroups" :key="item.key" :label="item.name" :value="item.key" />
               </el-select>
@@ -38,7 +38,7 @@
           </div>
         </div>
       </div>
-      <div class="dcHeaderCss">
+      <div class="batteryHeaderCss">
         <div class="tabContentCss">
           <div v-for="(item, index) in butList" :key="index" class="butContentCss cursorPointer" @click="selectBut(item)">
             <div class="butCss">
@@ -55,25 +55,25 @@
             <div class="cursorPointer" :class="item.selectEd ? 'selectButCss' : 'notSelectButCss'" />
           </div>
         </div>
-        <div class="dczxxContentCss">
-          <!-- <div class="dczxxCss">
-          <div class="dczxxBordCss">
-            <div class="dczxxTitleCss">
+        <div class="batteryGroupInfoContentCss">
+          <!-- <div class="batteryGroupInfoCss">
+          <div class="batteryGroupInfoBorderCss">
+            <div class="batteryGroupInfoTitleCss">
               电池组名称：
             </div>
-            <div class="dczxxMsgCss">{{ formData.equipmentName }}</div>
+            <div class="batteryGroupInfoValueCss">{{ formData.equipmentName }}</div>
           </div>
         </div> -->
-          <div class="dczxxCss">
-            <div class="dczxxBordCss">
-              <div class="dczxxTitleCss">
+          <div class="batteryGroupInfoCss">
+            <div class="batteryGroupInfoBorderCss">
+              <div class="batteryGroupInfoTitleCss">
                 电池组ID：
               </div>
-              <div class="dczxxMsgCss">{{ formData.equipmentCode }}</div>
+              <div class="batteryGroupInfoValueCss">{{ formData.equipmentCode }}</div>
             </div>
           </div>
         </div>
-        <div class="hqsjsjCss">获取数据时间：{{ dataDate || '-' }}</div>
+        <div class="dataFetchTimeCss">获取数据时间：{{ dataDate || '-' }}</div>
       </div>
       <RealTimeData
         v-if="nowPageName === '实时数据'"
@@ -113,17 +113,17 @@ import RealTimeData from './comp/RealTimeData.vue'
 import HistrData from './comp/HistrData.vue'
 import RealtimeAlarmPanel from './comp/RealtimeAlarmPanel.vue'
 import RealtimeWarningPanel from './comp/RealtimeWarningPanel.vue'
-import { getapilistdata, getRealTimeData, getStreamLabelList } from '@/api/moniList.js'
-import { findSiteListExactMatch } from '@/api/siteMana.js'
-import { getEquipAllPoint } from '@/api/equipMana.js'
+import { getapilistdata, getRealTimeData, getStreamLabelList } from '@/api/monitoring.js'
+import { findSiteListExactMatch } from '@/api/sites.js'
+import { getEquipAllPoint } from '@/api/equipment.js'
 import { findAlarmRecord, getAlarmStatusByEquipment } from '@/api/trigger.js'
-import { resolveBatteryPoint, REMAINING_DISCHARGE_TIME_POINT_DATA_ID } from '@/utils/battery-points.js'
-import alarmImage from './imgs/告警3.png'
-import warningImage from './imgs/预警3.png'
+import { resolveBatteryPoint, REMAINING_DISCHARGE_TIME_POINT_DATA_ID } from '@/utils/batteryPoints.js'
+import alarmImage from './imgs/alarmLevel3.png'
+import warningImage from './imgs/warningLevel3.png'
 
 export default {
-  // 保留改名前的组件名称，使既有路由缓存继续生效。
-  name: 'dcDetail',
+  // 组件名称与路由名称一致，确保页面缓存正常匹配。
+  name: 'BatteryDetail',
   components: {
     RealTimeData,
     HistrData,
@@ -482,7 +482,7 @@ butStyle() {
 
 boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
 
-.dcDetailCss {
+.batteryDetailCss {
   position relative
   width 100%
   height 100%
@@ -492,7 +492,7 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
   overflow hidden
   box-sizing border-box
   background-color #F7F7F7
-  .dcDetailContentCss {
+  .batteryDetailContentCss {
     width 100%
     height auto
     flex 1
@@ -524,33 +524,33 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
     height 4vw
     background-color #1C4267
     border-radius 0.2vw
-    .zdContentCss {
+    .siteContentCss {
       float left
       margin-left 4.7%
       padding-right 3%
       width 44%
       color #fff
       text-align right
-      .zdDetailsCss {
+      .siteDetailsCss {
         // 隔离名称、编码的浮动，避免 vw 小数像素取整后挤压下一行地址。
         display flow-root
         width 100%
         min-height 2.2vw
         line-height 2.2vw
         font-size 1vw
-        .zdMsg1Css {
+        .siteNameCss {
           float right
           width 17vw
           white-space nowrap
           overflow hidden
           text-overflow ellipsis
         }
-        .zdMsg2Css {
+        .siteCodeCss {
           float right
           margin-right 0.5vw
         }
       }
-      .zdAddrCss {
+      .siteAddressCss {
         width 100%
         height 1.5vw
         line-height 1.5vw
@@ -561,29 +561,29 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
         text-overflow ellipsis
       }
     }
-    .zdBasicCss {
+    .siteBasicInfoCss {
       float left
       color #fff
       font-size 1vw
-      .zdLogoCss {
+      .siteLogoCss {
         float left
         margin 0.5vw 2.8vw 0 0
         width 1.9vw
         height 3vw
       }
-      .zdBCss {
+      .siteSummaryCss {
         float left
         margin-right 1vw
         line-height 4vw
       }
-      .dqdczCss {
+      .currentBatteryGroupCss {
         float left
         line-height 4vw
-        .dczTitileCss {
+        .batteryGroupTitleCss {
           float left
           margin-right 0.5vw
         }
-        .dqdczSelCss {
+        .currentBatteryGroupSelectCss {
           float left
           margin-top -3px
           width 10vw
@@ -602,12 +602,12 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
     border-left 5px solid transparent
     border-right 5px solid transparent
   }
-  .dcHeaderCss {
+  .batteryHeaderCss {
     position relative
     margin 0.5vw 0
     width 100%
     height 4vw
-    background url('./imgs/head_bg.png') no-repeat
+    background url('./imgs/headBg.png') no-repeat
     background-size 100% 100%
     .tabContentCss {
       position absolute
@@ -672,29 +672,29 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
         }
       }
     }
-    .dczxxContentCss {
+    .batteryGroupInfoContentCss {
       position absolute
       top 50%
       left 50%
       transform translate(-50%, -50%)
       color #1C4267
       width 25vw
-      .dczxxCss {
+      .batteryGroupInfoCss {
         width 100%
         height 2vw
         font-size 1vw
         font-weight bolder
         text-align center
-        .dczxxBordCss {
+        .batteryGroupInfoBorderCss {
           display inline-block
           line-height normal
           padding 0 10px
-          .dczxxTitleCss {
+          .batteryGroupInfoTitleCss {
             float left
             line-height 1.5vw
             text-align left
           }
-          .dczxxMsgCss {
+          .batteryGroupInfoValueCss {
             float left
             line-height 1.5vw
             text-align right
@@ -702,7 +702,7 @@ boxShadow = 0 0 3px 2px rgba(0, 0, 0, 0.2)
         }
       }
     }
-    .hqsjsjCss {
+    .dataFetchTimeCss {
       position absolute
       top 2.8vw
       right 0.5vw

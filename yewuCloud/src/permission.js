@@ -1,10 +1,10 @@
 import router from './router'
 import store from './store'
-import { Message } from '@/utils/element-shim'
+import { Message } from '@/utils/elementShim'
 import NProgress from 'nprogress' // 一个进度条的插件
 import 'nprogress/nprogress.css' // 进度条插件样式
 import { getToken } from '@/utils/auth.js' // 封装了从cookie中获取token的方法
-import getPageTitle from '@/utils/get-page-title'
+import getPageTitle from '@/utils/getPageTitle'
 import config from '@/config.js'
 import { PLATFORM } from '@/constants/platform'
 import {
@@ -13,12 +13,12 @@ import {
   resolveAccessiblePath,
   resolveSectionHomePath,
   wouldRedirectTo
-} from '@/utils/resolve-accessible-route.js'
-import { resolveBannerIdFromPath } from '@/utils/banner-route.js'
+} from '@/utils/resolveAccessibleRoute.js'
+import { resolveBannerIdFromPath } from '@/utils/bannerRoute.js'
 import { ensureTolinkAccess } from '@/collection/utils/authAccess.js'
 import { useAuthStore } from '@/collection/stores/auth.js'
-import { isDynamicRoutesReady, markDynamicRoutesReady, resetDynamicRoutesReady } from '@/utils/dynamic-route-state.js'
-import { PASSWORD_CHANGE_PATH, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
+import { isDynamicRoutesReady, markDynamicRoutesReady, resetDynamicRoutesReady } from '@/utils/dynamicRouteState.js'
+import { PASSWORD_CHANGE_PATH, PASSWORD_CHANGE_REQUIRED } from '@/utils/passwordChangeState.js'
 
 // 保留登录页使用的导出入口，路由清理也能同步复位该状态。
 export { markDynamicRoutesReady, resetDynamicRoutesReady }
@@ -89,10 +89,10 @@ router.beforeEach(async(to, from, next) => {
       NProgress.done()
       return true
     }
-    // 每次导航先向后端核验，覆盖刷新、跨季度、超级管理员及采集云入口。
+    // 同一会话短暂复用校验，改密页强制刷新；刷新页面及后端到期时间仍会触发重新核验。
     if (to.path !== '/login') {
       try {
-        const status = await store.dispatch('user/checkPasswordChange')
+        const status = await store.dispatch('user/checkPasswordChange', { force: to.path === PASSWORD_CHANGE_PATH })
         if (abortChangedSession()) return
         if (status.passwordChangeRequired) {
           guardNext(next, to.path === PASSWORD_CHANGE_PATH ? undefined : { path: PASSWORD_CHANGE_PATH, replace: true })
@@ -124,7 +124,7 @@ router.beforeEach(async(to, from, next) => {
     const legacyPath = normalizeLegacyRoutePath(to.path)
     if (legacyPath !== to.path) {
       syncBannerIdByPath(legacyPath)
-      guardNext(next, { path: legacyPath, replace: true, query: to.query })
+      guardNext(next, { path: legacyPath, replace: true, query: to.query, hash: to.hash })
       NProgress.done()
       return
     }

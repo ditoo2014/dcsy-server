@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { Message } from '@/utils/element-shim'
-import { expireSession } from '@/utils/session-expiration'
-import { requirePasswordChange } from '@/utils/password-change.js'
-import { isPasswordChangeFailure, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/password-change-state.js'
+import { Message } from '@/utils/elementShim'
+import { expireSession } from '@/utils/sessionExpiration'
+import { requirePasswordChange } from '@/utils/passwordChange.js'
+import { isPasswordChangeFailure, requestBearerToken, PASSWORD_CHANGE_REQUIRED } from '@/utils/passwordChangeState.js'
 import { getToken } from '@/utils/auth.js'
 
 async function passwordFailure(body, config, readBlob = false) {

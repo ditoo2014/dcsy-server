@@ -17,16 +17,16 @@ if (platform === PLATFORM.DCSY_INTRANET) {
 } else if (platform === PLATFORM.DCSY_XC) { // 信创
   cloudConfigurationPort = '8001'
   cloudConfigurationBaseUrl = `http://${ip}:${cloudConfigurationPort}`
-  collectionBaseUrl = import.meta.env.VITE_COLLECTION_URL || '/dcsjgl/wgpz'
+  collectionBaseUrl = import.meta.env.VITE_COLLECTION_URL || '/batteryData/gatewayConfig'
 }
 
 const config = {
   platform,
   ip, // 服务器ip
   port, // 业务云业务端口
-  CJYDomainName: collectionBaseUrl, // 采集云域名
-  YZTDomainName: cloudConfigurationBaseUrl, // 云组态
-  JuriPort: Number(import.meta.env.VITE_AUTH_PORT || 9008) // 业务云权限端口
+  collectionBaseUrl, // 采集云入口
+  cloudConfigurationBaseUrl, // 云组态入口
+  authPort: Number(import.meta.env.VITE_AUTH_PORT || 9008) // 业务云权限端口
 }
 
 export default config

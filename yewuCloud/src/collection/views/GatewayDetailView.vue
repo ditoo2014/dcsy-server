@@ -4,11 +4,11 @@ import { useRoute, useRouter } from 'vue-router';
 // 局部注册原生抽屉，避免继承业务云抽屉封装的默认行为。
 import { ElDrawer, ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../stores/auth';
-import { addGatewayModule, deleteGatewayModule, deleteGatewayPoint, fetchGatewayModules, fetchGatewayOne, updateGatewayModule, } from '../api/gateway-module';
+import { addGatewayModule, deleteGatewayModule, deleteGatewayPoint, fetchGatewayModules, fetchGatewayOne, updateGatewayModule, } from '../api/gatewayModule';
 import { useGatewayDetailRouteSync } from '../composables/useGatewayDetailRouteSync';
-import { fetchTtdcTemplateDetail, fetchTtdcTemplateOptions } from '../api/ttdc-template';
-import { formatTtdcConversionType, isTtdcDecimalConversion, TTDC_CONV_HEX_TO_BIN, } from '../config/ttdc-transport';
-import { fetchGatewayRealtime } from '../api/gateway-realtime';
+import { fetchTtdcTemplateDetail, fetchTtdcTemplateOptions } from '../api/ttdcTemplate';
+import { formatTtdcConversionType, isTtdcDecimalConversion, TTDC_CONV_HEX_TO_BIN, } from '../config/ttdcTransport';
+import { fetchGatewayRealtime } from '../api/gatewayRealtime';
 import RealtimePointListPanel from '../components/gateway/RealtimePointListPanel.vue';
 const route = useRoute();
 const router = useRouter();

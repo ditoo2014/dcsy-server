@@ -86,7 +86,7 @@ export function onFullscreenChange(handler) {
 
 /** 驾驶舱缩放容器（不含顶部 Banner） */
 export function getDashboardScreenWrapper() {
-  return document.querySelector('.app-wrapper--jsc .screen-wrapper')
+  return document.querySelector('.app-wrapper--dashboard .screen-wrapper')
 }
 
 /** 是否处于驾驶舱 API 全屏 */

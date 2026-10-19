@@ -4,14 +4,26 @@ import { getToken, setToken, removeToken, setUserInfoStr, setUserId,
   removeRoleId, removePageList, removeCollectionToken } from '@/utils/auth.js'
 import { resetRouter, asyncRoutes } from '@/router'
 import { unique, objectSort } from '@/utils/utils.js'
-import { buildRoutesFromPermissions } from '@/utils/build-permission-routes.js'
-import { Message } from '@/utils/element-shim'
-import { notifyBackendLogout } from '@/utils/session-logout'
+import { buildRoutesFromPermissions } from '@/utils/buildPermissionRoutes.js'
+import { Message } from '@/utils/elementShim'
+import { notifyBackendLogout } from '@/utils/sessionLogout'
 import config from '@/config.js'
 import { PLATFORM } from '@/constants/platform'
-import { readPasswordChangeStatus } from '@/utils/password-change-state.js'
+import { readPasswordChangeStatus } from '@/utils/passwordChangeState.js'
 import { useAuthStore } from '@/collection/stores/auth.js'
 import { useTagsViewStore } from '@/collection/stores/tagsView.js'
+
+// 仅在内存中短暂复用同一会话的成功校验；后端仍逐次校验业务请求。
+const PASSWORD_STATUS_CACHE_MS = 30 * 1000
+let passwordStatusCache
+let passwordStatusPending
+let passwordStatusGeneration = 0
+
+function clearPasswordStatusCache() {
+  passwordStatusGeneration += 1
+  passwordStatusCache = undefined
+  passwordStatusPending = undefined
+}
 
 function changedSessionError() {
   return Object.assign(new Error('登录会话已更新，已忽略旧请求'), { errorCode: 'SESSION_CHANGED' })
@@ -41,6 +53,7 @@ const state = {
 
 const mutations = {
   SET_TOKEN: (state, token) => { // 设置 token
+    clearPasswordStatusCache()
     state.token = token
   },
   SET_ROLETYPE: (state, roleType) => { // 设置角色类型
@@ -218,20 +231,41 @@ const actions = {
     })
   },
 
-  async checkPasswordChange({ commit, dispatch }) {
+  async checkPasswordChange({ commit, dispatch }, { force = false } = {}) {
     const requestedToken = getToken()
-    const response = await findSelf()
-    if (!requestedToken || getToken() !== requestedToken) throw changedSessionError()
-    commit('SET_PASSWORD_STATUS', response)
-    const userInfo = response.return?.user
-    if (userInfo) {
-      setUserInfoStr(JSON.stringify(userInfo))
-      if (userInfo.id != null) setUserId(userInfo.id)
+    if (!requestedToken) throw changedSessionError()
+    if (!force && passwordStatusCache?.token === requestedToken && Date.now() < passwordStatusCache.expiresAt) {
+      return passwordStatusCache.status
     }
-    const status = readPasswordChangeStatus(response)
-    if (status.passwordChangeRequired) await dispatch('requirePasswordChange', response)
-    if (getToken() !== requestedToken) throw changedSessionError()
-    return status
+    if (passwordStatusPending?.token === requestedToken) return passwordStatusPending.promise
+
+    const generation = passwordStatusGeneration
+    const pending = { token: requestedToken }
+    pending.promise = (async() => {
+      const response = await findSelf()
+      if (getToken() !== requestedToken || generation !== passwordStatusGeneration) throw changedSessionError()
+      commit('SET_PASSWORD_STATUS', response)
+      const userInfo = response.return?.user
+      if (userInfo) {
+        setUserInfoStr(JSON.stringify(userInfo))
+        if (userInfo.id != null) setUserId(userInfo.id)
+      }
+      const status = readPasswordChangeStatus(response)
+      if (status.passwordChangeRequired) await dispatch('requirePasswordChange', response)
+      if (getToken() !== requestedToken) throw changedSessionError()
+      if (!status.passwordChangeRequired && generation === passwordStatusGeneration) {
+        // 使用后端返回的到期时间截断缓存，不能跨过季度密码到期边界。
+        const passwordExpiresAt = Date.parse(status.passwordExpiresAt)
+        const expiresAt = Math.min(Date.now() + PASSWORD_STATUS_CACHE_MS,
+          Number.isFinite(passwordExpiresAt) ? passwordExpiresAt : Infinity)
+        passwordStatusCache = { token: requestedToken, status, expiresAt }
+      }
+      return status
+    })().finally(() => {
+      if (passwordStatusPending === pending) passwordStatusPending = undefined
+    })
+    passwordStatusPending = pending
+    return pending.promise
   },
 
   async requirePasswordChange({ commit, dispatch }, body) {
@@ -240,6 +274,7 @@ const actions = {
   },
 
   async clearBusinessAccess({ commit, dispatch }) {
+    clearPasswordStatusCache()
     // 到期时清业务菜单、标签及采集权限，保留认证令牌供本人改密。
     commit('SET_ROLES', [])
     removePageList()

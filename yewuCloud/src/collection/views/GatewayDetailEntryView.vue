@@ -1,7 +1,7 @@
 <script setup>
 import { computed, shallowRef, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { resolveGatewayDetailSlugParam } from '../config/gateway-detail';
+import { resolveGatewayDetailSlugParam } from '../config/gatewayDetail';
 const route = useRoute();
 const router = useRouter();
 const modelSlug = computed(() => String(route.params.modelSlug || ''));

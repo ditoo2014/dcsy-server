@@ -1,4 +1,4 @@
-/** 与 variables.styl / element-variables.styl 保持同步，供 JS 侧引用 */
+/** 与 variables.styl / elementVariables.styl 保持同步，供 JS 侧引用 */
 export const sideBarVariables = {
   menuText: '#ffffff',
   menuActiveText: '#409EFF',

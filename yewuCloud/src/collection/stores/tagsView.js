@@ -11,30 +11,30 @@ export const useTagsViewStore = defineStore('collectionTagsView', () => {
   const visitedViews = ref([])
 
   function resolveTabKey(route) {
-    if (route.name === 'collection-home') {
+    if (route.name === 'collectionHome') {
       return route.query.module === 'stream' ? 'home:stream' : 'home:gateway'
     }
-    if (route.name === 'gateway-detail') {
+    if (route.name === 'gatewayDetail') {
       return `detail:${String(route.params.modelSlug || '')}:${String(route.params.gatewayId || '')}`
     }
-    if (route.name === 'gateway-detail-legacy') {
+    if (route.name === 'gatewayDetailLegacy') {
       return `detail-legacy:${String(route.params.gatewayId || '')}`
     }
-    if (route.name === 'stream-detail') {
+    if (route.name === 'streamDetail') {
       return `stream-detail:${String(route.params.streamCode || '')}`
     }
     return `path:${route.fullPath}`
   }
 
   function resolveTitle(route) {
-    if (route.name === 'collection-home') {
+    if (route.name === 'collectionHome') {
       return route.query.module === 'stream' ? STREAM_MANAGE_TITLE : GATEWAY_MANAGE_TITLE
     }
-    if (route.name === 'gateway-detail' || route.name === 'gateway-detail-legacy') {
+    if (route.name === 'gatewayDetail' || route.name === 'gatewayDetailLegacy') {
       const gatewayId = String(route.params.gatewayId || '')
       return gatewayId ? `${GATEWAY_DETAIL_TITLE} - ${gatewayId}` : GATEWAY_DETAIL_TITLE
     }
-    if (route.name === 'stream-detail') {
+    if (route.name === 'streamDetail') {
       const streamCode = String(route.params.streamCode || '')
       const streamName = String(route.query.name || '').trim()
       return `${STREAM_DETAIL_TITLE}${streamName || streamCode ? ` - ${streamName || streamCode}` : ''}`
@@ -45,7 +45,7 @@ export const useTagsViewStore = defineStore('collectionTagsView', () => {
   function addVisitedView(route) {
     if (!route.matched.some(item => item.meta?.collectionCloud)) return
     // 网关详情保持原采集云行为，不加入顶部标签栏。
-    if (route.name === 'gateway-detail' || route.name === 'gateway-detail-legacy') return
+    if (route.name === 'gatewayDetail' || route.name === 'gatewayDetailLegacy') return
 
     const tabKey = resolveTabKey(route)
     const current = visitedViews.value.find(item => item.tabKey === tabKey)
