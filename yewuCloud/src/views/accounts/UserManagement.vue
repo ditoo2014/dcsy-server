@@ -99,7 +99,7 @@
       </el-scrollbar>
 
       <!-- 添加修改弹窗 -->
-      <elDrawer v-model="showDrawer" :title="textMap[dialogStatus]" width="400">
+      <elDrawer v-model="showDrawer" :title="textMap[dialogStatus]" :width="dialogStatus === 'modify' ? 'min(600px, 100vw)' : '400px'">
         <el-form
           v-if="dialogStatus === 'add' || dialogStatus === 'modify'"
           ref="dataForm"
@@ -107,7 +107,7 @@
           :model="form"
           size="small"
           label-width="110px"
-          :class="{ 'password-policy-form': dialogStatus === 'add' }"
+          :class="{ 'password-policy-form': dialogStatus === 'add', 'user-edit-form': dialogStatus === 'modify' }"
         >
           <el-row>
             <el-col :span="20">
@@ -144,7 +144,10 @@
             </el-col>
             <el-col v-if="dialogStatus === 'modify'" :span="20">
               <el-form-item label="部门">
-                <MyElTree :navi-name-list="modifyTreeList" @click-tree="changeUserGroup" />
+                <!-- 部门树单独滚动，避免展开后挤占邮箱及底部操作区。 -->
+                <div class="department-tree-scroll">
+                  <MyElTree :navi-name-list="modifyTreeList" @click-tree="changeUserGroup" />
+                </div>
               </el-form-item>
             </el-col>
             <el-col :span="20">
@@ -206,14 +209,15 @@
             </el-col>
           </el-row>
         </el-form>
-        <div class="fixedBottomCss">
+        <!-- 操作区由抽屉保留独立空间，不再覆盖正文和可选节点。 -->
+        <template #footer>
           <el-button @click="showDrawer = false">
             取消
           </el-button>
           <el-button v-loading="setMsgLoading" type="primary" @click="setData">
             确定
           </el-button>
-        </div>
+        </template>
       </elDrawer>
     </div>
 
@@ -262,8 +266,21 @@ export default {
   },
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (value.length < 6) {
+      // 已有账号不可修改，只对新增账号执行名称限制。
+      if (this.dialogStatus === 'add' && /test|测试/i.test(String(value || '').trim())) {
+        callback(new Error('登录账号不能包含 test 或“测试”（英文不区分大小写）'))
+      } else if (value.length < 6) {
         callback(new Error('账号长度不能小于6位'))
+      } else {
+        callback()
+      }
+    }
+    const validateTrueName = (rule, value, callback) => {
+      // 创建和编辑共用校验，禁止姓名中任意位置包含 test 或“测试”。
+      if (!String(value || '').trim()) {
+        callback(new Error('姓名不能为空'))
+      } else if (/test|测试/i.test(String(value).trim())) {
+        callback(new Error('用户姓名不能包含 test 或“测试”（英文不区分大小写）'))
       } else {
         callback()
       }
@@ -326,7 +343,7 @@ export default {
       dialogEquipAuth: false, // 设备授权是否显示
 
       rules: {
-        truename: [{ required: true, trigger: 'blur', message: '姓名不能为空' }],
+        truename: [{ required: true, trigger: 'blur', validator: validateTrueName }],
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePass }],
         surePass: [{ required: true, trigger: 'blur', validator: validateSurePass }],
@@ -1026,6 +1043,42 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+// 仅加宽用户编辑表单，不改变新增、部门编辑及密码重置的布局。
+.user-edit-form {
+  :deep(.el-col) {
+    flex 0 0 100%
+    max-width 100%
+  }
+  // 普通字段保持紧凑，部门树仍使用整行宽度；窄窗口下不超出容器。
+  :deep(.el-input),
+  :deep(.el-select) {
+    width 300px
+    max-width 100%
+  }
+}
+.department-tree-scroll {
+  width 100%
+  min-width 0
+  // 正常窗口展示约400px；矮窗口限制高度，节点过多时在树内滚动。
+  max-height min(400px, 50vh)
+  overflow auto
+  :deep(.el-tree-node__content) {
+    height auto
+    min-height 26px
+    padding-top 3px
+    padding-bottom 3px
+  }
+  :deep(.tree-node) {
+    flex 1
+    min-width 0
+    white-space normal
+    overflow-wrap anywhere
+    line-height 20px
+  }
+  :deep(.tree-node-icon) {
+    flex-shrink 0
+  }
+}
 .treeContentCss {
   margin 1% 1% 0 1%
   padding 1% 0 0 1%

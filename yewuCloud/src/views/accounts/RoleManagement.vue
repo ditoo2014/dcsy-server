@@ -75,45 +75,45 @@
           </el-col>
         </el-row>
       </el-form>
-      <div class="fixedBottomCss">
+      <!-- 操作区独立于可滚动正文，避免按钮覆盖内容。 -->
+      <template #footer>
         <el-button @click="showDrawer = false">
           取消
         </el-button>
         <el-button type="primary" @click="setData()">
           确定
         </el-button>
-      </div>
+      </template>
     </elDrawer>
 
     <!-- 设置权限弹窗 -->
     <elDrawer v-model="showSetPermisDrawer" title="权限设置" :wrapper-closable="false" width="700">
-      <div style="height:1200px">
-        <el-form size="small" label-width="120px">
-          <MeTreeTransfer
-            type="page"
-            :title="permisPagTitle"
-            :left-data="notHasPagPermis"
-            :right-data="hasPagPermis"
-            @select-data="selectPermis"
-          />
-          <br><br>
-          <MeTreeTransfer
-            type="function"
-            :title="permisFuncTitle"
-            :left-data="notHasFuncPermis"
-            :right-data="hasFuncPermis"
-            @select-data="selectPermis"
-          />
-        </el-form>
-        <div class="fixedBottomCss">
-          <el-button @click="showSetPermisDrawer = false">
-            取消
-          </el-button>
-          <el-button type="primary" @click="surePermis()">
-            确定
-          </el-button>
-        </div>
-      </div>
+      <!-- 权限内容按实际高度展开，超出抽屉正文时滚动，不固定内容高度。 -->
+      <el-form size="small" label-width="120px">
+        <MeTreeTransfer
+          type="page"
+          :title="permisPagTitle"
+          :left-data="notHasPagPermis"
+          :right-data="hasPagPermis"
+          @select-data="selectPermis"
+        />
+        <br><br>
+        <MeTreeTransfer
+          type="function"
+          :title="permisFuncTitle"
+          :left-data="notHasFuncPermis"
+          :right-data="hasFuncPermis"
+          @select-data="selectPermis"
+        />
+      </el-form>
+      <template #footer>
+        <el-button @click="showSetPermisDrawer = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="surePermis()">
+          确定
+        </el-button>
+      </template>
     </elDrawer>
 
   </div>

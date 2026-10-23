@@ -94,6 +94,16 @@ func (u UserCtrler) Register(ctx *gin.Context) {
 	var rUser model.User
 	ctx.Bind(&rUser)
 
+	// 账号和姓名禁止包含 test 或“测试”，英文不区分大小写。
+	if strings.Contains(strings.ToLower(rUser.Username), "test") || strings.Contains(rUser.Username, "测试") {
+		response.Fail(ctx, "登录账号不能包含 test 或“测试”（英文不区分大小写）", nil)
+		return
+	}
+	if strings.Contains(strings.ToLower(rUser.TrueName), "test") || strings.Contains(rUser.TrueName, "测试") {
+		response.Fail(ctx, "用户姓名不能包含 test 或“测试”（英文不区分大小写）", nil)
+		return
+	}
+
 	/* RSA PKCS8解密 */
 	if len(rUser.Password) < 1 {
 		response.Fail(ctx, "无效密码", nil)
@@ -211,6 +221,12 @@ func (u UserCtrler) Update(ctx *gin.Context) {
 
 	if rUser.ID == 0 {
 		response.Fail(ctx, "非法数据", nil)
+		return
+	}
+
+	// 资料编辑不能绕过创建时的姓名限制；登录账号沿用原有禁止修改规则。
+	if strings.Contains(strings.ToLower(rUser.TrueName), "test") || strings.Contains(rUser.TrueName, "测试") {
+		response.Fail(ctx, "用户姓名不能包含 test 或“测试”（英文不区分大小写）", nil)
 		return
 	}
 

@@ -97,7 +97,7 @@ func ReasonMessage(reason string) string {
 	case ReasonPasswordUnset:
 		return "账号尚无密码修改记录，请先修改密码"
 	case ReasonAdminReset:
-		return "管理员已重置密码，请先修改为本人设置的新密码"
+		return "当前账号使用初始密码或管理员重置的密码，请先修改密码后继续使用平台。"
 	case ReasonFutureTime:
 		return "密码修改时间异常，请重新修改密码"
 	case ReasonQuarterExpired:

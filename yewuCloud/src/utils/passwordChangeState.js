@@ -22,7 +22,7 @@ export function isPasswordChangeFailure(body) {
 }
 
 export function passwordChangeMessage(reason) {
-  if (reason === 'admin_reset') return '管理员已重置您的密码，请先修改密码后继续使用平台。'
+  if (reason === 'admin_reset') return '当前账号使用初始密码或管理员重置的密码，请先修改密码后继续使用平台。'
   if (reason === 'password_unset') return '当前季度账号尚未完成密码更新，请先修改密码后继续使用平台。'
   if (reason === 'future_time') return '当前账号的密码更新时间异常，请先修改密码后继续使用平台。'
   return '已进入新的季度，请先修改密码后继续使用平台。'
